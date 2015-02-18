@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "76e8995bbb094134f07bc347676d0799",
+    "hash": "cdd06d169326e9acce69bb743ab07a8d",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -880,6 +880,17 @@
             "time": "2014-01-12 16:20:24"
         },
         {
+            "name": "jquery/jquery",
+            "version": "1.9.1",
+            "dist": {
+                "type": "file",
+                "url": "http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js",
+                "reference": null,
+                "shasum": null
+            },
+            "type": "library"
+        },
+        {
             "name": "kriswallsmith/assetic",
             "version": "v1.2.1",
             "source": {
@@ -952,6 +963,42 @@
                 "minification"
             ],
             "time": "2014-12-12 05:04:05"
+        },
+        {
+            "name": "leafo/lessphp",
+            "version": "v0.3.8",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/leafo/lessphp.git",
+                "reference": "175f276f4168a84db14f7e40c4ef98931793da78"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/leafo/lessphp/zipball/175f276f4168a84db14f7e40c4ef98931793da78",
+                "reference": "175f276f4168a84db14f7e40c4ef98931793da78",
+                "shasum": ""
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "lessc.inc.php"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT",
+                "GPL-3.0"
+            ],
+            "authors": [
+                {
+                    "name": "Leaf Corcoran",
+                    "email": "leafot@gmail.com",
+                    "homepage": "http://leafo.net"
+                }
+            ],
+            "description": "lessphp is a compiler for LESS written in PHP.",
+            "homepage": "http://leafo.net/lessphp/",
+            "time": "2012-08-19 02:16:09"
         },
         {
             "name": "monolog/monolog",
@@ -1730,6 +1777,16 @@
                 "templating"
             ],
             "time": "2015-01-25 17:32:08"
+        },
+        {
+            "name": "twitter/bootstrap",
+            "version": "2.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/twitter/bootstrap",
+                "reference": "v2.1.0"
+            },
+            "type": "library"
         }
     ],
     "packages-dev": [],

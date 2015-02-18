@@ -2,9 +2,13 @@
 <html>
     <head>
         <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}Chess Mate{% endblock %}</title>
         {% block stylesheets %}
         	<link href="{{ asset('bundles/cminterface/css/general.css') }}" rel="stylesheet" type="text/css" />
+	        {% stylesheets '%kernel.root_dir%/../vendor/twitter/bootstrap/less/bootstrap.less' %} 
+        		<link href="{{ asset_url }}" rel="stylesheet" type="text/css" />
+	        {% endstylesheets %}
         {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('bundles/cminterface/images/favicon.ico') }}" />
     </head>
@@ -19,11 +23,15 @@
     			{% endif %}
     			<td id="title">Chess Mate{{ subtitle }}</td>
     			{% if name is defined %}
-    				<td id="options"><button>Edit Profile</button></td>			
+    				<td id="options"><a class="btn btn-large btn-default">Edit Profile</a></td>			
     			{% endif %}
     		</tr>
     	</table>
         {% block body %}{% endblock %}
-        {% block javascripts %}{% endblock %}
+        {% block javascripts %}
+		    {% javascripts '%kernel.root_dir%/../vendor/jquery/jquery/jquery.min.js' %}
+		        <script type="text/javascript" src="{{ asset_url }}"></script>
+		    {% endjavascripts %}
+        {% endblock %}
     </body>
 </html>

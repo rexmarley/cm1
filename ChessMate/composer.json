@@ -6,6 +6,33 @@
     "autoload": {
         "psr-0": { "": "src/" }
     },
+    "repositories": [        
+    	{ 
+    	    "type": "package", 
+    	    "package": { 
+    	        "name": "twitter/bootstrap", 
+    	        "version": "2.1.0", 
+    	        "source": {
+					"type": "git", 
+					"url": "https://github.com/twitter/bootstrap", 
+					"reference": "v2.1.0" 
+				} 
+			} 
+		},
+		{
+		    "type": "package",
+		    "package":
+		    {
+		        "name": "jquery/jquery",
+		        "version": "1.9.1",
+		        "dist":    
+		        {   
+		            "url": "http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js",
+		            "type": "file"
+		        }
+		    }
+		} 
+	],
     "require": {
         "php": ">=5.3.3",
         "symfony/symfony": "2.3.*",
@@ -21,7 +48,10 @@
         "sensio/framework-extra-bundle": "~3.0,>=3.0.2",
         "sensio/generator-bundle": "~2.3",
         "incenteev/composer-parameter-handler": "~2.0",
-        "friendsofsymfony/user-bundle": "2.0.*@dev"
+        "friendsofsymfony/user-bundle": "2.0.*@dev",
+        "twitter/bootstrap": "v2.1.0",
+        "leafo/lessphp": "0.3.8",
+        "jquery/jquery": "1.9.1"
     },
     "scripts": {
         "post-install-cmd": [
