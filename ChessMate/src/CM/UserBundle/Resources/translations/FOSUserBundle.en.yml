@@ -60,7 +60,7 @@ resetting:
     request:
         invalid_username: The username or email address "%username%" does not exist.
         username: "Username/Email address:"
-        submit: Reset password
+        submit: Reset
     reset:
         submit: Change password
     flash:

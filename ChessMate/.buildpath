@@ -5,6 +5,7 @@
 	<buildpathentry kind="src" path="vendor/swiftmailer/swiftmailer/lib"/>
 	<buildpathentry kind="src" path="vendor/symfony/intl/Symfony/Component/Intl/Resources/stubs"/>
 	<buildpathentry kind="src" path="vendor/jdorn/sql-formatter/lib"/>
+	<buildpathentry kind="src" path="vendor/leafo/lessphp"/>
 	<buildpathentry kind="src" path="vendor/symfony/symfony/src/Symfony/Component/Intl/Resources/stubs"/>
 	<buildpathentry kind="con" path="org.eclipse.php.core.LANGUAGE"/>
 	<buildpathentry kind="src" path="vendor/composer"/>

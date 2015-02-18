@@ -13,20 +13,27 @@
         <link rel="icon" type="image/x-icon" href="{{ asset('bundles/cminterface/images/favicon.ico') }}" />
     </head>
     <body>
-    	<table id="header">
-    		<tr>
-    			<td><img id="logo" src="{{ asset('bundles/cminterface/images/logo.png') }}"/></td>
-    			{% if name is defined %}
-    				{% set subtitle = ': Welcome ' ~ name ~ '!'%}
-    			{%  else %}
-    				{% set subtitle = '' %}    			
-    			{% endif %}
-    			<td id="title">Chess Mate{{ subtitle }}</td>
-    			{% if name is defined %}
-    				<td id="options"><a class="btn btn-large btn-default">Edit Profile</a></td>			
-    			{% endif %}
-    		</tr>
-    	</table>
+		<div class="container-fluid">
+    		{% if name is defined %}
+    			{% set subtitle = ': Welcome ' ~ name ~ '!'%}
+    		{%  else %}
+    			{% set subtitle = '' %}    			
+    		{% endif %}
+	    	<div id="header" class="row">
+			   	<div class="col-md-1">
+	    			<img id="logo" src="{{ asset('bundles/cminterface/images/logo.png') }}"/>
+	    		</div>
+			   	<div class="col-md-9">
+	    			<label>Chess Mate{{ subtitle }}</label>
+	    		</div>
+			   	<div class="col-md-2">
+	    			{% if app.user %}
+	    				<a class="btn btn-large btn-default">Edit Profile</a>			
+	    			{% endif %}
+	    		</div>
+	    	</div>
+	    </div>
+	    <br>
         {% block body %}{% endblock %}
         {% block javascripts %}
 		    {% javascripts '%kernel.root_dir%/../vendor/jquery/jquery/jquery.min.js' %}

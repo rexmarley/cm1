@@ -6,48 +6,58 @@ body {
 	height:100%;
 }
 
-table#header {
-	font-size:4em;
-	vertical-align:top;
-	width:100%;
+div#header {
+	font-size:5em;
+	//vertical-align:top;
+	//width:100%;
 }
 
-table#header tr td:first-child {
-	white-space:nowrap;
-	width:1%;
+img#logo {
+	padding: 7px;
 }
 
-table#header td#options {
-	text-align:right;
+div#header div.col-md-9 label {
+    padding-top: 33px;
+	padding-left: 0.45em;
 }
 
 table#header button {
-	font-size: 0.5em;
-	width:6em;
-	height:1.7em;
-	background: #ffffff;
-	margin-bottom:7%;
-	font-weight:strong;
+	//font-size: 0.5em;
+	//width:6em;
+	//height:1.7em;
+	//background: #ffffff;
+	//margin-bottom:7%;
+	//font-weight:strong;
 }
 
 table.login {
 	background: radial-gradient(#CCCCE7, #5884b0) no-repeat;
-	font-size:2em;
+	font-size:1.8em;
 	margin-left:auto;
 	margin-right:auto;
-	padding:0.2em;
+	border-spacing:0.4em;
+	border-collapse: separate;
+    border-radius: 10px;
 	text-align:right;
+	font-weight:strong;
 }
 
-table.login tr:first-child {
-	text-align:center;
+div.login {
+	background: radial-gradient(#CCCCE7, #5884b0) no-repeat;
+	font-size:1.5em;
+	margin-left:auto;
+	margin-right:auto;
+    border-radius: 10px;
+	font-weight:strong;
+	padding: 0.6em;
 }
 
-table.login li {
-	text-align:center;
-	font-size:0.8em;
-	color: #ff0000;
-	margin-top:-4%;
+div.login input[type=text] {
+	width:68%;
+}
+
+div.login label {
+	//text-align:right;
 }
 
 div.errors {
@@ -55,39 +65,6 @@ div.errors {
 	color: #ff0000;	
 }
 
-table#login div {
-	text-align:left;
-	display:inline-block;
-	margin-left:0%;
-	width:73%;
-}
-
-table#login input[type=submit], table#register input[type=submit] {
-	width:25%;
-	height:2.5em;
-}
-
-table#reset input[type=submit] {
-	width:50%;
-	height:3em;
-}
-
-table.login label[for=remember_me] {
-	font-size:0.7em;
-}
-
-table.login input[type=text],[type=password],[type=email] {
-	width:18em;
-	font-weight:strong;
-	font-size:1em;
-}
-
 div#loginOptions a {
 	font-size:1.5em;
-}
-
-img#logo {
-	max-width:60%;
-	height:auto;
-	
 }
