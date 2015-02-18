@@ -6,12 +6,12 @@ body {
 	height:100%;
 }
 
-div#header {
-	font-size:5em;
-}
-
 img#logo {
 	padding: 7px;
+}
+
+div#header {
+	font-size:5em;
 }
 
 div#header div.col-md-9 label {
@@ -19,16 +19,13 @@ div#header div.col-md-9 label {
 	padding-left: 0.45em;
 }
 
-table.login {
-	background: radial-gradient(#CCCCE7, #5884b0) no-repeat;
-	font-size:1.8em;
-	margin-left:auto;
-	margin-right:auto;
-	border-spacing:0.4em;
-	border-collapse: separate;
-    border-radius: 10px;
-	text-align:right;
-	font-weight:strong;
+div.errors {
+	font-size:2em;
+	color: #ff0000;	
+}
+
+div#loginOptions a {
+	font-size:1.5em;
 }
 
 div.login {
@@ -42,22 +39,8 @@ div.login {
 }
 
 div.login input[type=text], div.login input[type=email], div.login input[type=password] {
-	width:68%;
-}
-
-div#register label {
-	width:100%;
-	text-align:right;
-}
-
-div#register input[type=text], div#register input[type=email], div#register input[type=password] {
 	margin-top: 0.2%;
 	margin-bottom: 0.8%;
-	width:90%;
-}
-
-div#register input[type=submit] {
-	margin-top: 10px;
 }
 
 div.login li {
@@ -65,11 +48,39 @@ div.login li {
 	color: #ff0000;
 }
 
-div.errors {
-	font-size:2em;
-	color: #ff0000;	
+div#login input[type=text], div#login input[type=email], div#login input[type=password] {
+	width:100%;
 }
 
-div#loginOptions a {
-	font-size:1.5em;
+div#login input[type=text], div#login input[type=email], div#login input[type=password] {
+	width:100%;
+}
+
+div#login input[type=submit] {
+    width:100%;
+}
+
+div#login label[for=remember_me], #remember_me {	
+	display:inline;
+}
+
+div#register input[type=text], div#register input[type=email], div#register input[type=password] {
+	width:90%;
+}
+
+div#register label, div#login label {
+	width:100%;
+	text-align:right;
+}
+
+div#register input[type=text], div#register input[type=email], div#register input[type=password] {
+	width:90%;
+}
+
+div#register input[type=submit] {
+	margin-top: 10px;
+}
+
+div#reset input[type=text], div#reset input[type=email], div#reset input[type=password] {
+	width:68%;
 }

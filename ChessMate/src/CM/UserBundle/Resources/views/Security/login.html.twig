@@ -10,36 +10,40 @@
 <form action="{{ path("fos_user_security_check") }}" method="post">
     <input type="hidden" name="_csrf_token" value="{{ csrf_token }}" />
     
-    <table id="login" class="login">
-	    <tr>
-		    <td colspan=2><u>Login</u></td>
-		</tr>  
-    	<tr>
-    		<td>
-	    		<label for="username">{{ 'security.login.username'|trans }}</label>
-	    	</td>
-    		<td>
-	    		<input type="text" id="username" name="_username" value="{{ last_username }}" required="required" />
-	    	</td>
-	    </tr>
-	    <tr>
-		    <td>
-			    <label for="password">{{ 'security.login.password'|trans }}</label>
-	    	</td>
-    		<td>
-			    <input type="password" id="password" name="_password" required="required" />
-		    </td>
-	    </tr>
-	    <tr>
-		    <td colspan=2>
-		    	<div>
-			    	<input type="checkbox" id="remember_me" name="_remember_me" value="on" />
+	<div class="container">
+		<div id="login" class="login">
+			<div class="row">
+			    <div class="col-md-12">
+			    	<center><span><u>Login</u></span></center>
+				</div>
+			</div>
+			<div class="row">
+			    <div class="col-md-2 col-xs-2">
+		    		<label for="username">{{ 'security.login.username'|trans }}</label>
+				</div>
+			    <div class="col-md-10">
+		    		<input type="text" id="username" name="_username" value="{{ last_username }}" required="required" />
+				</div>
+			</div> 
+			<div class="row">
+			    <div class="col-md-2 col-xs-2">
+				    <label for="password">{{ 'security.login.password'|trans }}</label>
+				</div>
+			    <div class="col-md-10">
+				    <input type="password" id="password" name="_password" required="required" />
+				</div>
+			</div>
+			<div class="row">
+			    <div class="col-md-3 col-md-offset-2">
+				    <input type="checkbox" id="remember_me" name="_remember_me" value="on" />
 			    	<label for="remember_me">{{ 'security.login.remember_me'|trans }}</label>
-			    </div>			    	
-		    	<input type="submit" id="_submit" name="_submit" value="{{ 'security.login.submit'|trans }}" />
-		    </td>
-	    </tr>
-	</table>
+				</div>
+			    <div class="col-md-2 col-md-offset-5">
+			    	<input type="submit" class="btn btn-lg btn-primary" id="_submit" name="_submit" value="{{ 'security.login.submit'|trans }}" />
+				</div>
+			</div>
+		</div>
+	</div>
 	
 	<div id="loginOptions">
 		<h2><u>Forgot password?</u></h2>
