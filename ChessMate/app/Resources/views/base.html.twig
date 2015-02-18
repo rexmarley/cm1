@@ -26,14 +26,14 @@
 			   	<div class="col-md-9">
 	    			<label>Chess Mate{{ subtitle }}</label>
 	    		</div>
-			   	<div class="col-md-2">
-	    			{% if app.user %}
-	    				<a class="btn btn-large btn-default">Edit Profile</a>			
+			   	<div id="userOptions" class="col-md-2">
+    				{% if name is defined %}
+	    				<a  href="{{ path('fos_user_profile_edit', {}) }}" class="btn btn-large btn-primary">Edit Profile</a>
+	    				<a  href="{{ path('fos_user_security_logout', {}) }}" class="btn btn-large btn-warning">Log-out</a>	
 	    			{% endif %}
 	    		</div>
 	    	</div>
 	    </div>
-	    <br>
         {% block body %}{% endblock %}
         {% block javascripts %}
 		    {% javascripts '%kernel.root_dir%/../vendor/jquery/jquery/jquery.min.js' %}
