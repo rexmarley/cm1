@@ -1,0 +1,9 @@
+cm_interface_play:
+    path:     /play
+    defaults: { _controller: "CMInterfaceBundle:Default:play" }
+    
+cm_interface_play:
+    path:     /
+    defaults: { _controller: "CMInterfaceBundle:Default:play" }
+
+    

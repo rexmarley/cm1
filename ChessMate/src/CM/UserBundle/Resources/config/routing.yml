@@ -1,0 +1,7 @@
+fos_user:
+    resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+
+cm_interface:
+    resource: "@CMInterfaceBundle/Resources/config/routing.yml"
+    prefix:   /
+    

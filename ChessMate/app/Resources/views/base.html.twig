@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="UTF-8" />
+        <title>{% block title %}Chess Mate{% endblock %}</title>
+        {% block stylesheets %}
+        	<link href="{{ asset('bundles/cminterface/css/general.css') }}" rel="stylesheet" type="text/css" />
+        {% endblock %}
+        <link rel="icon" type="image/x-icon" href="{{ asset('bundles/cminterface/images/favicon.ico') }}" />
+    </head>
+    <body>
+    	<table id="header">
+    		<tr>
+    			<td><img id="logo" src="{{ asset('bundles/cminterface/images/logo.png') }}"/></td>
+    			{% if name is defined %}
+    				{% set subtitle = ': Welcome ' ~ name ~ '!'%}
+    			{%  else %}
+    				{% set subtitle = '' %}    			
+    			{% endif %}
+    			<td id="title">Chess Mate{{ subtitle }}</td>
+    			{% if name is defined %}
+    				<td id="options"><button>Edit Profile</button></td>			
+    			{% endif %}
+    		</tr>
+    	</table>
+        {% block body %}{% endblock %}
+        {% block javascripts %}{% endblock %}
+    </body>
+</html>

@@ -1,0 +1,11 @@
+cm_interface:
+    resource: "@CMInterfaceBundle/Resources/config/routing.yml"
+    prefix:   /
+
+cm_user:
+    resource: "@CMUserBundle/Resources/config/routing.yml"
+    prefix:   /
+
+app:
+    resource: "@AppBundle/Controller/"
+    type:     annotation

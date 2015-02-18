@@ -1,0 +1,93 @@
+@CHARSET "ISO-8859-1";
+
+
+body {
+	background: linear-gradient(#6881E6,#ffffff) no-repeat;
+	height:100%;
+}
+
+table#header {
+	font-size:4em;
+	vertical-align:top;
+	width:100%;
+}
+
+table#header tr td:first-child {
+	white-space:nowrap;
+	width:1%;
+}
+
+table#header td#options {
+	text-align:right;
+}
+
+table#header button {
+	font-size: 0.5em;
+	width:6em;
+	height:1.7em;
+	background: #ffffff;
+	margin-bottom:7%;
+	font-weight:strong;
+}
+
+table.login {
+	background: radial-gradient(#CCCCE7, #5884b0) no-repeat;
+	font-size:2em;
+	margin-left:auto;
+	margin-right:auto;
+	padding:0.2em;
+	text-align:right;
+}
+
+table.login tr:first-child {
+	text-align:center;
+}
+
+table.login li {
+	text-align:center;
+	font-size:0.8em;
+	color: #ff0000;
+	margin-top:-4%;
+}
+
+div.errors {
+	font-size:2em;
+	color: #ff0000;	
+}
+
+table#login div {
+	text-align:left;
+	display:inline-block;
+	margin-left:0%;
+	width:73%;
+}
+
+table#login input[type=submit], table#register input[type=submit] {
+	width:25%;
+	height:2.5em;
+}
+
+table#reset input[type=submit] {
+	width:50%;
+	height:3em;
+}
+
+table.login label[for=remember_me] {
+	font-size:0.7em;
+}
+
+table.login input[type=text],[type=password],[type=email] {
+	width:18em;
+	font-weight:strong;
+	font-size:1em;
+}
+
+div#loginOptions a {
+	font-size:1.5em;
+}
+
+img#logo {
+	max-width:60%;
+	height:auto;
+	
+}
