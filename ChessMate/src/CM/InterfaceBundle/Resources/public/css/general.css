@@ -8,8 +8,6 @@ body {
 
 div#header {
 	font-size:5em;
-	//vertical-align:top;
-	//width:100%;
 }
 
 img#logo {
@@ -19,15 +17,6 @@ img#logo {
 div#header div.col-md-9 label {
     padding-top: 33px;
 	padding-left: 0.45em;
-}
-
-table#header button {
-	//font-size: 0.5em;
-	//width:6em;
-	//height:1.7em;
-	//background: #ffffff;
-	//margin-bottom:7%;
-	//font-weight:strong;
 }
 
 table.login {
@@ -52,12 +41,28 @@ div.login {
 	padding: 0.6em;
 }
 
-div.login input[type=text] {
+div.login input[type=text], div.login input[type=email], div.login input[type=password] {
 	width:68%;
 }
 
-div.login label {
-	//text-align:right;
+div#register label {
+	width:100%;
+	text-align:right;
+}
+
+div#register input[type=text], div#register input[type=email], div#register input[type=password] {
+	margin-top: 0.2%;
+	margin-bottom: 0.8%;
+	width:90%;
+}
+
+div#register input[type=submit] {
+	margin-top: 10px;
+}
+
+div.login li {
+	font-size:1em;
+	color: #ff0000;
 }
 
 div.errors {
