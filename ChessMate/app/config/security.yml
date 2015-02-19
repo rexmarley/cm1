@@ -20,10 +20,12 @@ security:
             form_login:
                 check_path: /login_check
                 login_path: /login
-                provider: fos_userbundle
+                provider: fos_userbundle                
+                always_use_default_target_path: false
+                default_target_path:            /play
             logout:
                 path:   /logout
-                target: /
+                target: /login
             anonymous: ~
             #http_basic:
             #    realm: "Secured Demo Area"

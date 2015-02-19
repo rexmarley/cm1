@@ -1,9 +1,13 @@
 cm_interface_play:
     path:     /play
     defaults: { _controller: "CMInterfaceBundle:Default:play" }
+
+cm_interface_guest:
+    path:     /guest/play
+    defaults: { _controller: "CMInterfaceBundle:Default:guestPlay" }
     
-cm_interface_play:
+cm_interface_login:
     path:     /
-    defaults: { _controller: "CMInterfaceBundle:Default:play" }
+    defaults: { _controller: "FOSUserBundle:Security:login" }
 
     

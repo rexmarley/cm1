@@ -1,9 +1,17 @@
 @CHARSET "ISO-8859-1";
 
+@media (max-width: @screen-xs) {
+    body{font-size: 6px;}
+}
+
+@media (max-width: @screen-sm) {
+    body{font-size: 10px;}
+}
 
 body {
 	background: linear-gradient(#6881E6,#ffffff) no-repeat;
 	height:100%;
+	font-size: 15px;
 }
 
 img#logo {
@@ -11,21 +19,21 @@ img#logo {
 }
 
 div#header {
-	font-size:5em;
+	font-size:4em;
 }
 
-div#header div.col-md-9 label {
+div#header label {
     padding-top: 33px;
 	padding-left: 0.45em;
+}
+
+div#userOptions {
+    padding-top: 33px;
 }
 
 div.errors {
 	font-size:2em;
 	color: #ff0000;	
-}
-
-div#loginOptions a {
-	font-size:1.5em;
 }
 
 div.login {
@@ -46,6 +54,14 @@ div.login input[type=text], div.login input[type=email], div.login input[type=pa
 div.login li {
 	font-size:1em;
 	color: #ff0000;
+}
+
+div#loginOptions {
+	margin-left: 7px;
+}
+
+div#loginOptions a {
+	font-size:1.5em;
 }
 
 div#login input[type=text], div#login input[type=email], div#login input[type=password] {
