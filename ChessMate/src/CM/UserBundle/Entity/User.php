@@ -10,6 +10,7 @@ use Doctrine\DBAL\Types\BooleanType;
 /**
  * @ORM\Entity
  * @ORM\Table(name="cm_user")
+ * @ORM\Entity(repositoryClass="CM\UserBundle\Repository\UserRepository")
  */
 class User extends BaseUser
 {
@@ -21,9 +22,19 @@ class User extends BaseUser
     protected $id;
     
     /**
+     * Is the user register or a guest
+     * 
      * @ORM\Column(type="boolean")
      */
     protected $registered;
+    
+    /**
+     * Time of last activity
+     *
+     * @var \Datetime
+     * @ORM\Column(name="last_active_time", type="datetime")
+     */
+    protected $lastActiveTime;
 
     public function __construct()
     {
@@ -31,11 +42,61 @@ class User extends BaseUser
         // your own logic
     }
     
+    /**
+     * set user as registered or guest
+     *
+     * @return Bool
+     */
     public function setRegistered($reg) {
     	$this->registered = $reg;
     }
     
+    /**
+     * Check if user is registered or guest
+     *
+     * @return Bool
+     */
     public function getRegistered() {
     	return $this->registered;
+    }
+    
+    /**
+     * Set time of last activity
+     * 
+     * @param \Datetime $activeTime
+     */
+    public function setLastActiveTime($activeTime)
+    {
+    	$this->lastActiveTime = $activeTime;
+    }
+    
+    /**
+     * Get time of last activity
+     * 
+     * @return \Datetime
+     */
+    public function getLastActiveTime()
+    {
+    	return $this->lastActiveTime;
+    }
+    
+    /**
+     * Check if user is online/active
+     * 
+     * @return Bool
+     */
+    public function isOnline()
+    {    
+    	return $this->getLastActiveTime() > new \DateTime('5 minutes ago');
+    }
+
+    /**
+     * Get id
+     *
+     * @return integer 
+     */
+    public function getId()
+    {
+        return $this->id;
     }
 }

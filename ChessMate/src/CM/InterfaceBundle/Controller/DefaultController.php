@@ -20,19 +20,24 @@ class DefaultController extends Controller
      
     public function guestPlayAction()
     {    	
-     	$userManager = $this->get('fos_user.user_manager');		
-		$user = $userManager->findUserBy(array('registered' => 0));
+     	$userManager = $this->get('fos_user.user_manager');	
+     	//get inactive guest account
+		$em = $this->getDoctrine()->getManager();
+		$user = $em->getRepository('CMUserBundle:User')->findInactiveGuest();
 		if (!$user) {
 			$name = "Guest 00" . rand(1,1000);
 			$user = $userManager->createUser();
 			$user->setUsername($name);		
-			$user->setEmail("");
+			$user->setEmail($name);
 			$user->setPassword("");
 			$user->setRegistered(false);
-			$userManager->updateUser($user);
+			$user->setLastActiveTime(new \DateTime());
 		} else {
+			$user = $user[0];
 			$name = $user->getUsername();
+			$user->setLastActiveTime(new \DateTime());
 		}
+		$userManager->updateUser($user);
 		//set login token
 		$token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
 		$this->get("security.context")->setToken($token);		
