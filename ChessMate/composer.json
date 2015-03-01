@@ -31,7 +31,7 @@
 		            "type": "file"
 		        }
 		    }
-		} 
+		}
 	],
     "require": {
         "php": ">=5.3.3",
@@ -51,7 +51,8 @@
         "friendsofsymfony/user-bundle": "2.0.*@dev",
         "twitter/bootstrap": "v3.0.0",
         "leafo/lessphp": "0.4.0",
-        "jquery/jquery": "1.9.1"
+        "jquery/jquery": "1.9.1",
+        "components/jqueryui": "1.11.0"
     },
     "scripts": {
         "post-install-cmd": [

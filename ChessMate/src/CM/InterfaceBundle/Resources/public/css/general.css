@@ -14,6 +14,31 @@ body {
 	font-size: 15px;
 }
 
+div#board {
+	width: 48em;
+	outline: 1px solid #bdb7b7;
+	margin: 2%;
+}
+
+div.square {  
+	float: left;
+    height: 6em;
+    width: 6em;
+}
+
+div.light {
+	background: #ffffff;
+}
+
+div.dark {
+	background: #bdb7b7;
+}
+
+div.piece {
+	font-size: 5em;
+	text-align: center;
+}
+
 img#logo {
 	padding: 7px;
 }

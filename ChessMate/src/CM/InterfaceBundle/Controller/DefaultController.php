@@ -15,8 +15,20 @@ class DefaultController extends Controller
     		$name = $user->getUsername();
     	}
     	
-        return $this->render('CMInterfaceBundle:Default:index.html.twig', array('name' => $name));
-    } 
+    	$pieces = $this->getPieces();
+    	
+        return $this->render('CMInterfaceBundle:Default:index.html.twig', array('name' => $name, 'pieces' => $pieces));
+    }
+    
+    private function getPieces() {
+    	$pieces = array('&#9814;','&#9816;','&#9815;','&#9812;','&#9813;','&#9815;','&#9816;','&#9814;',
+    			'&#9817;','&#9817;','&#9817;','&#9817;','&#9817;','&#9817;','&#9817;','&#9817;',
+    			'&#9823;','&#9823;','&#9823;','&#9823;','&#9823;','&#9823;','&#9823;','&#9823;',
+    			'&#9820;','&#9822;','&#9821;','&#9818;','&#9819;','&#9821;','&#9822;','&#9820;'
+    	);
+    	
+    	return $pieces;
+    }
      
     public function guestPlayAction()
     {    	

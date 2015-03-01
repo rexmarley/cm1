@@ -12,4 +12,30 @@
 <td></td>
 </tr>
 </table>
+<div id="board">
+	{% set p = 0 %}
+	{% for i in 1..8  %}
+		{% for j in 1..8  %}
+			{% if i is divisibleby(2) %}
+				{% if j is divisibleby(2) %}
+					{% set  squareColour = 'light' %}
+				{% else %}
+					{% set  squareColour = 'dark' %}
+				{% endif %}
+			{% else %}
+				{% if j is divisibleby(2) %}
+					{% set  squareColour = 'dark' %}
+				{% else %}
+					{% set  squareColour = 'light' %}
+				{% endif %}			
+			{% endif %}		
+			<div class="square {{ squareColour }} ui-droppable">
+				{% if i < 3 or i > 6 %}
+					<div class="piece ui-draggable">{{ pieces[p] | raw }}</div>
+					{% set p = p + 1 %}
+				{% endif %}
+			</div>
+		{% endfor %}
+	{% endfor %}
+</div>
 {% endblock %}
