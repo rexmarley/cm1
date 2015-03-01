@@ -24,10 +24,10 @@
 		    "package":
 		    {
 		        "name": "jquery/jquery",
-		        "version": "1.9.1",
+		        "version": "1.10.2",
 		        "dist":    
 		        {   
-		            "url": "http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js",
+		            "url": "http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js",
 		            "type": "file"
 		        }
 		    }
@@ -51,8 +51,8 @@
         "friendsofsymfony/user-bundle": "2.0.*@dev",
         "twitter/bootstrap": "v3.0.0",
         "leafo/lessphp": "0.4.0",
-        "jquery/jquery": "1.9.1",
-        "components/jqueryui": "1.11.0"
+        "jquery/jquery": "1.10.2",
+        "components/jqueryui": "1.10.4"
     },
     "scripts": {
         "post-install-cmd": [

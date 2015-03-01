@@ -4,7 +4,7 @@
         "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "a9ddc466a2dde5f6c3b67eda09a1f53f",
+    "hash": "2015be3dbbffe464512e7a48d84b3d1b",
     "packages": [
         {
             "name": "components/jquery",
@@ -50,16 +50,16 @@
         },
         {
             "name": "components/jqueryui",
-            "version": "1.11.0",
+            "version": "1.10.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/components/jqueryui.git",
-                "reference": "a024ef6de51ccd4bc0cfeea470cde113d33a59a8"
+                "reference": "b68f1ee8749c90b2dfc5f2cb33c76fd0308bd356"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/components/jqueryui/zipball/a024ef6de51ccd4bc0cfeea470cde113d33a59a8",
-                "reference": "a024ef6de51ccd4bc0cfeea470cde113d33a59a8",
+                "url": "https://api.github.com/repos/components/jqueryui/zipball/b68f1ee8749c90b2dfc5f2cb33c76fd0308bd356",
+                "reference": "b68f1ee8749c90b2dfc5f2cb33c76fd0308bd356",
                 "shasum": ""
             },
             "require": {
@@ -70,12 +70,11 @@
                 "component": {
                     "name": "jquery-ui",
                     "scripts": [
-                        "jquery-ui.js"
+                        "ui/jquery-ui.js"
                     ],
                     "files": [
                         "ui/**",
-                        "themes/**",
-                        "jquery-ui.min.js"
+                        "themes/**"
                     ],
                     "shim": {
                         "deps": [
@@ -127,7 +126,7 @@
                 }
             ],
             "description": "jQuery UI is a curated set of user interface interactions, effects, widgets, and themes built on top of the jQuery JavaScript Library. Whether you're building highly interactive web applications or you just need to add a date picker to a form control, jQuery UI is the perfect choice.",
-            "time": "2014-07-19 12:11:30"
+            "time": "2014-04-22 12:57:43"
         },
         {
             "name": "doctrine/annotations",
@@ -1002,10 +1001,10 @@
         },
         {
             "name": "jquery/jquery",
-            "version": "1.9.1",
+            "version": "1.10.2",
             "dist": {
                 "type": "file",
-                "url": "http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js",
+                "url": "http://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js",
                 "reference": null,
                 "shasum": null
             },

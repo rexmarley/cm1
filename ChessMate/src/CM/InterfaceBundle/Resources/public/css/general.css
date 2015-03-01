@@ -18,6 +18,7 @@ div#board {
 	width: 48em;
 	outline: 1px solid #bdb7b7;
 	margin: 2%;
+	cursor: pointer;
 }
 
 div.square {  
