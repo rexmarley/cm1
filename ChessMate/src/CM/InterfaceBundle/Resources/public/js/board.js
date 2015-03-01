@@ -1,9 +1,7 @@
-$(document).ready( function() {	
-	$.each($('.piece'), function() { 
-		$(this).draggable();
+$(document).ready( function() {
+	$('.piece').draggable({
+        containment : "#board"
 	});
 	
-	$.each($('.square'), function() { 
-		$(this).droppable();
-	});
+	$('.square').droppable();
 });
