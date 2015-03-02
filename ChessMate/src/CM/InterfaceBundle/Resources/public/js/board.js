@@ -10,12 +10,18 @@ $(document).ready( function() {
     });
 	
 	function validateMove(event, ui) {
+		//get colour/direction (for pawns)
+		var direction = 1;
+		if (ui.draggable.attr('id').charAt(0) == 'b') {
+			//black moves back
+			direction = -1;
+		}
 		var data = {
 			   	        pieceType: 'pawn',
 						//colour: 'white',
-						colour: 1, //or -1 for black
-				        fromSquare: 1,
-				        toSquare: 2,
+						colour: direction,
+				        fromSquare: ui.draggable.parent().attr('id'),
+				        toSquare: this.id,
 			        };
 		
 	    $.ajax({
@@ -28,8 +34,9 @@ $(document).ready( function() {
 	        },
 	        success : function(data) {
 				//centre piece
-				$(this).append(ui.draggable.css('position','static')); //prevents visible re-move? 
-				//TODO: disable on success
+	        	//console.log($(this));
+				//$(this).append(ui.draggable.css('position','static')); //prevents visible re-move? 
+				//TODO: disable on success?
 	        }
 	    });
 	}
