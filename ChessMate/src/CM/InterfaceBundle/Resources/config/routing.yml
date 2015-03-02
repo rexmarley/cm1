@@ -9,5 +9,9 @@ cm_interface_guest:
 cm_interface_login:
     path:     /
     defaults: { _controller: "FOSUserBundle:Security:login" }
+    
+cm_validate_move:
+    path:     /checkMove
+    defaults: { _controller: "CMInterfaceBundle:Ajax:validateMove" }
 
     
