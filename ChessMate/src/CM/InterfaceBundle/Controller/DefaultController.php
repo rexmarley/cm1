@@ -22,10 +22,38 @@ class DefaultController extends Controller
     
     private function getPieces() {
     	$pieces = array(
-    			'&#9820;','&#9822;','&#9821;','&#9818;','&#9819;','&#9821;','&#9822;','&#9820;',
-    			'&#9823;','&#9823;','&#9823;','&#9823;','&#9823;','&#9823;','&#9823;','&#9823;',
-    			'&#9817;','&#9817;','&#9817;','&#9817;','&#9817;','&#9817;','&#9817;','&#9817;',
-    			'&#9814;','&#9816;','&#9815;','&#9812;','&#9813;','&#9815;','&#9816;','&#9814;'
+    			array('name' => 'b_rook_1', 'img' => '&#9820;'),
+    			array('name' => 'b_knight_1', 'img' => '&#9822;'),
+    			array('name' => 'b_bishop_1', 'img' => '&#9821;'),
+    			array('name' => 'b_king', 'img' => '&#9818;'),
+    			array('name' => 'b_queen', 'img' => '&#9819;'),
+    			array('name' => 'b_bishop_2', 'img' => '&#9821;'),
+    			array('name' => 'b_knight_2', 'img' => '&#9822;'),
+    			array('name' => 'b_rook_2', 'img' => '&#9820;'),
+    			array('name' => 'b_pawn_1', 'img' => '&#9823;'),
+    			array('name' => 'b_pawn_2', 'img' => '&#9823;'),
+    			array('name' => 'b_pawn_3', 'img' => '&#9823;'),
+    			array('name' => 'b_pawn_4', 'img' => '&#9823;'),
+    			array('name' => 'b_pawn_5', 'img' => '&#9823;'),
+    			array('name' => 'b_pawn_6', 'img' => '&#9823;'),
+    			array('name' => 'b_pawn_7', 'img' => '&#9823;'),
+    			array('name' => 'b_pawn_8', 'img' => '&#9823;'),
+    			array('name' => 'w_pawn_1', 'img' => '&#9817;'),
+    			array('name' => 'w_pawn_2', 'img' => '&#9817;'),
+    			array('name' => 'w_pawn_3', 'img' => '&#9817;'),
+    			array('name' => 'w_pawn_4', 'img' => '&#9817;'),
+    			array('name' => 'w_pawn_5', 'img' => '&#9817;'),
+    			array('name' => 'w_pawn_6', 'img' => '&#9817;'),
+    			array('name' => 'w_pawn_7', 'img' => '&#9817;'),
+    			array('name' => 'w_pawn_8', 'img' => '&#9817;'),
+    			array('name' => 'w_rook_1', 'img' => '&#9814;'),
+    			array('name' => 'w_knight_1', 'img' => '&#9816;'),
+    			array('name' => 'w_bishop_1', 'img' => '&#9815;'),
+    			array('name' => 'w_king', 'img' => '&#9812;'),
+    			array('name' => 'w_queen', 'img' => '&#9813;'),
+    			array('name' => 'w_bishop_2', 'img' => '&#9815;'),
+    			array('name' => 'w_knight_2', 'img' => '&#9816;'),
+    			array('name' => 'w_rook_2', 'img' => '&#9814;')
     	);
     	
     	return $pieces;
