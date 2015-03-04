@@ -70,7 +70,7 @@ $(document).ready( function() {
     		//invalidate move
     		ui.draggable.addClass('invalid');
     	} else {
-    		//center (and disable?)
+    		//center (TODO disable board?)
     		$(this).append(ui.draggable.css('position','static'));
     	}
     	
