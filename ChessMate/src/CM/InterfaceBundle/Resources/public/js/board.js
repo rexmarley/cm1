@@ -23,7 +23,6 @@ $(document).ready( function() {
 		var pieceType = piece[1];
 		//get target square
 		var toSquare = this.id;
-		console.log($('#'+ toSquare).children('div.piece').get(0));
 		//check if target is occupied by own piece
 		if (occupiedByOwnPiece(toSquare, colour)) {
     		//invalidate move
@@ -52,13 +51,17 @@ $(document).ready( function() {
 				//allow initial movement of 2 spaces
 				spaces = 2;
 			}
-			if (fLetter == tLetter) {
-	    		if ((colour == 'w' && tNumber > fNumber && tNumber - fNumber <= spaces)
-	    			|| (colour == 'b' && tNumber < fNumber && fNumber - tNumber <= spaces)) {
-					valid = true;
-	    		}
-			} else if (!vacant(toSquare)) {
+			if (vacant(toSquare)) {
+				if (fLetter == tLetter) {
+		    		if ((colour == 'w' && tNumber > fNumber && tNumber - fNumber <= spaces)
+		    			|| (colour == 'b' && tNumber < fNumber && fNumber - tNumber <= spaces)) {
+						valid = true;
+		    		}
+				}				
+			} else if (onDiagonal(tNumber, fNumber, pos[tLetter], pos[fLetter]) 
+				&& ((colour == 'w' && tNumber > fNumber) || colour == 'b' && tNumber < fNumber))  {
 				//occupied by own already checked --> allow take
+				//TODO: sort out rat's nest 
 				valid = true;
 				//remove taken piece and move to side
 				var taken = getOccupant(toSquare);
@@ -74,11 +77,11 @@ $(document).ready( function() {
 				valid = true;
 			}		
 		} else if (pieceType == 'bishop') {
-			if (Math.abs(tNumber - fNumber) == Math.abs(pos[tLetter] - pos[fLetter])) {
+			if (onDiagonal(tNumber, fNumber, pos[tLetter], pos[fLetter])) {
 				valid = true;
 			}
 		} else if (pieceType == 'queen') {
-			if (fLetter == tLetter || fNumber == tNumber || Math.abs(tNumber - fNumber) == Math.abs(pos[tLetter] - pos[fLetter])) {
+			if (fLetter == tLetter || fNumber == tNumber || onDiagonal(tNumber, fNumber, pos[tLetter], pos[fLetter])) {
 				valid = true;
 			}		
 		} else if (pieceType == 'king') {
@@ -111,6 +114,19 @@ $(document).ready( function() {
     	}
     	
     	return valid;
+	}
+	
+	/**
+	 * check if target is on diagonal with source
+	 * 
+	 * @param tNumber
+	 * @param fNumber
+	 * @param tLetterPos
+	 * @param fLetterPos
+	 * @return Boolean
+	 */
+	function onDiagonal(tNumber, fNumber, tLetterPos, fLetterPos) {
+		return Math.abs(tNumber - fNumber) == Math.abs(tLetterPos - fLetterPos);
 	}
 	
 	/**
