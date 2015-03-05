@@ -84,12 +84,14 @@ $(document).ready( function() {
 				valid = true;
 			}		
 		} else if (pieceType == 'bishop') {
-			if (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter])) {
+			if (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
+				&& !diagonalBlocked(fNumber, tNumber, fLetter, tLetter)) {
 				valid = true;
 			}
 		} else if (pieceType == 'queen') {
 			if (fLetter == tLetter || fNumber == tNumber 
-				|| (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) && !diagonalBlocked(fNumber, tNumber, fLetter, tLetter))) {
+				|| (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
+					&& !diagonalBlocked(fNumber, tNumber, fLetter, tLetter))) {
 				valid = true;
 			}		
 		} else if (pieceType == 'king') {
@@ -162,56 +164,30 @@ $(document).ready( function() {
 		return false;
 	}
 	
+	/**
+	 * check if diagonal squares are blocked
+	 */
 	function diagonalBlocked(fNumber, tNumber, fLetter, tLetter) {
 		var fLetterPos = posOf[fLetter] - 1;
 		var tLetterPos = posOf[tLetter] - 1;
 		var range = Math.abs(tNumber - fNumber);
-		if (fLetterPos > tLetterPos) {
-			//moving left
-			if (fNumber < tNumber) {
-				//moving up
-				for (var i = 1; i < range; i++) {
-					fNumber++;
-					fLetterPos--;
-					console.log(letterAt[fLetterPos]+'_'+ fNumber);
-					if(!vacant(letterAt[fLetterPos]+'_'+ fNumber)) {
-						return true;
-					}
-				}				
-			} else {
-				//moving down
-				for (var i = 1; i < range; i++) {
-					fNumber--;
-					fLetterPos--;
-					console.log(letterAt[fLetterPos]+'_'+ fNumber);
-					if(!vacant(letterAt[fLetterPos]+'_'+ fNumber)) {
-						return true;
-					}
-				}
-			}			
-		} else {
-			//moving right
-			if (fNumber < tNumber) {
-				//moving up
-				for (var i = 1; i < range; i++) {
-					fNumber++;
-					fLetterPos++;
-					console.log(letterAt[fLetterPos]+'_'+ fNumber);
-					if(!vacant(letterAt[fLetterPos]+'_'+ fNumber)) {
-						return true;
-					}
-				}				
-			} else {
-				//moving down
-				for (var i = 1; i < range; i++) {
-					fNumber--;
-					fLetterPos++;
-					console.log(letterAt[fLetterPos]+'_'+ fNumber);
-					if(!vacant(letterAt[fLetterPos]+'_'+ fNumber)) {
-						return true;
-					}
-				}
-			}	
+		var numbers = [];
+		var letters = [];
+		//get x-axis movement
+		var x = (tLetterPos - fLetterPos) / range
+		//get y-axis movement
+		var y = (tNumber - fNumber) / range
+		//get square references
+		for (var i = 1; i < range; i++) {
+			letters[i-1] = fLetterPos + (i*x);
+			numbers[i-1] = fNumber + (i*y);
+		}
+		//check squares are empty
+		range--;
+		for (var i = 0; i < range; i++) {
+			if(!vacant(letterAt[letters[i]]+'_'+ numbers[i])) {
+				return true;
+			}
 		}
 
 		return false;
