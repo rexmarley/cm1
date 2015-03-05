@@ -15,6 +15,7 @@ body {
 }
 
 div#board {
+	height: 48em;
 	width: 48em;
 	outline: 1px solid #bdb7b7;
 	margin: 2%;
