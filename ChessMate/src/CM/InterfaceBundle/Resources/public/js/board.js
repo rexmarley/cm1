@@ -171,21 +171,13 @@ $(document).ready( function() {
 		var fLetterPos = posOf[fLetter] - 1;
 		var tLetterPos = posOf[tLetter] - 1;
 		var range = Math.abs(tNumber - fNumber);
-		var numbers = [];
-		var letters = [];
 		//get x-axis movement
 		var x = (tLetterPos - fLetterPos) / range
 		//get y-axis movement
 		var y = (tNumber - fNumber) / range
-		//get square references
-		for (var i = 1; i < range; i++) {
-			letters[i-1] = fLetterPos + (i*x);
-			numbers[i-1] = fNumber + (i*y);
-		}
 		//check squares are empty
-		range--;
-		for (var i = 0; i < range; i++) {
-			if(!vacant(letterAt[letters[i]]+'_'+ numbers[i])) {
+		for (var i = 1; i < range; i++) {
+			if(!vacant(letterAt[fLetterPos + (i*x)]+'_'+(fNumber + (i*y)))) {
 				return true;
 			}
 		}
