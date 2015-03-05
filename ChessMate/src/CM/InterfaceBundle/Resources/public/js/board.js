@@ -84,6 +84,8 @@ $(document).ready( function() {
 	function validateRook(fLetter, tLetter, fNumber, tNumber) {
 		if ((fLetter == tLetter && !yAxisBlocked(fNumber, tNumber, fLetter))
 			|| (fNumber == tNumber && !xAxisBlocked(fLetter, tLetter, fNumber))) {
+			//allow piece to be taken
+			checkTakePiece(tLetter+'_'+tNumber);	
 			return true;
 		}
 		return false;
@@ -94,6 +96,8 @@ $(document).ready( function() {
 	 */
 	function validateKnight(fLetter, tLetter, fNumber, tNumber) {
 		if (((tNumber - fNumber)*(tNumber - fNumber)) + ((posOf[tLetter] - posOf[fLetter])*(posOf[tLetter] - posOf[fLetter])) == 5) {
+			//allow piece to be taken
+			checkTakePiece(tLetter+'_'+tNumber);
 			return true;
 		}
 		return false;
@@ -105,6 +109,8 @@ $(document).ready( function() {
 	function validateBishop(fLetter, tLetter, fNumber, tNumber) {
 		if (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
 			&& !diagonalBlocked(fNumber, tNumber, fLetter, tLetter)) {
+			//allow piece to be taken
+			checkTakePiece(tLetter+'_'+tNumber);
 			return true;
 		}
 		return false;
@@ -118,6 +124,8 @@ $(document).ready( function() {
 			|| (fNumber == tNumber && !xAxisBlocked(fLetter, tLetter, fNumber)) 
 			|| (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
 				&& !diagonalBlocked(fNumber, tNumber, fLetter, tLetter))) {
+			//allow piece to be taken
+			checkTakePiece(tLetter+'_'+tNumber);
 			return true;
 		}	
 		return false;
@@ -129,6 +137,9 @@ $(document).ready( function() {
 	function validateKing(unmoved, colour, fLetter, tLetter, fNumber, tNumber) {
 		var valid = false;
 		if (Math.abs(tNumber - fNumber) <= 1 && Math.abs(posOf[tLetter] - posOf[fLetter]) <= 1) {
+			//TODO moving into check
+			//allow piece to be taken
+			checkTakePiece(tLetter+'_'+tNumber);
 			valid = true;
 		} else if (unmoved && tNumber == fNumber) {
 			if (tLetter == 'g' && $('#'+colour+'_rook_2').hasClass('unmoved') 
@@ -149,7 +160,7 @@ $(document).ready( function() {
 	}
 	
 	/**
-	 * Validate pawn movement TODO: refactor
+	 * Validate pawn movement
 	 */
 	function validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber) {
 		var valid = false;
@@ -171,24 +182,27 @@ $(document).ready( function() {
 			//occupied by own already checked --> allow take
 			valid = true;
 			//remove taken piece and move to side
-			var taken = getOccupant(toSquare);
-			$('#piecesWon').append(taken);
-        	taken.removeClass('ui-draggable');
+			takePiece(toSquare);
 		}
 		return valid;
 	}
 	
 	/**
-	 * check if target is on diagonal with source
-	 * 
-	 * @param tNumber
-	 * @param fNumber
-	 * @param tLetterPos
-	 * @param fLetterPos
-	 * @return Boolean
+	 * Remove any exisitng piece, from given square, and move to side 
 	 */
-	function onDiagonal(tNumber, fNumber, tLetterPos, fLetterPos) {
-		return Math.abs(tNumber - fNumber) == Math.abs(tLetterPos - fLetterPos);
+	function checkTakePiece(toSquare) {
+		if (!vacant(toSquare)) {
+			takePiece(toSquare);
+		}
+	}
+	
+	/**
+	 * Remove piece, from given square, and move to side 
+	 */
+	function takePiece(toSquare) {
+		var taken = getOccupant(toSquare);
+		$('#piecesWon').append(taken);
+    	taken.removeClass('ui-draggable');
 	}
 	
 	/**
@@ -213,6 +227,37 @@ $(document).ready( function() {
 			return true;
 		}
 		
+		return false;
+	}
+	
+	/**
+	 * check if target square is diagonal with source
+	 * 
+	 * @return Boolean
+	 */
+	function onDiagonal(tNumber, fNumber, tLetterPos, fLetterPos) {
+		return Math.abs(tNumber - fNumber) == Math.abs(tLetterPos - fLetterPos);
+	}
+	
+	
+	/**
+	 * Check if diagonal squares are blocked
+	 */
+	function diagonalBlocked(fNumber, tNumber, fLetter, tLetter) {
+		var fLetterPos = posOf[fLetter] - 1;
+		var tLetterPos = posOf[tLetter] - 1;
+		var range = Math.abs(tNumber - fNumber);
+		//get x-axis direction
+		var x = (tLetterPos - fLetterPos) / range;
+		//get y-axis direction
+		var y = (tNumber - fNumber) / range;
+		//check squares are empty
+		for (var i = 1; i < range; i++) {
+			if(!vacant(letterAt[fLetterPos + (i*x)]+'_'+(fNumber + (i*y)))) {
+				return true;
+			}
+		}
+
 		return false;
 	}
 	
@@ -245,27 +290,6 @@ $(document).ready( function() {
 		//check squares are empty
 		for (var i = 1; i < range; i++) {
 			if(!vacant(letter+'_'+(fNumber + (i*y)))) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-	
-	/**
-	 * Check if diagonal squares are blocked
-	 */
-	function diagonalBlocked(fNumber, tNumber, fLetter, tLetter) {
-		var fLetterPos = posOf[fLetter] - 1;
-		var tLetterPos = posOf[tLetter] - 1;
-		var range = Math.abs(tNumber - fNumber);
-		//get x-axis direction
-		var x = (tLetterPos - fLetterPos) / range;
-		//get y-axis direction
-		var y = (tNumber - fNumber) / range;
-		//check squares are empty
-		for (var i = 1; i < range; i++) {
-			if(!vacant(letterAt[fLetterPos + (i*x)]+'_'+(fNumber + (i*y)))) {
 				return true;
 			}
 		}
