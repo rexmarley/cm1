@@ -12,32 +12,45 @@
 <td></td>
 </tr>
 </table>
-<div id="board">
-	{% set p = 0 %}
-	{% set colour = 'b' %}
-	{% for i in 8..1  %}
-		{% for j in 'a'..'h'  %}
-			{% if i is divisibleby(2) %}
-				{% if loop.index is divisibleby(2) %}
-					{% set  squareColour = 'dark' %}
-				{% else %}
-					{% set  squareColour = 'light' %}
-				{% endif %}
-			{% else %}
-				{% if loop.index is divisibleby(2) %}
-					{% set  squareColour = 'light' %}
-				{% else %}
-					{% set  squareColour = 'dark' %}
-				{% endif %}	
-			{% endif %}		
-			<div id="{{j}}_{{i}}" class="square {{ squareColour }} ui-droppable">
-				{% if i < 3 or i > 6 %}
-					<div id="{{ pieces[p].id }}" class="piece ui-draggable unmoved">{{ pieces[p].img | raw }}</div>
-					{% set p = p + 1 %}
-				{% endif %}
+<div class="container-fluid">
+	<div class="row">
+	    <div class="col-md-8">
+			<div id="board">
+				{% set p = 0 %}
+				{% set colour = 'b' %}
+				{% for i in 8..1  %}
+					{% for j in 'a'..'h'  %}
+						{% if i is divisibleby(2) %}
+							{% if loop.index is divisibleby(2) %}
+								{% set  squareColour = 'dark' %}
+							{% else %}
+								{% set  squareColour = 'light' %}
+							{% endif %}
+						{% else %}
+							{% if loop.index is divisibleby(2) %}
+								{% set  squareColour = 'light' %}
+							{% else %}
+								{% set  squareColour = 'dark' %}
+							{% endif %}	
+						{% endif %}		
+						<div id="{{j}}_{{i}}" class="square {{ squareColour }} ui-droppable">
+							{% if i < 3 or i > 6 %}
+								<div id="{{ pieces[p].id }}" class="piece ui-draggable unmoved">{{ pieces[p].img | raw }}</div>
+								{% set p = p + 1 %}
+							{% endif %}
+						</div>
+					{% endfor %}
+				{% endfor %}
 			</div>
-		{% endfor %}
-	{% endfor %}
+		</div>
+		<div class="col-md-4">
+			<div id="piecesLost">
+			</div>	
+			<div id="piecesWon">
+			<span>Taken Pieces:</span>
+			</div>	
+		</div>
+	</div>
 </div>
 <br><br>
 {% endblock %}

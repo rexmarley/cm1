@@ -17,29 +17,37 @@ $(document).ready( function() {
 	
 	function validateMove(event, ui) {
 		var valid = false;
+		//get moved piece
+		var piece = ui.draggable.attr('id').split('_');
+		var colour = piece[0];
+		var pieceType = piece[1];
+		//get target square
+		var toSquare = this.id;
+		console.log($('#'+ toSquare).children('div.piece').get(0));
+		//check if target is occupied by own piece
+		if (occupiedByOwnPiece(toSquare, colour)) {
+    		//invalidate move
+    		ui.draggable.addClass('invalid');
+			return false;
+		}
+		var to = toSquare.split('_');
+		var tLetter = to[0];
+		var tNumber = to[1];
+		//get from square
+		var fromSquare = ui.draggable.parent().attr('id');
+		var from = fromSquare.split('_');
+		var fLetter = from[0];
+		var fNumber = from[1];
+		//check if piece's first move
 		var unmoved = false;		
 		if (ui.draggable.hasClass('unmoved')) {
 			unmoved = true;
 		}
-		//console.log(unmoved);
-		//console.log(ui.draggable);
-		var fromSquare = ui.draggable.parent().attr('id');
-		var toSquare = this.id;
-		var from = fromSquare.split('_');
-		var fLetter = from[0];
-		var fNumber = from[1];
-		var to = toSquare.split('_');
-		var tLetter = to[0];
-		var tNumber = to[1];
-		//get piece type & colour
-		var piece = ui.draggable.attr('id').split('_');
-		var colour = piece[0];
-		var pieceType = piece[1];
-		//set positioning of letters
+		//set positioning of letters - TODO global?
 		var pos = {'a': 1,'b': 2,'c': 3,'d': 4,'e': 5,'f': 6,'g': 7,'h': 8};
+		//validate move
     	if (pieceType == 'pawn') {
     		var spaces = 1;
-			//if (fNumber == 2 || fNumber == 7) {
 			if (unmoved) {
 				//allow initial movement of 2 spaces
 				spaces = 2;
@@ -49,6 +57,13 @@ $(document).ready( function() {
 	    			|| (colour == 'b' && tNumber < fNumber && fNumber - tNumber <= spaces)) {
 					valid = true;
 	    		}
+			} else if (!vacant(toSquare)) {
+				//occupied by own already checked --> allow take
+				valid = true;
+				//remove taken piece and move to side
+				var taken = getOccupant(toSquare);
+				$('#piecesWon').append(taken);
+            	taken.removeClass('ui-draggable');
 			}
     	} else if (pieceType == 'rook') {
 			if (fLetter == tLetter || fNumber == tNumber) {
@@ -71,13 +86,13 @@ $(document).ready( function() {
 				valid = true;
 			} else if (unmoved && tNumber == fNumber) {
 				if (tLetter == 'g' && $('#'+colour+'_rook_2').hasClass('unmoved') 
-					&& !$.trim($('#f_'+tNumber).text()).length && !$.trim($('#g_'+tNumber).text()).length) {
+					&& vacant('f_'+tNumber) && vacant('g_'+tNumber)) {
 					//allow short castle
 					valid = true;
 					//move castle
 					$('#f_'+tNumber).append($('#'+colour+'_rook_2'));
-				} else if (tLetter == 'c' && $('#'+colour+'_rook_1').hasClass('unmoved') && !$.trim($('#b_'+tNumber).text()).length 
-					&& !$.trim($('#c_'+tNumber).text()).length && !$.trim($('#d_'+ tNumber).text()).length) {
+				} else if (tLetter == 'c' && $('#'+colour+'_rook_1').hasClass('unmoved') && vacant('b_'+tNumber) 
+					&& vacant('c_'+tNumber) && vacant('d_'+tNumber)) {
 					//allow long castle
 					valid = true;
 					//move castle
@@ -96,5 +111,34 @@ $(document).ready( function() {
     	}
     	
     	return valid;
+	}
+	
+	/**
+	 * Check if target square is unoccupied
+	 */
+	function vacant(squareID) {		
+		return !$.trim($('#'+squareID).text()).length;
+	}
+	
+	/**
+	 * Get occupant of given square
+	 */
+	function getOccupant(squareID) {
+		return $('#'+ squareID).children('div.piece');
+	}
+	
+	/**
+	 * Check if target square is occupied by own piece
+	 */
+	function occupiedByOwnPiece(targetID, colour) {
+		if (!vacant(targetID) && getOccupant(targetID).attr('id').charAt(0) == colour) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	function diagonalNotBlocked(fNumber, fLetter, tNumber, tLetter) {
+		//Math.abs(tNumber - fNumber) == Math.abs(pos[tLetter] - pos[fLetter])
 	}
 });
