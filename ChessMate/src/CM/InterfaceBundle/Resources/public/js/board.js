@@ -1,4 +1,8 @@
 $(document).ready( function() {
+	//set positioning of letters
+	posOf = {'a': 1,'b': 2,'c': 3,'d': 4,'e': 5,'f': 6,'g': 7,'h': 8};
+	letterAt = ['a','b','c','d','e','f','g','h'];
+	
 	//make pieces draggable
 	$('.piece').draggable({
         containment : '#board',
@@ -16,10 +20,6 @@ $(document).ready( function() {
 		accept: '.piece',
 		drop: validateMove,
     });
-	
-	//set positioning of letters
-	posOf = {'a': 1,'b': 2,'c': 3,'d': 4,'e': 5,'f': 6,'g': 7,'h': 8};
-	letterAt = ['a','b','c','d','e','f','g','h'];
 	
 	/**
 	 * Validate chess move
@@ -53,65 +53,17 @@ $(document).ready( function() {
 		}
 		//validate move
     	if (pieceType == 'pawn') {
-    		var spaces = 1;
-			if (unmoved) {
-				//allow initial movement of 2 spaces
-				spaces = 2;
-			}
-			if (vacant(toSquare)) {
-				//allow moving forward
-				if (fLetter == tLetter) {
-		    		if ((colour == 'w' && tNumber > fNumber && tNumber - fNumber <= spaces)
-		    			|| (colour == 'b' && tNumber < fNumber && fNumber - tNumber <= spaces)) {
-						valid = true;
-		    		}
-				}				
-			} else if (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
-				&& ((colour == 'w' && tNumber - 1 == fNumber) || colour == 'b' && fNumber - 1 == tNumber))  {
-				//occupied by own already checked --> allow take
-				valid = true;
-				//remove taken piece and move to side
-				var taken = getOccupant(toSquare);
-				$('#piecesWon').append(taken);
-            	taken.removeClass('ui-draggable');
-			}
+    		valid = validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber);
     	} else if (pieceType == 'rook') {
-			if (fLetter == tLetter || fNumber == tNumber) {
-				valid = true;
-			}		
+    		valid = validateRook(fLetter, tLetter, fNumber, tNumber);
 		} else if (pieceType == 'knight') {
-			if (((tNumber - fNumber)*(tNumber - fNumber)) + ((posOf[tLetter] - posOf[fLetter])*(posOf[tLetter] - posOf[fLetter])) == 5) {
-				valid = true;
-			}		
+			valid = validateKnight(fLetter, tLetter, fNumber, tNumber);
 		} else if (pieceType == 'bishop') {
-			if (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
-				&& !diagonalBlocked(fNumber, tNumber, fLetter, tLetter)) {
-				valid = true;
-			}
+			valid = validateBishop(fLetter, tLetter, fNumber, tNumber);
 		} else if (pieceType == 'queen') {
-			if (fLetter == tLetter || fNumber == tNumber 
-				|| (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
-					&& !diagonalBlocked(fNumber, tNumber, fLetter, tLetter))) {
-				valid = true;
-			}		
+			valid = validateQueen(fLetter, tLetter, fNumber, tNumber);	
 		} else if (pieceType == 'king') {
-			if (Math.abs(tNumber - fNumber) <= 1 && Math.abs(posOf[tLetter] - posOf[fLetter]) <= 1) {
-				valid = true;
-			} else if (unmoved && tNumber == fNumber) {
-				if (tLetter == 'g' && $('#'+colour+'_rook_2').hasClass('unmoved') 
-					&& vacant('f_'+tNumber) && vacant('g_'+tNumber)) {
-					//allow short castle
-					valid = true;
-					//move castle
-					$('#f_'+tNumber).append($('#'+colour+'_rook_2'));
-				} else if (tLetter == 'c' && $('#'+colour+'_rook_1').hasClass('unmoved') && vacant('b_'+tNumber) 
-					&& vacant('c_'+tNumber) && vacant('d_'+tNumber)) {
-					//allow long castle
-					valid = true;
-					//move castle
-					$('#d_'+tNumber).append($('#'+colour+'_rook_1'));
-				}
-			}
+			valid = validateKing(unmoved, colour, fLetter, tLetter, fNumber, tNumber);
 		}
 
     	if(!valid) {
@@ -124,6 +76,106 @@ $(document).ready( function() {
     	}
     	
     	return valid;
+	}
+	
+	/**
+	 * Validate rook movement
+	 */
+	function validateRook(fLetter, tLetter, fNumber, tNumber) {
+		if ((fLetter == tLetter && !yAxisBlocked(fNumber, tNumber, fLetter))
+			|| (fNumber == tNumber && !xAxisBlocked(fLetter, tLetter, fNumber))) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Validate knight movement
+	 */
+	function validateKnight(fLetter, tLetter, fNumber, tNumber) {
+		if (((tNumber - fNumber)*(tNumber - fNumber)) + ((posOf[tLetter] - posOf[fLetter])*(posOf[tLetter] - posOf[fLetter])) == 5) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Validate bishop movement
+	 */
+	function validateBishop(fLetter, tLetter, fNumber, tNumber) {
+		if (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
+			&& !diagonalBlocked(fNumber, tNumber, fLetter, tLetter)) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Validate queen movement
+	 */
+	function validateQueen(fLetter, tLetter, fNumber, tNumber) {
+		if ((fLetter == tLetter && !yAxisBlocked(fNumber, tNumber, fLetter))
+			|| (fNumber == tNumber && !xAxisBlocked(fLetter, tLetter, fNumber)) 
+			|| (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
+				&& !diagonalBlocked(fNumber, tNumber, fLetter, tLetter))) {
+			return true;
+		}	
+		return false;
+	}
+	
+	/**
+	 * Validate king movement
+	 */
+	function validateKing(unmoved, colour, fLetter, tLetter, fNumber, tNumber) {
+		var valid = false;
+		if (Math.abs(tNumber - fNumber) <= 1 && Math.abs(posOf[tLetter] - posOf[fLetter]) <= 1) {
+			valid = true;
+		} else if (unmoved && tNumber == fNumber) {
+			if (tLetter == 'g' && $('#'+colour+'_rook_2').hasClass('unmoved') 
+				&& vacant('f_'+tNumber) && vacant('g_'+tNumber)) {
+				//allow short castle
+				valid = true;
+				//move castle
+				$('#f_'+tNumber).append($('#'+colour+'_rook_2'));
+			} else if (tLetter == 'c' && $('#'+colour+'_rook_1').hasClass('unmoved') && vacant('b_'+tNumber) 
+				&& vacant('c_'+tNumber) && vacant('d_'+tNumber)) {
+				//allow long castle
+				valid = true;
+				//move castle
+				$('#d_'+tNumber).append($('#'+colour+'_rook_1'));
+			}
+		}
+		return valid;
+	}
+	
+	/**
+	 * Validate pawn movement TODO: refactor
+	 */
+	function validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber) {
+		var valid = false;
+		var spaces = 1;
+		if (unmoved) {
+			//allow initial movement of 2 spaces
+			spaces = 2;
+		}
+		if (vacant(toSquare)) {
+			//allow moving forward
+			if (fLetter == tLetter) {
+	    		if ((colour == 'w' && tNumber > fNumber && tNumber - fNumber <= spaces)
+	    			|| (colour == 'b' && tNumber < fNumber && fNumber - tNumber <= spaces)) {
+					valid = true;
+	    		}
+			}				
+		} else if (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
+			&& ((colour == 'w' && tNumber - 1 == fNumber) || colour == 'b' && fNumber - 1 == tNumber))  {
+			//occupied by own already checked --> allow take
+			valid = true;
+			//remove taken piece and move to side
+			var taken = getOccupant(toSquare);
+			$('#piecesWon').append(taken);
+        	taken.removeClass('ui-draggable');
+		}
+		return valid;
 	}
 	
 	/**
@@ -165,16 +217,52 @@ $(document).ready( function() {
 	}
 	
 	/**
-	 * check if diagonal squares are blocked
+	 * Check if x-axis squares are blocked
+	 */
+	function xAxisBlocked(fLetter, tLetter, number) {
+		var fLetterPos = posOf[fLetter] - 1;
+		var tLetterPos = posOf[tLetter] - 1;
+		var range = Math.abs(fLetterPos - tLetterPos);
+		//get x-axis direction
+		var x = (tLetterPos - fLetterPos) / range;
+		//check squares are empty
+		for (var i = 1; i < range; i++) {
+			if(!vacant(letterAt[fLetterPos + (i*x)]+'_'+number)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
+	/**
+	 * Check if y-axis squares are blocked
+	 */
+	function yAxisBlocked(fNumber, tNumber, letter) {
+		var range = Math.abs(tNumber - fNumber);
+		//get x-axis direction
+		var y = (tNumber - fNumber) / range;
+		//check squares are empty
+		for (var i = 1; i < range; i++) {
+			if(!vacant(letter+'_'+(fNumber + (i*y)))) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+	
+	/**
+	 * Check if diagonal squares are blocked
 	 */
 	function diagonalBlocked(fNumber, tNumber, fLetter, tLetter) {
 		var fLetterPos = posOf[fLetter] - 1;
 		var tLetterPos = posOf[tLetter] - 1;
 		var range = Math.abs(tNumber - fNumber);
-		//get x-axis movement
-		var x = (tLetterPos - fLetterPos) / range
-		//get y-axis movement
-		var y = (tNumber - fNumber) / range
+		//get x-axis direction
+		var x = (tLetterPos - fLetterPos) / range;
+		//get y-axis direction
+		var y = (tNumber - fNumber) / range;
 		//check squares are empty
 		for (var i = 1; i < range; i++) {
 			if(!vacant(letterAt[fLetterPos + (i*x)]+'_'+(fNumber + (i*y)))) {
