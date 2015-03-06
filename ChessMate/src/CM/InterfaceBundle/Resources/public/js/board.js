@@ -71,6 +71,12 @@ $(document).ready( function() {
     		//invalidate move
     		ui.draggable.addClass('invalid');
     	} else {
+			//remove any lingering En passant
+			var ep = $('div.piece.passant');
+			//console.log(ep);
+			if(ep.length != 0 && !ep.hasClass('unmoved')) {
+				ep.removeClass('passant');
+			}
 			ui.draggable.removeClass('unmoved');
     		//center (TODO disable board?)
     		$(this).append(ui.draggable.css('position','static'));
