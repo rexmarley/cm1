@@ -96,10 +96,7 @@ $(document).ready( function() {
 			valid = validateKing(unmoved, colour, fLetter, tLetter, fNumber, tNumber);
 		}
 
-    	if(!valid) {
-    		//invalidate move
-    		ui.draggable.addClass('invalid');
-    	} else {
+    	if(valid) {
 			//remove any lingering En passant
 			var ep = $('div.piece.passant');
 			//console.log(ep);
@@ -109,6 +106,13 @@ $(document).ready( function() {
 			ui.draggable.removeClass('unmoved');
     		//center (TODO disable board?)
     		$(this).append(ui.draggable.css('position','static'));
+        	//update abstract board
+        	abstractBoard[getIndexFromGridRef(tLetter, tNumber)] = abstractBoard[getIndexFromGridRef(fLetter, fNumber)];
+        	abstractBoard[getIndexFromGridRef(fLetter, fNumber)] = false
+        	//console.log(abstractBoard);
+    	} else {
+    		//invalidate move
+    		ui.draggable.addClass('invalid');
     	}
     	
     	return valid;
@@ -248,14 +252,16 @@ $(document).ready( function() {
 	 * Remove piece, from given square, and move to side 
 	 */
 	function takePiece(toSquare) {
+		//get taken piece
 		var taken = getOccupant(toSquare);
+		//move off board
     	if ($('div#piecesWon div.piece').length == 0) {
     		$('div#piecesWon div.row:first div.col-md-2:first').append(taken);
     	} else {
     		var lastOccupied = $('div#piecesWon div.piece:last').parent();
-    		var nextVacant = lastOccupied.next('div.col-md-2');
-    		nextVacant.append(taken);
+    		lastOccupied.next('div.col-md-2').append(taken);
     	}
+    	//prevent further movement
     	taken.removeClass('ui-draggable');
 	}
 	
