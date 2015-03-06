@@ -27,7 +27,8 @@ $(document).ready( function() {
 	function validateMove(event, ui) {
 		var valid = false;
 		//get moved piece
-		var piece = ui.draggable.attr('id').split('_');
+		var pieceID = ui.draggable.attr('id');
+		var piece = pieceID.split('_');
 		var colour = piece[0];
 		var pieceType = piece[1];
 		//get target square
@@ -53,7 +54,7 @@ $(document).ready( function() {
 		}
 		//validate move
     	if (pieceType == 'pawn') {
-    		valid = validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber);
+    		valid = validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber, pieceID);
     	} else if (pieceType == 'rook') {
     		valid = validateRook(fLetter, tLetter, fNumber, tNumber);
 		} else if (pieceType == 'knight') {
@@ -162,27 +163,39 @@ $(document).ready( function() {
 	/**
 	 * Validate pawn movement
 	 */
-	function validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber) {
+	function validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber, pieceID) {
 		var valid = false;
 		var spaces = 1;
 		if (unmoved) {
 			//allow initial movement of 2 spaces
 			spaces = 2;
 		}
-		if (vacant(toSquare)) {
-			//allow moving forward
-			if (fLetter == tLetter) {
-	    		if ((colour == 'w' && tNumber > fNumber && tNumber - fNumber <= spaces)
-	    			|| (colour == 'b' && tNumber < fNumber && fNumber - tNumber <= spaces)) {
-					valid = true;
-	    		}
-			}				
+		//allow moving forward
+		var move = Math.abs(tNumber - fNumber);
+		if (vacant(toSquare) && fLetter == tLetter && move <= spaces) {
+    		if ((colour == 'w' && tNumber > fNumber) || (colour == 'b' && tNumber < fNumber)) {
+				valid = true;
+				//check/apply En passant
+				if (move == 2) {
+					//look left/right
+					if (occupiedByOtherPiece(letterAt[posOf[tLetter]-2]+'_'+tNumber, colour)
+							|| occupiedByOtherPiece(letterAt[posOf[tLetter]]+'_'+tNumber, colour)) {
+						$('#'+pieceID).addClass('passant');
+					}
+				}
+    		}
 		} else if (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
 			&& ((colour == 'w' && tNumber - 1 == fNumber) || colour == 'b' && fNumber - 1 == tNumber))  {
-			//occupied by own already checked --> allow take
-			valid = true;
-			//remove taken piece and move to side
-			takePiece(toSquare);
+			if (!vacant(toSquare)) {
+				//occupied by own already checked --> allow take
+				valid = true;
+				//remove taken piece and move to side
+				takePiece(toSquare);
+			} else if (getOccupant(tLetter+'_'+fNumber).hasClass('passant')) {
+				//use En passant
+				valid = true;
+				takePiece(tLetter+'_'+fNumber);
+			}
 		}
 		return valid;
 	}
@@ -230,6 +243,17 @@ $(document).ready( function() {
 	 */
 	function occupiedByOwnPiece(targetID, colour) {
 		if (!vacant(targetID) && getOccupant(targetID).attr('id').charAt(0) == colour) {
+			return true;
+		}
+		
+		return false;
+	}
+	
+	/**
+	 * Check if target square is occupied by other piece
+	 */
+	function occupiedByOtherPiece(targetID, colour) {
+		if (!vacant(targetID) && getOccupant(targetID).attr('id').charAt(0) != colour) {
 			return true;
 		}
 		
