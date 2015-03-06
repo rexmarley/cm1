@@ -13,9 +13,10 @@
 					for (i = 1; i <= 8; i++) {
 						for (j = 0; j < 8; j++) {
 							var alphaX = letterAt[j];
-							var index = getIndexFromGridRef(alphaX, i);
-							assert.equal(index, ((i-1) * 8) + j);
-							assert.equal(getGridRefFromIndex(index), alphaX+'_'+i);
+							var indices = getAbstractIndicesFromGridRef(alphaX, i);
+							assert.equal(indices[0], i-1);
+							assert.equal(indices[1], j);
+							assert.equal(getGridRefFromAbstractIndices(indices[0], indices[1]), alphaX+'_'+i);
 						}
 					}
 				});

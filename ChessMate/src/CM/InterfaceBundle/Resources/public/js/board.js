@@ -81,11 +81,16 @@ $(document).ready( function() {
 		if (ui.draggable.hasClass('unmoved')) {
 			unmoved = true;
 		}
+		//get abstract indices for from/to
+		var absFrom = getAbstractIndicesFromGridRef(fLetter, fNumber);
+		var absTo = getAbstractIndicesFromGridRef(tLetter, tNumber);
+		
 		//validate move
     	if (pieceType == 'pawn') {
     		valid = validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber, pieceID);
     	} else if (pieceType == 'rook') {
-    		valid = validateRook(fLetter, tLetter, fNumber, tNumber);
+    		//valid = validateRook(fLetter, tLetter, fNumber, tNumber);
+    		valid = validateRook(fromIndex, toIndex);
 		} else if (pieceType == 'knight') {
 			valid = validateKnight(fLetter, tLetter, fNumber, tNumber);
 		} else if (pieceType == 'bishop') {
@@ -107,9 +112,7 @@ $(document).ready( function() {
     		//center (TODO disable board?)
     		$(this).append(ui.draggable.css('position','static'));
         	//update abstract board
-        	abstractBoard[getIndexFromGridRef(tLetter, tNumber)] = abstractBoard[getIndexFromGridRef(fLetter, fNumber)];
-        	abstractBoard[getIndexFromGridRef(fLetter, fNumber)] = false
-        	//console.log(abstractBoard);
+    		updateAbstractBoard(absFrom, absTo);
     	} else {
     		//invalidate move
     		ui.draggable.addClass('invalid');
@@ -121,13 +124,32 @@ $(document).ready( function() {
 	/**
 	 * Validate rook movement
 	 */
-	function validateRook(fLetter, tLetter, fNumber, tNumber) {
+	function validateRook2(fLetter, tLetter, fNumber, tNumber) {
 		if ((fLetter == tLetter && !yAxisBlocked(fNumber, tNumber, fLetter))
 			|| (fNumber == tNumber && !xAxisBlocked(fLetter, tLetter, fNumber))) {
 			//allow piece to be taken
 			checkTakePiece(tLetter+'_'+tNumber);	
 			return true;
 		}
+		return false;
+	}
+	
+	/**
+	 * Validate rook movement
+	 */
+	function validateRook(fromIndex, toIndex) {
+		if ((toIndex - fromIndex) % 8 === 0) {
+			console.log('ok');
+		} else {
+			console.log('not ok');
+		}	
+		
+//		if ((fLetter == tLetter && !yAxisBlocked(fNumber, tNumber, fLetter))
+//			|| (fNumber == tNumber && !xAxisBlocked(fLetter, tLetter, fNumber))) {
+//			//allow piece to be taken
+//			checkTakePiece(tLetter+'_'+tNumber);	
+//			return true;
+//		}
 		return false;
 	}
 	
