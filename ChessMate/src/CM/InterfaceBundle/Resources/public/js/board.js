@@ -188,7 +188,7 @@ $(document).ready( function() {
 	}
 	
 	/**
-	 * Remove any exisitng piece, from given square, and move to side 
+	 * Remove any existing piece, from given square, and move to side 
 	 */
 	function checkTakePiece(toSquare) {
 		if (!vacant(toSquare)) {
@@ -201,7 +201,13 @@ $(document).ready( function() {
 	 */
 	function takePiece(toSquare) {
 		var taken = getOccupant(toSquare);
-		$('#piecesWon').append(taken);
+    	if ($('div#piecesWon div.piece').length == 0) {
+    		$('div#piecesWon div.row:first div.col-md-2:first').append(taken);
+    	} else {
+    		var lastOccupied = $('div#piecesWon div.piece:last').parent();
+    		var nextVacant = lastOccupied.next('div.col-md-2');
+    		nextVacant.append(taken);
+    	}
     	taken.removeClass('ui-draggable');
 	}
 	

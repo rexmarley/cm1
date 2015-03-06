@@ -44,10 +44,16 @@
 			</div>
 		</div>
 		<div class="col-md-6">
-			<div id="piecesLost">
+			<div id="piecesLost" class="row">
 			</div>	
-			<div id="piecesWon">
-			<span>Taken Pieces:</span>
+			<div id="piecesWon" class="row">
+				<div class="col-md-12">
+					<span>Taken Pieces:</span>
+					<div class="row">
+						{% for i in 1..15  %}
+							<div class="col-md-2 col-sm-2 col-xs-2"></div>
+						{% endfor %}
+					</div>
 			</div>	
 		</div>
 	</div>

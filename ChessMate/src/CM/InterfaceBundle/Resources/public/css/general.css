@@ -41,6 +41,14 @@ div.piece {
 	text-align: center;
 }
 
+div#piecesWon {
+	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
+	min-height: 10em;
+	outline: 1px solid #bdb7b7;
+	margin-right: 2em;
+	margin-top: 1em;
+}
+
 img#logo {
 	padding: 7px;
 }
