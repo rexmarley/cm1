@@ -90,7 +90,7 @@ $(document).ready( function() {
     		valid = validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber, pieceID);
     	} else if (pieceType == 'rook') {
     		//valid = validateRook(fLetter, tLetter, fNumber, tNumber);
-    		valid = validateRook(fromIndex, toIndex);
+    		valid = validateRook(absFrom, absTo);
 		} else if (pieceType == 'knight') {
 			valid = validateKnight(fLetter, tLetter, fNumber, tNumber);
 		} else if (pieceType == 'bishop') {
@@ -137,19 +137,15 @@ $(document).ready( function() {
 	/**
 	 * Validate rook movement
 	 */
-	function validateRook(fromIndex, toIndex) {
-		if ((toIndex - fromIndex) % 8 === 0) {
+	function validateRook(fromIndices, toIndices) {
+		if ((fromIndices[0] == toIndices[0] && !xAxisBlocked(fromIndices[0], toIndices[0], fromIndices[1])) 
+			|| (fromIndices[1] == toIndices[1] && !yAxisBlocked(fromIndices[1], toIndices[1], fromIndices[0]))) {
 			console.log('ok');
-		} else {
-			console.log('not ok');
-		}	
-		
-//		if ((fLetter == tLetter && !yAxisBlocked(fNumber, tNumber, fLetter))
-//			|| (fNumber == tNumber && !xAxisBlocked(fLetter, tLetter, fNumber))) {
-//			//allow piece to be taken
-//			checkTakePiece(tLetter+'_'+tNumber);	
-//			return true;
-//		}
+			//allow piece to be taken
+			checkTakePiece(tLetter+'_'+tNumber);	
+			return true;
+		}
+
 		return false;
 	}
 	
@@ -357,7 +353,7 @@ $(document).ready( function() {
 	/**
 	 * Check if x-axis squares are blocked
 	 */
-	function xAxisBlocked(fLetter, tLetter, number) {
+	function xAxisBlocked2(fLetter, tLetter, number) {
 		var fLetterPos = posOf[fLetter] - 1;
 		var tLetterPos = posOf[tLetter] - 1;
 		var range = Math.abs(fLetterPos - tLetterPos);
@@ -376,7 +372,7 @@ $(document).ready( function() {
 	/**
 	 * Check if y-axis squares are blocked
 	 */
-	function yAxisBlocked(fNumber, tNumber, letter) {
+	function yAxisBlocked2(fNumber, tNumber, letter) {
 		var range = Math.abs(tNumber - fNumber);
 		//get x-axis direction
 		var y = (tNumber - fNumber) / range;

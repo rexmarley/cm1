@@ -9,6 +9,7 @@
 			<script src="//code.jquery.com/qunit/qunit-1.17.1.js"></script>
 			<script src="{{ asset('bundles/cminterface/js/boardHelper.js') }}"></script>
 			<script>
+				//test abstractBoard indices to grid reference conversion
 				QUnit.test("testResolveAbstractBoard", function( assert ) {
 					for (i = 1; i <= 8; i++) {
 						for (j = 0; j < 8; j++) {
@@ -19,6 +20,40 @@
 							assert.equal(getGridRefFromAbstractIndices(indices[0], indices[1]), alphaX+'_'+i);
 						}
 					}
+				});
+				//test checking if x-axis is blocked (uses default piece positions)
+				QUnit.test("testXAxisBlocked", function( assert ) {
+					//test unblocked moving left
+					assert.equal(xAxisBlocked(3,0,2), false);
+					assert.equal(xAxisBlocked(7,2,3), false);
+					//test unblocked moving right
+					assert.equal(xAxisBlocked(1,6,2), false);
+					assert.equal(xAxisBlocked(3,7,3), false);
+					//test blocked moving left
+					assert.equal(xAxisBlocked(3,0,0), true);
+					assert.equal(xAxisBlocked(5,1,1), true);
+					assert.equal(xAxisBlocked(7,2,6), true);
+					assert.equal(xAxisBlocked(3,0,7), true);
+					//test blocked moving right
+					assert.equal(xAxisBlocked(1,6,0), true);
+					assert.equal(xAxisBlocked(3,7,1), true);
+					assert.equal(xAxisBlocked(1,7,6), true);
+					assert.equal(xAxisBlocked(3,5,7), true);
+				});
+				//test checking if y-axis is blocked (uses default piece positions)
+				QUnit.test("testYAxisBlocked", function( assert ) {
+					//test unblocked moving forward
+					assert.equal(yAxisBlocked(1,5,2), false);
+					assert.equal(yAxisBlocked(2,4,3), false);
+					//test unblocked moving backwards
+					assert.equal(yAxisBlocked(6,2,2), false);
+					assert.equal(yAxisBlocked(5,1,5), false);
+					//test blocked moving forward
+					assert.equal(yAxisBlocked(0,4,0), true);
+					assert.equal(yAxisBlocked(0,2,1), true);
+					//test blocked moving backwards
+					assert.equal(yAxisBlocked(7,2,3), true);
+					assert.equal(yAxisBlocked(7,3,4), true);
 				});
 			</script>
 		</head>
