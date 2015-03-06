@@ -1,8 +1,4 @@
-$(document).ready( function() {
-	//set positioning of letters
-	posOf = {'a': 1,'b': 2,'c': 3,'d': 4,'e': 5,'f': 6,'g': 7,'h': 8};
-	letterAt = ['a','b','c','d','e','f','g','h'];
-	
+$(document).ready( function() {	
 	//make pieces draggable
 	$('.piece').draggable({
         containment : '#board',
@@ -21,6 +17,35 @@ $(document).ready( function() {
 		drop: validateMove,
     });
 	
+	function inCheck(colour) {
+		var kingID = '#'+colour + '_king';
+		var kingSquare = $(kingID).parent().attr('id').split('_');
+		var x = kingSquare[0];
+		var y = kingSquare[1];
+		//check in check by pawn
+		if (inCheckByPawn(colour, x, y)) {
+			//$(kingID).removeClass('inCheck');	
+			return true;
+		}
+		return false;
+	}
+	
+	function inCheckByPawn(colour, xKing, yKing) {
+		var x1 = letterAt[posOf[xKing]-2];
+		var x2 = letterAt[posOf[xKing]];
+		if (colour == 'w') {
+			yKing++;
+		} else {
+			yKing--;			
+		}
+		if ((occupiedByOtherPiece(x1+'_'+yKing, colour) && getOccupant(x1+'_'+yKing).hasClass(colour+' pawn'))
+				||(occupiedByOtherPiece(x2+'_'+yKing, colour) && getOccupant(x2+'_'+yKing).hasClass(colour+' pawn'))) {
+			console.log('check by pawn')
+			return true;
+		}
+		return false;
+	}
+	
 	/**
 	 * Validate chess move
 	 */
@@ -31,6 +56,10 @@ $(document).ready( function() {
 		var piece = pieceID.split('_');
 		var colour = piece[0];
 		var pieceType = piece[1];
+		//if in check, force moving out
+		if (inCheck(colour)) {
+			//$(kingID).addClass('inCheck');			
+		}
 		//get target square
 		var toSquare = this.id;
 		//check if target is occupied by own piece

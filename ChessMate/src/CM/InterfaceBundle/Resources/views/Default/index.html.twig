@@ -35,7 +35,7 @@
 						{% endif %}		
 						<div id="{{j}}_{{i}}" class="square {{ squareColour }} ui-droppable">
 							{% if i < 3 or i > 6 %}
-								<div id="{{ pieces[p].id }}" class="piece ui-draggable unmoved">{{ pieces[p].img | raw }}</div>
+								<div id="{{ pieces[p].id }}" class="piece {{ pieces[p].colour }} {{ pieces[p].type }} ui-draggable unmoved">{{ pieces[p].img | raw }}</div>
 								{% set p = p + 1 %}
 							{% endif %}
 						</div>

@@ -11,7 +11,7 @@ class AjaxController extends Controller
 {    
     public function validateMoveAction(Request $request)
     {
-    	//TODO: all in js and just Ajax move if valid!!!!!!!!!!!!!!
+    	//TODO: all in js but must also be checked server side to prevent tampering
     	$pieceType = $request->request->get('pieceType');
     	$colour = $request->request->get('colour');
     	$fromSquare = $request->request->get('fromSquare');
