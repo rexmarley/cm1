@@ -124,23 +124,9 @@ $(document).ready( function() {
 	/**
 	 * Validate rook movement
 	 */
-	function validateRook2(fLetter, tLetter, fNumber, tNumber) {
-		if ((fLetter == tLetter && !yAxisBlocked(fNumber, tNumber, fLetter))
-			|| (fNumber == tNumber && !xAxisBlocked(fLetter, tLetter, fNumber))) {
-			//allow piece to be taken
-			checkTakePiece(tLetter+'_'+tNumber);	
-			return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Validate rook movement
-	 */
 	function validateRook(fromIndices, toIndices) {
 		if ((fromIndices[0] == toIndices[0] && !xAxisBlocked(fromIndices[0], toIndices[0], fromIndices[1])) 
 			|| (fromIndices[1] == toIndices[1] && !yAxisBlocked(fromIndices[1], toIndices[1], fromIndices[0]))) {
-			console.log('ok');
 			//allow piece to be taken
 			checkTakePiece(tLetter+'_'+tNumber);	
 			return true;
@@ -328,11 +314,13 @@ $(document).ready( function() {
 		return Math.abs(tNumber - fNumber) == Math.abs(tLetterPos - fLetterPos);
 	}
 	
+	//--------------------------------------------old------------------------------------------------
+	
 	
 	/**
 	 * Check if diagonal squares are blocked
 	 */
-	function diagonalBlocked(fNumber, tNumber, fLetter, tLetter) {
+	function diagonalBlocked2(fNumber, tNumber, fLetter, tLetter) {
 		var fLetterPos = posOf[fLetter] - 1;
 		var tLetterPos = posOf[tLetter] - 1;
 		var range = Math.abs(tNumber - fNumber);
@@ -347,6 +335,19 @@ $(document).ready( function() {
 			}
 		}
 
+		return false;
+	}
+	
+	/**
+	 * Validate rook movement
+	 */
+	function validateRook2(fLetter, tLetter, fNumber, tNumber) {
+		if ((fLetter == tLetter && !yAxisBlocked(fNumber, tNumber, fLetter))
+			|| (fNumber == tNumber && !xAxisBlocked(fLetter, tLetter, fNumber))) {
+			//allow piece to be taken
+			checkTakePiece(tLetter+'_'+tNumber);	
+			return true;
+		}
 		return false;
 	}
 	

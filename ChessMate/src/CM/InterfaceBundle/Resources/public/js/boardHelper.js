@@ -55,15 +55,12 @@ function updateAbstractBoard(from, to) {
  * @param row
  */
 function xAxisBlocked(from, to, row) {
-	//get direction
-	var start = from;
-	if (from > to) {
-		start = to;
-		to = from;
-	}
-	//check squares are empty
-	for (var i = (start + 1); i < to; i++) {
-		if(abstractBoard[row][i]) {
+	//get x-axis direction
+	var range = Math.abs(to - from);
+	var x = (to - from) / range;
+	//check squares inbetween are empty
+	for (var i = 1; i < range; i++) {
+		if(abstractBoard[row][from + (i*x)]) {
 			return true;
 		}
 	}
@@ -78,15 +75,31 @@ function xAxisBlocked(from, to, row) {
  * @param column
  */
 function yAxisBlocked(from, to, column) {
-	//get direction
-	var start = from;
-	if (from > to) {
-		start = to;
-		to = from;
+	//get y-axis direction
+	var range = Math.abs(to - from);
+	var y = (to - from) / range;
+	//check squares inbetween are empty
+	for (var i = 1; i < range; i++) {
+		if(abstractBoard[from + (i*y)][column]) {
+			return true;
+		}
 	}
-	//check squares are empty
-	for (var i = (start + 1); i < to; i++) {
-		if(abstractBoard[i][column]) {
+
+	return false;
+}
+
+/**
+ * Check if diagonal squares are blocked
+ */
+function diagonalBlocked(fromX, fromY, toX, toY) {
+	var range = Math.abs(fromX - toX);
+	//get x-axis direction
+	var xDir = (toX - fromX) / range;
+	//get y-axis direction
+	var yDir = (toY - fromY) / range;
+	//check squares inbetween are empty
+	for (var i = 1; i < range; i++) {
+		if(abstractBoard[fromY + (i*yDir)][fromX + (i*xDir)]) {
 			return true;
 		}
 	}
