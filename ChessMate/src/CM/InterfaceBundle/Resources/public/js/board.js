@@ -50,6 +50,14 @@ $(document).ready( function() {
 	 * Validate chess move
 	 */
 	function validateMove(event, ui) {
+//		console.log(abstractBoard[0]);
+//		console.log(abstractBoard[1]);
+//		console.log(abstractBoard[2]);
+//		console.log(abstractBoard[3]);
+//		console.log(abstractBoard[4]);
+//		console.log(abstractBoard[5]);
+//		console.log(abstractBoard[6]);
+//		console.log(abstractBoard[7]);
 		var valid = false;
 		//get moved piece
 		var pieceID = ui.draggable.attr('id');
@@ -134,7 +142,6 @@ $(document).ready( function() {
     		}
 		} else if (onDiagonal(absFrom, absTo) 
 			&& ((colour == 'w' && dir == 1) || colour == 'b' && dir == -1))  {
-			console.log(absFrom[0], absTo[1]);
 			if (!vacant(absTo[0], absTo[1])) {
 				//occupied by own already checked --> allow take
 				valid = true;
@@ -155,10 +162,10 @@ $(document).ready( function() {
 	 * @param to	[y,x]
 	 */
 	function validateRook(from, to) {
-		if ((fromIndices[0] == toIndices[0] && !xAxisBlocked(fromIndices[0], toIndices[0], fromIndices[1])) 
-			|| (fromIndices[1] == toIndices[1] && !yAxisBlocked(fromIndices[1], toIndices[1], fromIndices[0]))) {
+		if ((from[0] == to[0] && !xAxisBlocked(from[1], to[1], from[0])) 
+			|| (from[1] == to[1] && !yAxisBlocked(from[0], to[0], from[1]))) {
 			//allow piece to be taken
-			//checkTakePiece(tLetter+'_'+tNumber);	
+			checkTakePiece(to);
 			return true;
 		}
 
@@ -173,7 +180,7 @@ $(document).ready( function() {
 	function validateKnight(from, to) {
 		if (((to[0] - from[0])*(to[0] - from[0])) + ((to[1] - from[1])*(to[1] - from[1])) == 5) {
 			//allow piece to be taken
-			//checkTakePiece(tLetter+'_'+tNumber);
+			checkTakePiece(to);
 			return true;
 		}
 		return false;
@@ -187,7 +194,7 @@ $(document).ready( function() {
 	function validateBishop(from, to) {
 		if (onDiagonal(from, to) && !diagonalBlocked(from[1], from[0], to[1], to[0])) {
 			//allow piece to be taken
-			//checkTakePiece(tLetter+'_'+tNumber);
+			checkTakePiece(to);
 			return true;
 		}
 		return false;
@@ -199,11 +206,11 @@ $(document).ready( function() {
 	 * @param to	[y,x]
 	 */
 	function validateQueen(from, to) {
-		if ((from[0] == to[0] && !xAxisBlocked(from[0], to[0], from[1])) 
-			|| (from[1] == to[1] && !yAxisBlocked(from[1], to[1], from[0])) 
+		if ((from[0] == to[0] && !xAxisBlocked(from[1], to[1], from[0])) 
+			|| (from[1] == to[1] && !yAxisBlocked(from[0], to[0], from[1])) 
 			|| (onDiagonal(from, to) && !diagonalBlocked(from[1], from[0], to[1], to[0]))) {
 			//allow piece to be taken
-			//checkTakePiece(tLetter+'_'+tNumber);
+			checkTakePiece(to);
 			return true;
 		}	
 		return false;
@@ -240,9 +247,9 @@ $(document).ready( function() {
 	/**
 	 * Remove any existing piece, from given square, and move to side 
 	 */
-	function checkTakePiece(toSquare) {
-		if (!vacant(toSquare)) {
-			takePiece(toSquare);
+	function checkTakePiece(square) {
+		if (!vacant(square[0],square[1])) {
+			takePiece(getGridRefFromAbstractIndices(square[0],square[1]));
 		}
 	}
 	
