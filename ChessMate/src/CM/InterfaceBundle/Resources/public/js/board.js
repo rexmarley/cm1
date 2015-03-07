@@ -305,17 +305,17 @@ $(document).ready( function() {
 		return false;
 	}
 	
+	//--------------------------------------------old------------------------------------------------
+
+	
 	/**
 	 * check if target square is diagonal with source
 	 * 
 	 * @return Boolean
 	 */
-	function onDiagonal(tNumber, fNumber, tLetterPos, fLetterPos) {
+	function onDiagonal2(tNumber, fNumber, tLetterPos, fLetterPos) {
 		return Math.abs(tNumber - fNumber) == Math.abs(tLetterPos - fLetterPos);
 	}
-	
-	//--------------------------------------------old------------------------------------------------
-	
 	
 	/**
 	 * Check if diagonal squares are blocked

@@ -106,3 +106,14 @@ function diagonalBlocked(fromX, fromY, toX, toY) {
 
 	return false;
 }
+
+/**
+ * check if target square is diagonal with source
+ * @param from	[y,x]
+ * @param to	[y,x]
+ * 
+ * @return Boolean
+ */
+function onDiagonal(from, to) {
+	return Math.abs(to[0] - from[0]) == Math.abs(to[1] - from[1]);
+}
