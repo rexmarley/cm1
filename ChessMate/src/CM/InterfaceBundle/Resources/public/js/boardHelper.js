@@ -13,6 +13,19 @@ abstractBoard = [
 	                ['bRook','bKnight','bBishop','bQueen','bKing','bBishop','bKnight','bRook']
                 ];
 
+unmoved = [
+			[true, true, true, true, true, true, true, true],
+			[true, true, true, true, true, true, true, true],
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+			[false, false, false, false, false, false, false, false],
+			[true, true, true, true, true, true, true, true],
+			[true, true, true, true, true, true, true, true]
+        ];
+
+enPassant = false;
+
 /**
  * Resolve grid reference to array indices
  * @param x alphabet ref
@@ -26,8 +39,8 @@ function getAbstractIndicesFromGridRef(x, y) {
 
 /**
  * Resolve array index to grid reference
- * @param y column in abstractBoard
- * @param x row in abstractBoard
+ * @param y row in abstractBoard
+ * @param x column in abstractBoard
  * 
  * @return the corresponding grid reference
  */
@@ -39,7 +52,8 @@ function getGridRefFromAbstractIndices(y, x) {
 }
 
 /**
- * Update abstract board
+ * Update abstract board,
+ * handles taking automatically
  * @param from	[y,x]
  * @param to	[y,x]
  */
@@ -129,8 +143,10 @@ function vacant(row, column) {
  * Check if target square is occupied by own piece
  */
 function occupiedByOwnPiece(row, column, colour) {
-	if (!vacant(row, column) && abstractBoard[row][column].charAt(0) == colour) {
-		return true;
+	if (row > -1 && row < 8 && column > -1 && column < 8) {
+		if (!vacant(row, column) && abstractBoard[row][column].charAt(0) == colour) {
+			return true;
+		}
 	}
 	
 	return false;
@@ -140,9 +156,26 @@ function occupiedByOwnPiece(row, column, colour) {
  * Check if target square is occupied by other piece
  */
 function occupiedByOtherPiece(row, column, colour) {
-	if (!vacant(row, column) && abstractBoard[row][column].charAt(0) != colour) {
-		return true;
+	if (row > -1 && row < 8 && column > -1 && column < 8) {
+		if (!vacant(row, column) && abstractBoard[row][column].charAt(0) != colour) {
+			return true;
+		}
 	}
 	
 	return false;
+}
+
+function checkApplyEnPassant(move, to, colour) {
+	if (move == 2) {
+		//get opponent's colour
+		if (colour == 'w') {
+			colour = 'b';
+		} else {
+			colour = 'w';
+		}
+		//look left/right
+		if (abstractBoard[to[0]][to[1]-1] == colour+'Pawn' || abstractBoard[to[0]][to[1]+1] == colour+'Pawn') {
+			enPassant = to;
+		}
+	}	
 }

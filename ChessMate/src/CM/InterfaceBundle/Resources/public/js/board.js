@@ -57,9 +57,9 @@ $(document).ready( function() {
 		var colour = piece[0];
 		var pieceType = piece[1];
 		//if in check, force moving out
-		if (inCheck(colour)) {
+		//if (inCheck(colour)) {
 			//$(kingID).addClass('inCheck');			
-		}
+		//}
 		//get from square
 		var fromSquare = ui.draggable.parent().attr('id');
 		var from = fromSquare.split('_');
@@ -73,6 +73,7 @@ $(document).ready( function() {
 		//get abstract indices for from/to
 		var absFrom = getAbstractIndicesFromGridRef(fLetter, fNumber);
 		var absTo = getAbstractIndicesFromGridRef(tLetter, tNumber);
+		
 		//check if target is occupied by own piece
 		if (occupiedByOwnPiece(absTo[0], absTo[1], colour)) {
     		//invalidate move
@@ -80,15 +81,9 @@ $(document).ready( function() {
 			return false;
 		}
 		
-		//check if piece's first move
-		var unmoved = false;		
-		if (ui.draggable.hasClass('unmoved')) {
-			unmoved = true;
-		}
-		
 		//validate move
     	if (pieceType == 'pawn') {
-    		valid = validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber, pieceID);
+    		valid = validatePawn(colour, absFrom, absTo);
     	} else if (pieceType == 'rook') {
     		valid = validateRook(absFrom, absTo);
 		} else if (pieceType == 'knight') {
@@ -102,13 +97,11 @@ $(document).ready( function() {
 		}
 
     	if(valid) {
-			//remove any lingering En passant
-			var ep = $('div.piece.passant');
-			//console.log(ep);
-			if(ep.length != 0 && !ep.hasClass('unmoved')) {
-				ep.removeClass('passant');
+			if (enPassant && enPassant !== absTo) {
+				//remove timed-out En passant
+				enPassant = false;
 			}
-			ui.draggable.removeClass('unmoved');
+			unmoved[absFrom[0]][absFrom[1]] = false;
     		//center (TODO disable board?)
     		$(this).append(ui.draggable.css('position','static'));
         	//update abstract board
@@ -119,6 +112,41 @@ $(document).ready( function() {
     	}
     	
     	return valid;
+	}
+	
+	/**
+	 * Validate pawn movement
+	 */
+	function validatePawn(colour, absFrom, absTo) {
+		var valid = false;
+		var spaces = 1;
+		if (unmoved[absFrom[0]][absFrom[1]]) {
+			//allow initial movement of 2 spaces
+			spaces = 2;
+		}
+		//allow moving forward
+		var dir = absTo[0] - absFrom[0];
+		var move = Math.abs(dir);
+		if (vacant(absTo[0], absTo[1]) && absFrom[1] == absTo[1] && move <= spaces) {
+    		if ((colour == 'w' && absTo[0] > absFrom[0]) || (colour == 'b' && absTo[0] < absFrom[0])) {
+				valid = true;
+				checkApplyEnPassant(move, absTo, colour);
+    		}
+		} else if (onDiagonal(absFrom, absTo) 
+			&& ((colour == 'w' && dir == 1) || colour == 'b' && dir == -1))  {
+			console.log(absFrom[0], absTo[1]);
+			if (!vacant(absTo[0], absTo[1])) {
+				//occupied by own already checked --> allow take
+				valid = true;
+				//remove taken piece and move to side
+				takePiece(getGridRefFromAbstractIndices(absTo[0],absTo[1]));
+			} else if (enPassant[0] == absFrom[0] && enPassant[1] == absTo[1]) {
+				//use En passant
+				valid = true;
+				takePiece(getGridRefFromAbstractIndices(absFrom[0],absTo[1]));
+			}
+		}
+		return valid;
 	}
 	
 	/**
@@ -204,46 +232,6 @@ $(document).ready( function() {
 				valid = true;
 				//move castle
 				$('#d_'+tNumber).append($('#'+colour+'_rook_1'));
-			}
-		}
-		return valid;
-	}
-	
-	/**
-	 * Validate pawn movement
-	 */
-	function validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber, pieceID) {
-		var valid = false;
-		var spaces = 1;
-		if (unmoved) {
-			//allow initial movement of 2 spaces
-			spaces = 2;
-		}
-		//allow moving forward
-		var move = Math.abs(tNumber - fNumber);
-		if (vacant(toSquare) && fLetter == tLetter && move <= spaces) {
-    		if ((colour == 'w' && tNumber > fNumber) || (colour == 'b' && tNumber < fNumber)) {
-				valid = true;
-				//check/apply En passant
-				if (move == 2) {
-					//look left/right
-					if (occupiedByOtherPiece(letterAt[posOf[tLetter]-2]+'_'+tNumber, colour)
-							|| occupiedByOtherPiece(letterAt[posOf[tLetter]]+'_'+tNumber, colour)) {
-						$('#'+pieceID).addClass('passant');
-					}
-				}
-    		}
-		} else if (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
-			&& ((colour == 'w' && tNumber - 1 == fNumber) || colour == 'b' && fNumber - 1 == tNumber))  {
-			if (!vacant(toSquare)) {
-				//occupied by own already checked --> allow take
-				valid = true;
-				//remove taken piece and move to side
-				takePiece(toSquare);
-			} else if (getOccupant(tLetter+'_'+fNumber).hasClass('passant')) {
-				//use En passant
-				valid = true;
-				takePiece(tLetter+'_'+fNumber);
 			}
 		}
 		return valid;
