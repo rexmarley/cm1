@@ -117,3 +117,32 @@ function diagonalBlocked(fromX, fromY, toX, toY) {
 function onDiagonal(from, to) {
 	return Math.abs(to[0] - from[0]) == Math.abs(to[1] - from[1]);
 }
+
+/**
+ * Check if target square is unoccupied
+ */
+function vacant(row, column) {
+	return abstractBoard[row][column] === false;
+}
+
+/**
+ * Check if target square is occupied by own piece
+ */
+function occupiedByOwnPiece(row, column, colour) {
+	if (!vacant(row, column) && abstractBoard[row][column].charAt(0) == colour) {
+		return true;
+	}
+	
+	return false;
+}
+
+/**
+ * Check if target square is occupied by other piece
+ */
+function occupiedByOtherPiece(row, column, colour) {
+	if (!vacant(row, column) && abstractBoard[row][column].charAt(0) != colour) {
+		return true;
+	}
+	
+	return false;
+}

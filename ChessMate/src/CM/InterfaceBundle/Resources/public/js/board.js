@@ -60,43 +60,43 @@ $(document).ready( function() {
 		if (inCheck(colour)) {
 			//$(kingID).addClass('inCheck');			
 		}
-		//get target square
-		var toSquare = this.id;
-		//check if target is occupied by own piece
-		if (occupiedByOwnPiece(toSquare, colour)) {
-    		//invalidate move
-    		ui.draggable.addClass('invalid');
-			return false;
-		}
-		var to = toSquare.split('_');
-		var tLetter = to[0];
-		var tNumber = parseInt(to[1], '10');
 		//get from square
 		var fromSquare = ui.draggable.parent().attr('id');
 		var from = fromSquare.split('_');
 		var fLetter = from[0];
 		var fNumber = parseInt(from[1], '10');
+		//get to square
+		var toSquare = this.id;
+		var to = toSquare.split('_');
+		var tLetter = to[0];
+		var tNumber = parseInt(to[1], '10');		
+		//get abstract indices for from/to
+		var absFrom = getAbstractIndicesFromGridRef(fLetter, fNumber);
+		var absTo = getAbstractIndicesFromGridRef(tLetter, tNumber);
+		//check if target is occupied by own piece
+		if (occupiedByOwnPiece(absTo[0], absTo[1], colour)) {
+    		//invalidate move
+    		ui.draggable.addClass('invalid');
+			return false;
+		}
+		
 		//check if piece's first move
 		var unmoved = false;		
 		if (ui.draggable.hasClass('unmoved')) {
 			unmoved = true;
 		}
-		//get abstract indices for from/to
-		var absFrom = getAbstractIndicesFromGridRef(fLetter, fNumber);
-		var absTo = getAbstractIndicesFromGridRef(tLetter, tNumber);
 		
 		//validate move
     	if (pieceType == 'pawn') {
     		valid = validatePawn(unmoved, colour, toSquare, fLetter, tLetter, fNumber, tNumber, pieceID);
     	} else if (pieceType == 'rook') {
-    		//valid = validateRook(fLetter, tLetter, fNumber, tNumber);
     		valid = validateRook(absFrom, absTo);
 		} else if (pieceType == 'knight') {
-			valid = validateKnight(fLetter, tLetter, fNumber, tNumber);
+			valid = validateKnight(absFrom, absTo);
 		} else if (pieceType == 'bishop') {
-			valid = validateBishop(fLetter, tLetter, fNumber, tNumber);
+			valid = validateBishop(absFrom, absTo);
 		} else if (pieceType == 'queen') {
-			valid = validateQueen(fLetter, tLetter, fNumber, tNumber);	
+			valid = validateQueen(absFrom, absTo);	
 		} else if (pieceType == 'king') {
 			valid = validateKing(unmoved, colour, fLetter, tLetter, fNumber, tNumber);
 		}
@@ -123,12 +123,14 @@ $(document).ready( function() {
 	
 	/**
 	 * Validate rook movement
+	 * @param from	[y,x]
+	 * @param to	[y,x]
 	 */
-	function validateRook(fromIndices, toIndices) {
+	function validateRook(from, to) {
 		if ((fromIndices[0] == toIndices[0] && !xAxisBlocked(fromIndices[0], toIndices[0], fromIndices[1])) 
 			|| (fromIndices[1] == toIndices[1] && !yAxisBlocked(fromIndices[1], toIndices[1], fromIndices[0]))) {
 			//allow piece to be taken
-			checkTakePiece(tLetter+'_'+tNumber);	
+			//checkTakePiece(tLetter+'_'+tNumber);	
 			return true;
 		}
 
@@ -137,11 +139,13 @@ $(document).ready( function() {
 	
 	/**
 	 * Validate knight movement
+	 * @param from	[y,x]
+	 * @param to	[y,x]
 	 */
-	function validateKnight(fLetter, tLetter, fNumber, tNumber) {
-		if (((tNumber - fNumber)*(tNumber - fNumber)) + ((posOf[tLetter] - posOf[fLetter])*(posOf[tLetter] - posOf[fLetter])) == 5) {
+	function validateKnight(from, to) {
+		if (((to[0] - from[0])*(to[0] - from[0])) + ((to[1] - from[1])*(to[1] - from[1])) == 5) {
 			//allow piece to be taken
-			checkTakePiece(tLetter+'_'+tNumber);
+			//checkTakePiece(tLetter+'_'+tNumber);
 			return true;
 		}
 		return false;
@@ -149,12 +153,13 @@ $(document).ready( function() {
 	
 	/**
 	 * Validate bishop movement
+	 * @param from	[y,x]
+	 * @param to	[y,x]
 	 */
-	function validateBishop(fLetter, tLetter, fNumber, tNumber) {
-		if (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
-			&& !diagonalBlocked(fNumber, tNumber, fLetter, tLetter)) {
+	function validateBishop(from, to) {
+		if (onDiagonal(from, to) && !diagonalBlocked(from[1], from[0], to[1], to[0])) {
 			//allow piece to be taken
-			checkTakePiece(tLetter+'_'+tNumber);
+			//checkTakePiece(tLetter+'_'+tNumber);
 			return true;
 		}
 		return false;
@@ -162,14 +167,15 @@ $(document).ready( function() {
 	
 	/**
 	 * Validate queen movement
+	 * @param from	[y,x]
+	 * @param to	[y,x]
 	 */
-	function validateQueen(fLetter, tLetter, fNumber, tNumber) {
-		if ((fLetter == tLetter && !yAxisBlocked(fNumber, tNumber, fLetter))
-			|| (fNumber == tNumber && !xAxisBlocked(fLetter, tLetter, fNumber)) 
-			|| (onDiagonal(tNumber, fNumber, posOf[tLetter], posOf[fLetter]) 
-				&& !diagonalBlocked(fNumber, tNumber, fLetter, tLetter))) {
+	function validateQueen(from, to) {
+		if ((from[0] == to[0] && !xAxisBlocked(from[0], to[0], from[1])) 
+			|| (from[1] == to[1] && !yAxisBlocked(from[1], to[1], from[0])) 
+			|| (onDiagonal(from, to) && !diagonalBlocked(from[1], from[0], to[1], to[0]))) {
 			//allow piece to be taken
-			checkTakePiece(tLetter+'_'+tNumber);
+			//checkTakePiece(tLetter+'_'+tNumber);
 			return true;
 		}	
 		return false;
@@ -270,120 +276,9 @@ $(document).ready( function() {
 	}
 	
 	/**
-	 * Check if target square is unoccupied
-	 */
-	function vacant(squareID) {
-		return $('div#'+squareID+' div.piece').length < 1;
-	}
-	
-	/**
 	 * Get occupant of given square
 	 */
 	function getOccupant(squareID) {
 		return $('#'+ squareID).children('div.piece');
-	}
-	
-	/**
-	 * Check if target square is occupied by own piece
-	 */
-	function occupiedByOwnPiece(targetID, colour) {
-		if (!vacant(targetID) && getOccupant(targetID).attr('id').charAt(0) == colour) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	/**
-	 * Check if target square is occupied by other piece
-	 */
-	function occupiedByOtherPiece(targetID, colour) {
-		if (!vacant(targetID) && getOccupant(targetID).attr('id').charAt(0) != colour) {
-			return true;
-		}
-		
-		return false;
-	}
-	
-	//--------------------------------------------old------------------------------------------------
-
-	
-	/**
-	 * check if target square is diagonal with source
-	 * 
-	 * @return Boolean
-	 */
-	function onDiagonal2(tNumber, fNumber, tLetterPos, fLetterPos) {
-		return Math.abs(tNumber - fNumber) == Math.abs(tLetterPos - fLetterPos);
-	}
-	
-	/**
-	 * Check if diagonal squares are blocked
-	 */
-	function diagonalBlocked2(fNumber, tNumber, fLetter, tLetter) {
-		var fLetterPos = posOf[fLetter] - 1;
-		var tLetterPos = posOf[tLetter] - 1;
-		var range = Math.abs(tNumber - fNumber);
-		//get x-axis direction
-		var x = (tLetterPos - fLetterPos) / range;
-		//get y-axis direction
-		var y = (tNumber - fNumber) / range;
-		//check squares are empty
-		for (var i = 1; i < range; i++) {
-			if(!vacant(letterAt[fLetterPos + (i*x)]+'_'+(fNumber + (i*y)))) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-	
-	/**
-	 * Validate rook movement
-	 */
-	function validateRook2(fLetter, tLetter, fNumber, tNumber) {
-		if ((fLetter == tLetter && !yAxisBlocked(fNumber, tNumber, fLetter))
-			|| (fNumber == tNumber && !xAxisBlocked(fLetter, tLetter, fNumber))) {
-			//allow piece to be taken
-			checkTakePiece(tLetter+'_'+tNumber);	
-			return true;
-		}
-		return false;
-	}
-	
-	/**
-	 * Check if x-axis squares are blocked
-	 */
-	function xAxisBlocked2(fLetter, tLetter, number) {
-		var fLetterPos = posOf[fLetter] - 1;
-		var tLetterPos = posOf[tLetter] - 1;
-		var range = Math.abs(fLetterPos - tLetterPos);
-		//get x-axis direction
-		var x = (tLetterPos - fLetterPos) / range;
-		//check squares are empty
-		for (var i = 1; i < range; i++) {
-			if(!vacant(letterAt[fLetterPos + (i*x)]+'_'+number)) {
-				return true;
-			}
-		}
-
-		return false;
-	}
-	
-	/**
-	 * Check if y-axis squares are blocked
-	 */
-	function yAxisBlocked2(fNumber, tNumber, letter) {
-		var range = Math.abs(tNumber - fNumber);
-		//get x-axis direction
-		var y = (tNumber - fNumber) / range;
-		//check squares are empty
-		for (var i = 1; i < range; i++) {
-			if(!vacant(letter+'_'+(fNumber + (i*y)))) {
-				return true;
-			}
-		}
-
-		return false;
 	}
 });
