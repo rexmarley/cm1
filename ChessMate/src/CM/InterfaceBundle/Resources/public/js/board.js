@@ -17,48 +17,44 @@ $(document).ready( function() {
 		drop: validateMove,
     });
 	
+	/**
+	 * Check if king is in check
+	 */
 	function inCheck(colour) {
-		var kingID = '#'+colour + '_king';
-		var kingSquare = $(kingID).parent().attr('id').split('_');
-		var x = kingSquare[0];
-		var y = kingSquare[1];
+		var king = colour+'King';
+		//get king's position
+		var kingSquare;
+		for (var row = 0; row < 8; row++) {
+			var col = $.inArray(king, abstractBoard[row]);
+			if (col !== -1) {
+				kingSquare = [row, col];
+				break;
+			}
+		}
 		//check in check by pawn
-		if (inCheckByPawn(colour, x, y)) {
+		if (inCheckByPawn(colour, kingSquare)) {
 			//$(kingID).removeClass('inCheck');	
 			return true;
 		}
 		return false;
 	}
 	
-	function inCheckByPawn(colour, xKing, yKing) {
-		var x1 = letterAt[posOf[xKing]-2];
-		var x2 = letterAt[posOf[xKing]];
+	/**
+	 * Check if king is in check by pawn
+	 */
+	function inCheckByPawn(colour, kingSquare) {
 		if (colour == 'w') {
-			yKing++;
+			kingSquare[0]++;
+			colour = 'b';
 		} else {
-			yKing--;			
+			kingSquare[0]--;
+			colour = 'w';			
 		}
-		if ((occupiedByOtherPiece(x1+'_'+yKing, colour) && getOccupant(x1+'_'+yKing).hasClass(colour+' pawn'))
-				||(occupiedByOtherPiece(x2+'_'+yKing, colour) && getOccupant(x2+'_'+yKing).hasClass(colour+' pawn'))) {
-			console.log('check by pawn')
+		if (abstractBoard[kingSquare[0]][kingSquare[1]-1] == colour+'Pawn'
+			|| abstractBoard[kingSquare[0]][kingSquare[1]+1] == colour+'Pawn') {
 			return true;
 		}
 		return false;
-	}
-	
-	/**
-	 * Get piece type/colour from id
-	 */
-	function getPieceDetails(pieceID) {
-		var piece = pieceID.split('_');
-		return {'colour':piece[0], 'type':piece[1]};
-	}
-	
-	function getAbstractedSquareIndex(squareID) {
-		//get grid reference
-		var square = squareID.split('_');
-		//convert to array indices
-		return getAbstractIndicesFromGridRef(square[0], parseInt(square[1], '10'));		
 	}
 	
 	/**
@@ -78,20 +74,26 @@ $(document).ready( function() {
 		}		
 		//validate move
     	var valid = validatePieceType(piece['type'], piece['colour'], from, to);
-
     	if(valid) {
+    		//get target square occupant - in case of revert
+    		var occupant = abstractBoard[to[0]][to[1]];
+        	//update abstract board
+    		updateAbstractBoard(from, to);
     		//if in check, invalidate move
-    		//if (inCheck(colour)) {
-    			//$(kingID).addClass('inCheck');			
-    		//}
+    		if (inCheck(piece['colour'])) {
+            	//revert board
+        		updateAbstractBoard(to, from);
+        		abstractBoard[to[0]][to[1]] = occupant;
+        		//invalidate move
+        		ui.draggable.addClass('invalid');
+        		return false;
+    		}
     		//else
 			if (enPassant && enPassant !== to) {
-				//remove timed-out En passant
+				//time-out En passant
 				enPassant = false;
 			}
 			unmoved[from[0]][from[1]] = false;
-        	//update abstract board
-    		updateAbstractBoard(from, to);
     		//center piece
     		$(this).append(ui.draggable.css('position','static'));
 			//(TODO disable board?)
@@ -256,6 +258,24 @@ $(document).ready( function() {
 			}
 		}
 		return false;
+	}
+	
+	/**
+	 * Get piece type/colour from id
+	 */
+	function getPieceDetails(pieceID) {
+		var piece = pieceID.split('_');
+		return {'colour':piece[0], 'type':piece[1]};
+	}
+	
+	/**
+	 * Get board square's abstracted index in array
+	 */
+	function getAbstractedSquareIndex(squareID) {
+		//get grid reference
+		var square = squareID.split('_');
+		//convert to array indices
+		return getAbstractIndicesFromGridRef(square[0], parseInt(square[1], '10'));		
 	}
 	
 	/**
