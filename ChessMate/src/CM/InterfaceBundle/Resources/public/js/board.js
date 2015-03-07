@@ -47,65 +47,83 @@ $(document).ready( function() {
 	}
 	
 	/**
+	 * Get piece type/colour from id
+	 */
+	function getPieceDetails(pieceID) {
+		var piece = pieceID.split('_');
+		return {'colour':piece[0], 'type':piece[1]};
+	}
+	
+	function getAbstractedSquareIndex(squareID) {
+		//get grid reference
+		var square = squareID.split('_');
+		//convert to array indices
+		return getAbstractIndicesFromGridRef(square[0], parseInt(square[1], '10'));		
+	}
+	
+	/**
 	 * Validate chess move
 	 */
 	function validateMove(event, ui) {
-		var valid = false;
 		//get moved piece
-		var pieceID = ui.draggable.attr('id');
-		var piece = pieceID.split('_');
-		var colour = piece[0];
-		var pieceType = piece[1];
-		//if in check, force moving out
-		//if (inCheck(colour)) {
-			//$(kingID).addClass('inCheck');			
-		//}
-		//get from square
-		var fromSquare = ui.draggable.parent().attr('id');
-		var from = fromSquare.split('_');
-		//get to square
-		var toSquare = this.id;
-		var to = toSquare.split('_');		
-		//get abstract indices for from/to
-		var absFrom = getAbstractIndicesFromGridRef(from[0], parseInt(from[1], '10'));
-		var absTo = getAbstractIndicesFromGridRef(to[0], parseInt(to[1], '10'));		
+		var piece = getPieceDetails(ui.draggable.attr('id'));		
+		//get abstract indices for from/to squares
+		var from = getAbstractedSquareIndex(ui.draggable.parent().attr('id'));
+		var to = getAbstractedSquareIndex(this.id);
 		//check if target is occupied by own piece
-		if (occupiedByOwnPiece(absTo[0], absTo[1], colour)) {
+		if (occupiedByOwnPiece(to[0], to[1], piece['colour'])) {
     		//invalidate move
     		ui.draggable.addClass('invalid');
 			return false;
 		}		
 		//validate move
-    	if (pieceType == 'pawn') {
-    		valid = validatePawn(colour, absFrom, absTo);
-    	} else if (pieceType == 'rook') {
-    		valid = validateRook(absFrom, absTo);
-		} else if (pieceType == 'knight') {
-			valid = validateKnight(absFrom, absTo);
-		} else if (pieceType == 'bishop') {
-			valid = validateBishop(absFrom, absTo);
-		} else if (pieceType == 'queen') {
-			valid = validateQueen(absFrom, absTo);	
-		} else if (pieceType == 'king') {
-			valid = validateKing(colour, absFrom, absTo);
-		}
+    	var valid = validatePieceType(piece['type'], piece['colour'], from, to);
 
     	if(valid) {
-			if (enPassant && enPassant !== absTo) {
+    		//if in check, invalidate move
+    		//if (inCheck(colour)) {
+    			//$(kingID).addClass('inCheck');			
+    		//}
+    		//else
+			if (enPassant && enPassant !== to) {
 				//remove timed-out En passant
 				enPassant = false;
 			}
-			unmoved[absFrom[0]][absFrom[1]] = false;
-    		//center (TODO disable board?)
-    		$(this).append(ui.draggable.css('position','static'));
+			unmoved[from[0]][from[1]] = false;
         	//update abstract board
-    		updateAbstractBoard(absFrom, absTo);
+    		updateAbstractBoard(from, to);
+    		//center piece
+    		$(this).append(ui.draggable.css('position','static'));
+			//(TODO disable board?)
     	} else {
     		//invalidate move
     		ui.draggable.addClass('invalid');
     	}
     	
     	return valid;
+	}
+	
+	/**
+	 * Get validation for different pieces
+	 * @param colour 'w'/'b'
+	 * @param from	[y,x]
+	 * @param to	[y,x]
+	 */
+	function validatePieceType(type, colour, from, to) {
+    	if (type == 'pawn') {
+    		return validatePawn(colour, from, to);
+    	} else if (type == 'rook') {
+    		return validateRook(from, to);
+		} else if (type == 'knight') {
+			return validateKnight(from, to);
+		} else if (type == 'bishop') {
+			return validateBishop(from, to);
+		} else if (type == 'queen') {
+			return validateQueen(from, to);	
+		} else if (type == 'king') {
+			return validateKing(colour, from, to);
+		}
+		return false;
 	}
 	
 	/**

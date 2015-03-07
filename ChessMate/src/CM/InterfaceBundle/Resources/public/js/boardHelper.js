@@ -2,6 +2,7 @@
 posOf = {'a': 1,'b': 2,'c': 3,'d': 4,'e': 5,'f': 6,'g': 7,'h': 8};
 letterAt = ['a','b','c','d','e','f','g','h'];
 
+//allow abstract validation
 abstractBoard = [
 	                ['wRook','wKnight','wBishop','wQueen','wKing','wBishop','wKnight','wRook'],
 	                ['wPawn','wPawn','wPawn','wPawn','wPawn','wPawn','wPawn','wPawn'],
@@ -165,6 +166,9 @@ function occupiedByOtherPiece(row, column, colour) {
 	return false;
 }
 
+/**
+ * Mark a piece as vulnerable to En passant
+ */
 function checkApplyEnPassant(move, to, colour) {
 	if (move == 2) {
 		//get opponent's colour
