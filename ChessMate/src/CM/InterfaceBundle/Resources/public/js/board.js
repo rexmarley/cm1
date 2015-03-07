@@ -50,14 +50,6 @@ $(document).ready( function() {
 	 * Validate chess move
 	 */
 	function validateMove(event, ui) {
-//		console.log(abstractBoard[0]);
-//		console.log(abstractBoard[1]);
-//		console.log(abstractBoard[2]);
-//		console.log(abstractBoard[3]);
-//		console.log(abstractBoard[4]);
-//		console.log(abstractBoard[5]);
-//		console.log(abstractBoard[6]);
-//		console.log(abstractBoard[7]);
 		var valid = false;
 		//get moved piece
 		var pieceID = ui.draggable.attr('id');
@@ -71,24 +63,18 @@ $(document).ready( function() {
 		//get from square
 		var fromSquare = ui.draggable.parent().attr('id');
 		var from = fromSquare.split('_');
-		var fLetter = from[0];
-		var fNumber = parseInt(from[1], '10');
 		//get to square
 		var toSquare = this.id;
-		var to = toSquare.split('_');
-		var tLetter = to[0];
-		var tNumber = parseInt(to[1], '10');		
+		var to = toSquare.split('_');		
 		//get abstract indices for from/to
-		var absFrom = getAbstractIndicesFromGridRef(fLetter, fNumber);
-		var absTo = getAbstractIndicesFromGridRef(tLetter, tNumber);
-		
+		var absFrom = getAbstractIndicesFromGridRef(from[0], parseInt(from[1], '10'));
+		var absTo = getAbstractIndicesFromGridRef(to[0], parseInt(to[1], '10'));		
 		//check if target is occupied by own piece
 		if (occupiedByOwnPiece(absTo[0], absTo[1], colour)) {
     		//invalidate move
     		ui.draggable.addClass('invalid');
 			return false;
-		}
-		
+		}		
 		//validate move
     	if (pieceType == 'pawn') {
     		valid = validatePawn(colour, absFrom, absTo);
@@ -101,7 +87,7 @@ $(document).ready( function() {
 		} else if (pieceType == 'queen') {
 			valid = validateQueen(absFrom, absTo);	
 		} else if (pieceType == 'king') {
-			valid = validateKing(unmoved, colour, fLetter, tLetter, fNumber, tNumber);
+			valid = validateKing(colour, absFrom, absTo);
 		}
 
     	if(valid) {
@@ -120,40 +106,6 @@ $(document).ready( function() {
     	}
     	
     	return valid;
-	}
-	
-	/**
-	 * Validate pawn movement
-	 */
-	function validatePawn(colour, absFrom, absTo) {
-		var valid = false;
-		var spaces = 1;
-		if (unmoved[absFrom[0]][absFrom[1]]) {
-			//allow initial movement of 2 spaces
-			spaces = 2;
-		}
-		//allow moving forward
-		var dir = absTo[0] - absFrom[0];
-		var move = Math.abs(dir);
-		if (vacant(absTo[0], absTo[1]) && absFrom[1] == absTo[1] && move <= spaces) {
-    		if ((colour == 'w' && absTo[0] > absFrom[0]) || (colour == 'b' && absTo[0] < absFrom[0])) {
-				valid = true;
-				checkApplyEnPassant(move, absTo, colour);
-    		}
-		} else if (onDiagonal(absFrom, absTo) 
-			&& ((colour == 'w' && dir == 1) || colour == 'b' && dir == -1))  {
-			if (!vacant(absTo[0], absTo[1])) {
-				//occupied by own already checked --> allow take
-				valid = true;
-				//remove taken piece and move to side
-				takePiece(getGridRefFromAbstractIndices(absTo[0],absTo[1]));
-			} else if (enPassant[0] == absFrom[0] && enPassant[1] == absTo[1]) {
-				//use En passant
-				valid = true;
-				takePiece(getGridRefFromAbstractIndices(absFrom[0],absTo[1]));
-			}
-		}
-		return valid;
 	}
 	
 	/**
@@ -218,34 +170,78 @@ $(document).ready( function() {
 	
 	/**
 	 * Validate king movement
+	 * @param from	[y,x]
+	 * @param to	[y,x]
 	 */
-	function validateKing(unmoved, colour, fLetter, tLetter, fNumber, tNumber) {
-		var valid = false;
-		if (Math.abs(tNumber - fNumber) <= 1 && Math.abs(posOf[tLetter] - posOf[fLetter]) <= 1) {
-			//TODO moving into check
+	function validateKing(colour, from, to) {
+		//TODO moving into check
+		if (Math.abs(to[1] - from[1]) <= 1 && Math.abs(to[0] - from[0]) <= 1) {
 			//allow piece to be taken
-			checkTakePiece(tLetter+'_'+tNumber);
-			valid = true;
-		} else if (unmoved && tNumber == fNumber) {
-			if (tLetter == 'g' && $('#'+colour+'_rook_2').hasClass('unmoved') 
-				&& vacant('f_'+tNumber) && vacant('g_'+tNumber)) {
+			checkTakePiece(to);
+			return true;
+		} else if (unmoved[from[0]][from[1]] && to[0] == from[0]) {
+			//handle castling
+			if (to[1] == 6 && unmoved[from[0]][7]
+				&& vacant(from[0], 5) && vacant(from[0], 6)) {
+				//move castle
+				$('#f_'+(to[0]+1)).append($('#'+colour+'_rook_2'));
+	        	//update abstract board
+	    		updateAbstractBoard([from[0], 7], [to[0], 5]);
+	    		//set rook as moved - not actually necessary
+				unmoved[from[0]][7] = false;
 				//allow short castle
-				valid = true;
+				return true;
+			} else if (to[1] == 2 && unmoved[from[0]][0] && vacant(from[0], 1)
+				&& vacant(from[0], 3) && vacant(from[0], 3)) {
 				//move castle
-				$('#f_'+tNumber).append($('#'+colour+'_rook_2'));
-			} else if (tLetter == 'c' && $('#'+colour+'_rook_1').hasClass('unmoved') && vacant('b_'+tNumber) 
-				&& vacant('c_'+tNumber) && vacant('d_'+tNumber)) {
+				$('#d_'+(to[0]+1)).append($('#'+colour+'_rook_1'));
+	        	//update abstract board
+	    		updateAbstractBoard([from[0], 0], [to[0], 3]);
+	    		//set rook as moved - not actually necessary
+				unmoved[from[0]][0] = false;
 				//allow long castle
-				valid = true;
-				//move castle
-				$('#d_'+tNumber).append($('#'+colour+'_rook_1'));
+				return true;
 			}
 		}
-		return valid;
+		return false;
 	}
 	
 	/**
-	 * Remove any existing piece, from given square, and move to side 
+	 * Validate pawn movement
+	 * @param from	[y,x]
+	 * @param to	[y,x]
+	 */
+	function validatePawn(colour, from, to) {
+		var spaces = 1;
+		if (unmoved[from[0]][from[1]]) {
+			//allow initial movement of 2 spaces
+			spaces = 2;
+		}
+		//allow moving forward
+		var dir = to[0] - from[0];
+		var move = Math.abs(dir);
+		if (vacant(to[0], to[1]) && from[1] == to[1] && move <= spaces) {
+    		if ((colour == 'w' && to[0] > from[0]) || (colour == 'b' && to[0] < from[0])) {
+				checkApplyEnPassant(move, to, colour);
+				return true;
+    		}
+		} else if (onDiagonal(from, to) 
+			&& ((colour == 'w' && dir == 1) || colour == 'b' && dir == -1))  {
+			if (!vacant(to[0], to[1])) {
+				//occupied by own already checked --> allow take
+				takePiece(getGridRefFromAbstractIndices(to[0],to[1]));
+				return true;
+			} else if (enPassant[0] == from[0] && enPassant[1] == to[1]) {
+				//use En passant
+				takePiece(getGridRefFromAbstractIndices(from[0],to[1]));
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Check for takeable piece and remove if found 
 	 */
 	function checkTakePiece(square) {
 		if (!vacant(square[0],square[1])) {
