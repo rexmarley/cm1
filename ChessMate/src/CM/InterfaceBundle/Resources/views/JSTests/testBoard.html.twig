@@ -10,7 +10,7 @@
 			<script src="{{ asset('bundles/cminterface/js/boardHelper.js') }}"></script>
 			<script>
 				//test abstractBoard indices to grid reference conversion
-				QUnit.test("testResolveAbstractBoard", function( assert ) {
+				QUnit.test("testResolveAbstractBoardReference", function( assert ) {
 					for (i = 1; i <= 8; i++) {
 						for (j = 0; j < 8; j++) {
 							var alphaX = letterAt[j];
@@ -21,7 +21,19 @@
 						}
 					}
 				});
-				//test checking if x-axis is blocked (uses default piece positions)
+				//test moving pieces on abstract board (using default piece positions)
+				QUnit.test("testUpdateAbstractBoard", function( assert ) {
+					updateAbstractBoard([1,4],[3,2]);
+					assert.equal(abstractBoard[1][4], false);
+					assert.equal(abstractBoard[3][2], 'wPawn');
+					updateAbstractBoard([7,3],[4,3]);
+					assert.equal(abstractBoard[7][3], false);
+					assert.equal(abstractBoard[4][3], 'bQueen');
+					//reset board
+					updateAbstractBoard([3,2],[1,4]);
+					updateAbstractBoard([4,3],[7,3]);						
+				});
+				//test checking if x-axis is blocked (using default piece positions)
 				QUnit.test("testXAxisBlocked", function( assert ) {
 					//test unblocked moving left
 					assert.equal(xAxisBlocked(3,0,2), false);
@@ -40,7 +52,7 @@
 					assert.equal(xAxisBlocked(1,7,6), true);
 					assert.equal(xAxisBlocked(3,5,7), true);
 				});
-				//test checking if y-axis is blocked (uses default piece positions)
+				//test checking if y-axis is blocked (using default piece positions)
 				QUnit.test("testYAxisBlocked", function( assert ) {
 					//test unblocked moving forward
 					assert.equal(yAxisBlocked(1,5,2), false);
@@ -55,7 +67,7 @@
 					assert.equal(yAxisBlocked(7,2,3), true);
 					assert.equal(yAxisBlocked(7,3,4), true);
 				});
-				//test checking if diagonal is blocked (uses default piece positions)
+				//test checking if diagonal is blocked (using default piece positions)
 				//fromX, fromY, toX, toY
 				QUnit.test("testDiagonalBlocked", function( assert ) {
 					//test unblocked moving forward

@@ -40,8 +40,8 @@ function getGridRefFromAbstractIndices(y, x) {
 
 /**
  * Update abstract board
- * @param from
- * @param to
+ * @param from	[y,x]
+ * @param to	[y,x]
  */
 function updateAbstractBoard(from, to) {
 	abstractBoard[to[0]][to[1]] = abstractBoard[from[0]][from[1]];
