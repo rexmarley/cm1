@@ -43,6 +43,9 @@ $(document).ready( function() {
 		} else if (inCheckOnXAxis(colour, kingSquare)) {
 			console.log('check on x-axis');
 			return true;
+		} else if (inCheckOnYAxis(colour, kingSquare)) {
+			console.log('check on y-axis');
+			return true;
 		}
 		
 		//y-axis
@@ -54,11 +57,29 @@ $(document).ready( function() {
 		return false;
 	}
 	
+	/**
+	 * Check if in check on x-axis
+	 */
 	function inCheckOnXAxis(colour, kingSquare) {
 		var row = kingSquare[0];
 		for (var col = 0; col < 8; col++) {
 			if (abstractBoard[row][col] == colour+'Rook' || abstractBoard[row][col] == colour+'Queen') {
 				if ((col + 1) == kingSquare[1] || (col - 1) == kingSquare[1] || !xAxisBlocked(kingSquare[1], col, row)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Check if in check on y-axis
+	 */
+	function inCheckOnYAxis(colour, kingSquare) {
+		var col = kingSquare[1];
+		for (var row = 0; row < 8; row++) {
+			if (abstractBoard[row][col] == colour+'Rook' || abstractBoard[row][col] == colour+'Queen') {
+				if ((row + 1) == kingSquare[0] || (row - 1) == kingSquare[0] || !yAxisBlocked(kingSquare[0], row, col)) {
 					return true;
 				}
 			}
