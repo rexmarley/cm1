@@ -23,11 +23,7 @@ $(document).ready( function() {
 	function inCheck(colour) {
 		var king = colour+'King';
 		//get opponent colour
-		if (colour == 'w') {
-			colour = 'b';
-		} else {
-			colour = 'w';			
-		}
+		colour = getOpponentColour(colour);
 		//get king's position
 		var kingSquare = 0;
 		for (var row = 0; row < 8; row++) {
@@ -58,6 +54,18 @@ $(document).ready( function() {
 		return false;
 	}
 	
+	function inCheckOnXAxis(colour, kingSquare) {
+		var row = kingSquare[0];
+		for (var col = 0; col < 8; col++) {
+			if (abstractBoard[row][col] == colour+'Rook' || abstractBoard[row][col] == colour+'Queen') {
+				if ((col + 1) == kingSquare[1] || (col - 1) == kingSquare[1] || !xAxisBlocked(kingSquare[1], col, row)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+	
 	/**
 	 * Check if king is in check by knight
 	 */
@@ -76,18 +84,6 @@ $(document).ready( function() {
 	}
 	
 	/**
-	 * Check given piece is at given square
-	 */
-	function pieceAt(row, column, piece) {
-		if (row > -1 && row < 8 && column > -1 && column < 8) {
-			if (abstractBoard[row][column] == piece) {
-				return true;
-			}
-		}
-		return false;
-	}
-	
-	/**
 	 * Check if king is in check by pawn
 	 */
 	function inCheckByPawn(colour, kingSquare) {
@@ -100,6 +96,30 @@ $(document).ready( function() {
 			return true;
 		}
 		return false;
+	}
+	
+	/**
+	 * Check given piece is at given square
+	 */
+	function pieceAt(row, column, piece) {
+		if (row > -1 && row < 8 && column > -1 && column < 8) {
+			if (abstractBoard[row][column] == piece) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	/**
+	 * Get opponent's colour
+	 */
+	function getOpponentColour(colour) {
+		if (colour == 'w') {
+			colour = 'b';
+		} else {
+			colour = 'w';			
+		}
+		return colour;
 	}
 	
 	/**
