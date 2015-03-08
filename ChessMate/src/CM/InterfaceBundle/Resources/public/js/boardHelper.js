@@ -26,6 +26,7 @@ unmoved = [
         ];
 
 enPassant = false;
+enPassantPerformed = false;
 
 /**
  * Resolve grid reference to array indices
@@ -65,8 +66,8 @@ function updateAbstractBoard(from, to) {
 
 /**
  * Check if x-axis squares are blocked
- * @param from
- * @param to
+ * @param from	y1
+ * @param to	y2
  * @param row
  */
 function xAxisBlocked(from, to, row) {
@@ -85,8 +86,8 @@ function xAxisBlocked(from, to, row) {
 
 /**
  * Check if y-axis squares are blocked
- * @param from
- * @param to
+ * @param from	x1
+ * @param to	x2
  * @param column
  */
 function yAxisBlocked(from, to, column) {

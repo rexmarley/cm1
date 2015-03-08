@@ -46,14 +46,39 @@ $(document).ready( function() {
 		} else if (inCheckOnYAxis(colour, kingSquare)) {
 			console.log('check on y-axis');
 			return true;
+		} else if (inCheckOnDiagonal(colour, kingSquare)) {
+			console.log('check on diagonal');
+			return true;
 		}
-		
-		//y-axis
-		
-		//diagonal
 		
 		console.log('no check');	
 		
+		return false;
+	}
+	
+	/**
+	 * Check if in check on diagonal
+	 */
+	function inCheckOnDiagonal(colour, kingSquare) {
+		var row = kingSquare[0];
+		var col = kingSquare[1];
+		var blocks = [false,false,false,false];
+		for (var i = 1; i < 8; i++) {
+			var threats = [getPieceAt(row+i, col-i), getPieceAt(row+i, col+i), getPieceAt(row-i, col-i), getPieceAt(row-i, col+i)];
+			if ((!blocks[0] && (threats[0] == colour+'Bishop' || threats[0] == colour+'Queen'))
+				|| (!blocks[1] && (threats[1] == colour+'Bishop' || threats[1] == colour+'Queen'))
+				|| (!blocks[2] && (threats[2] == colour+'Bishop' || threats[2] == colour+'Queen'))
+				|| (!blocks[3] && (threats[3] == colour+'Bishop' || threats[3] == colour+'Queen'))
+				) {
+				return true;
+			}
+			//get blocking pieces
+			for (var j = 0; j < 4; j++) {
+				if (!blocks[j]) {
+					blocks[j] = threats[j];					
+				}
+			}
+		}
 		return false;
 	}
 	
@@ -132,6 +157,16 @@ $(document).ready( function() {
 	}
 	
 	/**
+	 * Get piece/false at given square
+	 */
+	function getPieceAt(row, column) {
+		if (row > -1 && row < 8 && column > -1 && column < 8) {
+			return abstractBoard[row][column];
+		}
+		return false;
+	}
+	
+	/**
 	 * Get opponent's colour
 	 */
 	function getOpponentColour(colour) {
@@ -163,6 +198,11 @@ $(document).ready( function() {
     	if(valid) {
     		//get target square occupant - in case of revert
     		var occupant = abstractBoard[to[0]][to[1]];
+    		var epTaken = false;
+    		if (enPassantPerformed) {
+    			epTaken = abstractBoard[from[0]][to[1]];
+    			abstractBoard[from[0]][to[1]] = false;
+    		}
         	//update abstract board
     		updateAbstractBoard(from, to);
     		//if in check, invalidate move
@@ -170,13 +210,24 @@ $(document).ready( function() {
             	//revert board
         		updateAbstractBoard(to, from);
         		abstractBoard[to[0]][to[1]] = occupant;
+        		if (epTaken) {
+        			//revert En passant
+            		abstractBoard[to[0]][to[1]] = epTaken;
+        		}
         		//invalidate move
         		ui.draggable.addClass('invalid');
         		return false;
     		}
     		//else
+			//allow piece to be taken
+    		if (!enPassantPerformed) {
+    			checkTakePiece(to);    			
+    		} else {
+				takePiece(getGridRefFromAbstractIndices(from[0],to[1]));
+				enPassantPerformed = false;
+			}
+			//check En passant time-out
 			if (enPassant && enPassant !== to) {
-				//time-out En passant
 				enPassant = false;
 			}
 			unmoved[from[0]][from[1]] = false;
@@ -222,8 +273,6 @@ $(document).ready( function() {
 	function validateRook(from, to) {
 		if ((from[0] == to[0] && !xAxisBlocked(from[1], to[1], from[0])) 
 			|| (from[1] == to[1] && !yAxisBlocked(from[0], to[0], from[1]))) {
-			//allow piece to be taken
-			checkTakePiece(to);
 			return true;
 		}
 
@@ -237,8 +286,6 @@ $(document).ready( function() {
 	 */
 	function validateKnight(from, to) {
 		if (((to[0] - from[0])*(to[0] - from[0])) + ((to[1] - from[1])*(to[1] - from[1])) == 5) {
-			//allow piece to be taken
-			checkTakePiece(to);
 			return true;
 		}
 		return false;
@@ -251,8 +298,6 @@ $(document).ready( function() {
 	 */
 	function validateBishop(from, to) {
 		if (onDiagonal(from, to) && !diagonalBlocked(from[1], from[0], to[1], to[0])) {
-			//allow piece to be taken
-			checkTakePiece(to);
 			return true;
 		}
 		return false;
@@ -267,8 +312,6 @@ $(document).ready( function() {
 		if ((from[0] == to[0] && !xAxisBlocked(from[1], to[1], from[0])) 
 			|| (from[1] == to[1] && !yAxisBlocked(from[0], to[0], from[1])) 
 			|| (onDiagonal(from, to) && !diagonalBlocked(from[1], from[0], to[1], to[0]))) {
-			//allow piece to be taken
-			checkTakePiece(to);
 			return true;
 		}	
 		return false;
@@ -280,10 +323,7 @@ $(document).ready( function() {
 	 * @param to	[y,x]
 	 */
 	function validateKing(colour, from, to) {
-		//TODO moving into check
 		if (Math.abs(to[1] - from[1]) <= 1 && Math.abs(to[0] - from[0]) <= 1) {
-			//allow piece to be taken
-			checkTakePiece(to);
 			return true;
 		} else if (unmoved[from[0]][from[1]] && to[0] == from[0]) {
 			//handle castling
@@ -334,12 +374,10 @@ $(document).ready( function() {
 		} else if (onDiagonal(from, to) 
 			&& ((colour == 'w' && dir == 1) || colour == 'b' && dir == -1))  {
 			if (!vacant(to[0], to[1])) {
-				//occupied by own already checked --> allow take
-				takePiece(getGridRefFromAbstractIndices(to[0],to[1]));
 				return true;
 			} else if (enPassant[0] == from[0] && enPassant[1] == to[1]) {
 				//use En passant
-				takePiece(getGridRefFromAbstractIndices(from[0],to[1]));
+				enPassantPerformed = true;
 				return true;
 			}
 		}
