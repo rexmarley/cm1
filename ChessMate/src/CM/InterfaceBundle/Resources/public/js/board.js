@@ -87,6 +87,7 @@ $(document).ready( function() {
 	 */
 	function inCheckOnXAxis(colour, kingSquare) {
 		var row = kingSquare[0];
+		console.log(row);
 		for (var col = 0; col < 8; col++) {
 			if (abstractBoard[row][col] == colour+'Rook' || abstractBoard[row][col] == colour+'Queen') {
 				if ((col + 1) == kingSquare[1] || (col - 1) == kingSquare[1] || !xAxisBlocked(kingSquare[1], col, row)) {
@@ -205,30 +206,34 @@ $(document).ready( function() {
     		}
         	//update abstract board
     		updateAbstractBoard(from, to);
-    		//if in check, invalidate move
-    		if (inCheck(piece['colour'])) {
-            	//revert board
-        		updateAbstractBoard(to, from);
-        		abstractBoard[to[0]][to[1]] = occupant;
-        		if (epTaken) {
-        			//revert En passant
-            		abstractBoard[to[0]][to[1]] = epTaken;
+    		if (!castled) {
+        		//if in check, invalidate move
+    			if (inCheck(piece['colour'])) {
+                	//revert board
+            		updateAbstractBoard(to, from);
+            		abstractBoard[to[0]][to[1]] = occupant;
+            		if (epTaken) {
+            			//revert En passant
+                		abstractBoard[to[0]][to[1]] = epTaken;
+            		}
+            		//invalidate move
+            		ui.draggable.addClass('invalid');
+            		return false;
         		}
-        		//invalidate move
-        		ui.draggable.addClass('invalid');
-        		return false;
+    		} else {
+    			//check already checked
+    			castled = false;
     		}
-    		//else
 			//allow piece to be taken
     		if (!enPassantPerformed) {
-    			checkTakePiece(to);    			
+    			checkTakePiece(to);
+    			//check En passant time-out
+    			if (enPassantAvailable) {
+    				enPassantAvailable = false;
+    			}  			
     		} else {
 				takePiece(getGridRefFromAbstractIndices(from[0],to[1]));
 				enPassantPerformed = false;
-			}
-			//check En passant time-out
-			if (enPassant && enPassant !== to) {
-				enPassant = false;
 			}
 			unmoved[from[0]][from[1]] = false;
     		//center piece
@@ -325,28 +330,53 @@ $(document).ready( function() {
 	function validateKing(colour, from, to) {
 		if (Math.abs(to[1] - from[1]) <= 1 && Math.abs(to[0] - from[0]) <= 1) {
 			return true;
-		} else if (unmoved[from[0]][from[1]] && to[0] == from[0]) {
+		} else if (unmoved[from[0]][from[1]] && to[0] == from[0] && !inCheck(colour)) {
 			//handle castling
-			if (to[1] == 6 && unmoved[from[0]][7]
-				&& vacant(from[0], 5) && vacant(from[0], 6)) {
-				//move castle
-				$('#f_'+(to[0]+1)).append($('#'+colour+'_rook_2'));
-	        	//update abstract board
-	    		updateAbstractBoard([from[0], 7], [to[0], 5]);
-	    		//set rook as moved - not actually necessary
-				unmoved[from[0]][7] = false;
-				//allow short castle
-				return true;
-			} else if (to[1] == 2 && unmoved[from[0]][0] && vacant(from[0], 1)
-				&& vacant(from[0], 3) && vacant(from[0], 3)) {
-				//move castle
-				$('#d_'+(to[0]+1)).append($('#'+colour+'_rook_1'));
-	        	//update abstract board
-	    		updateAbstractBoard([from[0], 0], [to[0], 3]);
-	    		//set rook as moved - not actually necessary
-				unmoved[from[0]][0] = false;
-				//allow long castle
-				return true;
+			if (to[1] == 2 || to[1] == 6) {
+				var rookFromCol = 0;
+				var start = 1;
+				var end = 4;
+				var rookToCol = 3;
+				var rookToLetter = 'd';
+				var rookNum = 1;
+				if (to[1] == 6) {
+					rookFromCol = 7;
+					start = 5;
+					end = 7;
+					rookToCol = 5;
+					rookToLetter = 'f';
+					rookNum = 2;
+				}
+				//check castle is unmoved
+				if (unmoved[from[0]][rookFromCol]) {
+					//check intermittent points are vacant
+					for (var i = start; i < end; i++) {
+						if (!vacant(from[0], i)) {
+							return false;
+						}
+						// if in check at intermittent points, return false
+						var nextSpace = [from[0], i];
+			    		updateAbstractBoard(from, nextSpace);
+			    		console.log('from/nextSpace');
+			    		console.log(from, nextSpace);
+			    		if (inCheck(colour)) {
+							//put king back in place
+				    		updateAbstractBoard(nextSpace, from);
+			    			return false;
+			    		}
+						//put king back in place
+			    		updateAbstractBoard(nextSpace, from);
+					}
+					//move castle
+					$('#'+rookToLetter+'_'+(to[0]+1)).append($('#'+colour+'_rook_'+rookNum));
+		        	//update abstract board
+		    		updateAbstractBoard([from[0], rookFromCol], [to[0], rookToCol]);
+		    		//set rook as moved - not actually necessary
+					unmoved[from[0]][rookFromCol] = false;
+					//flag castled - prevent recheck of inCheck()
+					castled = true;
+					return true;
+				}
 			}
 		}
 		return false;
@@ -375,7 +405,7 @@ $(document).ready( function() {
 			&& ((colour == 'w' && dir == 1) || colour == 'b' && dir == -1))  {
 			if (!vacant(to[0], to[1])) {
 				return true;
-			} else if (enPassant[0] == from[0] && enPassant[1] == to[1]) {
+			} else if (enPassantAvailable[0] == from[0] && enPassantAvailable[1] == to[1]) {
 				//use En passant
 				enPassantPerformed = true;
 				return true;

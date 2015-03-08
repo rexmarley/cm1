@@ -12,6 +12,7 @@ class AjaxController extends Controller
     public function validateMoveAction(Request $request)
     {
     	//TODO: all in js but must also be checked server side to prevent tampering
+    	//compare between boards --> any difference validated
     	$pieceType = $request->request->get('pieceType');
     	$colour = $request->request->get('colour');
     	$fromSquare = $request->request->get('fromSquare');

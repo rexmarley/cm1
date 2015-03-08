@@ -25,8 +25,9 @@ unmoved = [
 			[true, true, true, true, true, true, true, true]
         ];
 
-enPassant = false;
+enPassantAvailable = false;
 enPassantPerformed = false;
+castled = false;
 
 /**
  * Resolve grid reference to array indices
@@ -180,7 +181,7 @@ function checkApplyEnPassant(move, to, colour) {
 		}
 		//look left/right
 		if (abstractBoard[to[0]][to[1]-1] == colour+'Pawn' || abstractBoard[to[0]][to[1]+1] == colour+'Pawn') {
-			enPassant = to;
+			enPassantAvailable = to;
 		}
 	}	
 }
