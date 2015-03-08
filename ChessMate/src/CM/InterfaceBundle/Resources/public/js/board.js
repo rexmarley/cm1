@@ -22,8 +22,14 @@ $(document).ready( function() {
 	 */
 	function inCheck(colour) {
 		var king = colour+'King';
+		//get opponent colour
+		if (colour == 'w') {
+			colour = 'b';
+		} else {
+			colour = 'w';			
+		}
 		//get king's position
-		var kingSquare;
+		var kingSquare = 0;
 		for (var row = 0; row < 8; row++) {
 			var col = $.inArray(king, abstractBoard[row]);
 			if (col !== -1) {
@@ -33,8 +39,50 @@ $(document).ready( function() {
 		}
 		//check in check by pawn
 		if (inCheckByPawn(colour, kingSquare)) {
-			//$(kingID).removeClass('inCheck');	
+			console.log('check by pawn');	
 			return true;
+		} else if (inCheckByKnight(colour, kingSquare)) {
+			console.log('check by knight');
+			return true;
+		} else if (inCheckOnXAxis(colour, kingSquare)) {
+			console.log('check on x-axis');
+			return true;
+		}
+		
+		//y-axis
+		
+		//diagonal
+		
+		console.log('no check');	
+		
+		return false;
+	}
+	
+	/**
+	 * Check if king is in check by knight
+	 */
+	function inCheckByKnight(colour, kingSquare) {
+		if (pieceAt(kingSquare[0]+2, kingSquare[1]-1, colour+'Knight')
+			|| pieceAt(kingSquare[0]+2, kingSquare[1]+1, colour+'Knight')
+			|| pieceAt(kingSquare[0]+1, kingSquare[1]-2, colour+'Knight')
+			|| pieceAt(kingSquare[0]+1, kingSquare[1]+2, colour+'Knight')
+			|| pieceAt(kingSquare[0]-1, kingSquare[1]-2, colour+'Knight')
+			|| pieceAt(kingSquare[0]-1, kingSquare[1]+2, colour+'Knight')
+			|| pieceAt(kingSquare[0]-2, kingSquare[1]-1, colour+'Knight')
+			|| pieceAt(kingSquare[0]-2, kingSquare[1]+1, colour+'Knight')) {
+			return true;
+		}
+		return false;
+	}
+	
+	/**
+	 * Check given piece is at given square
+	 */
+	function pieceAt(row, column, piece) {
+		if (row > -1 && row < 8 && column > -1 && column < 8) {
+			if (abstractBoard[row][column] == piece) {
+				return true;
+			}
 		}
 		return false;
 	}
@@ -43,15 +91,12 @@ $(document).ready( function() {
 	 * Check if king is in check by pawn
 	 */
 	function inCheckByPawn(colour, kingSquare) {
+		var dir = 1;
 		if (colour == 'w') {
-			kingSquare[0]++;
-			colour = 'b';
-		} else {
-			kingSquare[0]--;
-			colour = 'w';			
+			dir = -1;
 		}
-		if (abstractBoard[kingSquare[0]][kingSquare[1]-1] == colour+'Pawn'
-			|| abstractBoard[kingSquare[0]][kingSquare[1]+1] == colour+'Pawn') {
+		if (pieceAt(kingSquare[0]+dir, kingSquare[1]-1, colour+'Pawn')
+			|| pieceAt(kingSquare[0]+dir, kingSquare[1]+1, colour+'Pawn')) {
 			return true;
 		}
 		return false;
