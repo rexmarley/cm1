@@ -161,6 +161,77 @@
 					assert.equal(occupiedByOtherPiece(0,-1,'w'), false);
 					assert.equal(occupiedByOtherPiece(0,8,'w'), false);
 				});
+				//test piece movement with dummy game
+				QUnit.test("testMoveValidation", function( assert ) {
+					//TEST PAWN
+					//invalid pawn movement - diagonal
+					assert.equal(validatePawn('w', [1,4], [2,3]), false);
+					//invalid pawn movement - 3 spaces
+					assert.equal(validatePawn('w', [1,2], [4,2]), false);
+					//valid pawn movement - 2 spaces on first go
+					assert.equal(validatePawn('w', [1,4], [3,4]), true);					
+					updateAbstractBoard([1,4],[3,4]);
+					//valid pawn movement - 1 space
+					assert.equal(validatePawn('b', [6,4], [5,4]), true);					
+					updateAbstractBoard([6,4], [5,4]);
+					assert.equal(validatePawn('w', [1,5], [2,5]), true);					
+					updateAbstractBoard([1,5],[2,5]);
+					assert.equal(validatePawn('b', [6,3], [4,3]), true);					
+					updateAbstractBoard([6,3], [4,3]);
+					//take piece
+					assert.equal(validatePawn('w', [3,4], [4,3]), true);					
+					updateAbstractBoard([3,4], [4,3]);
+					//invalid pawn movement - 2 spaces, not first go
+					assert.equal(validatePawn('b', [5,4], [3,4]), false);
+					//valid pawn movement - vulnerable to En passant
+					assert.equal(validatePawn('b', [6,2], [4,2]), true);
+					assert.equal(enPassantAvailable[0], 4);
+					assert.equal(enPassantAvailable[1], 2);	
+					updateAbstractBoard([6,2],[4,2]);
+					//ignore En passant - timed out
+					assert.equal(validatePawn('w', [4,3], [5,4]), true);
+					assert.equal(checkEnPassantPerformed(), false);
+					assert.equal(enPassantAvailable, false);		
+					updateAbstractBoard([4,3], [5,4]);
+					assert.equal(validatePawn('b', [4,2], [3,2]), true);	
+					updateAbstractBoard([4,2], [3,2]);
+					//make white vulnerable to En passant
+					assert.equal(validatePawn('w', [1,1], [3,1]), true);
+					assert.equal(enPassantAvailable[0], 3);
+					assert.equal(enPassantAvailable[1], 1);		
+					updateAbstractBoard([1,1],[3,1]);
+					//perform En passant
+					assert.equal(validatePawn('b', [3,2], [2,1]), true);
+					assert.equal(enPassantAvailable, false);
+					assert.equal(checkEnPassantPerformed(), true);
+					assert.equal(abstractBoard[3][1], false);
+					//valid moves
+					assert.equal(validatePawn('w', [1,0], [2,1]), true);
+					updateAbstractBoard([1,0],[2,1]);
+					assert.equal(validatePawn('b', [6,1], [5,1]), true);
+					updateAbstractBoard([6,1],[5,1]);
+					//invalid move - take own piece
+					assert.equal(validatePawn('w', [1,2], [2,1]), false);
+					//TEST KNIGHT
+					//invalid move - take own piece
+					assert.equal(validateKnight('w', [0,1], [1,3]), false);
+					//invalid move - along y-axis 1 space
+					assert.equal(validateKnight('w', [0,1], [1,1]), false);
+					//invalid move - along y-axis 3 spaces
+					assert.equal(validateKnight('w', [0,1], [3,1]), false);
+					//invalid move - 3 on x, 1 on y
+					assert.equal(validateKnight('w', [0,1], [1,4]), false);
+					//invalid move - 3 on y, 1 on x
+					assert.equal(validateKnight('w', [0,1], [3,2]), false);
+					//valid move
+					console.log(abstractBoard[0]);
+					console.log(abstractBoard[1]);
+					console.log(abstractBoard[2]);
+					assert.equal(validateKnight([0,1], [2,2]), true);
+					updateAbstractBoard([0,1],[2,2]);
+					
+				});
+				
 			</script>
 		</head>
 		<body>
