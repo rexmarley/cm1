@@ -31,6 +31,19 @@
 		            "type": "file"
 		        }
 		    }
+		},
+		{
+		    "type": "package",
+		    "package":
+		    {
+		        "name": "components/jqueryui",
+		        "version": "1.10.4",
+		        "dist":    
+		        {   
+		            "url": "http://ajax.googleapis.com/ajax/libs/jqueryui/1.10.4/jquery-ui.min.js",
+		            "type": "file"
+		        }
+		    }
 		}
 	],
     "require": {

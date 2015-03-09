@@ -9,6 +9,9 @@
 	        {% stylesheets '%kernel.root_dir%/../vendor/twitter/bootstrap/less/bootstrap.less' %} 
         		<link href="{{ asset_url }}" rel="stylesheet" type="text/css" />
 	        {% endstylesheets %}
+	        {% stylesheets '%kernel.root_dir%/../vendor/components/jqueryui/themes/smoothness/jquery-ui.min.css' %} 
+        		<link href="{{ asset_url }}" rel="stylesheet" type="text/css" />
+	        {% endstylesheets %}
         {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('bundles/cminterface/images/favicon.ico') }}" />
     </head>
@@ -35,8 +38,8 @@
 	    			{% endif %}
 	    		</div>
 	    	</div>
-	    </div>
         {% block body %}{% endblock %}
+	    </div>
         {% block javascripts %}
 		    {% javascripts '%kernel.root_dir%/../vendor/jquery/jquery/jquery.min.js' %}
 		        <script type="text/javascript" src="{{ asset_url }}"></script>

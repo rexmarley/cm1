@@ -13,6 +13,7 @@ class AjaxController extends Controller
     {
     	//TODO: all in js but must also be checked server side to prevent tampering
     	//compare between boards --> any difference validated
+    	//--> and another thing; no point checking check mate client-side
     	$pieceType = $request->request->get('pieceType');
     	$colour = $request->request->get('colour');
     	$fromSquare = $request->request->get('fromSquare');
