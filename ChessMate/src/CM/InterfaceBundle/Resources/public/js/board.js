@@ -63,15 +63,17 @@ $(document).ready( function() {
     		var occupant = abstractBoard[to[0]][to[1]];
         	//update abstract board
     		updateAbstractBoard(from, to);
-    		if (!castled && !enPassantPerformed) {
-        		//if in check, invalidate move
-    			if (inCheck(piece['colour'])) {
-                	//revert board
-            		updateAbstractBoard(to, from);
-            		abstractBoard[to[0]][to[1]] = occupant;
-            		//invalidate move
-            		ui.draggable.addClass('invalid');
-            		return false;
+    		if (!castled) {
+        		if (!enPassantPerformed) {
+	        		//if in check, invalidate move
+	    			if (inCheck(piece['colour'])) {
+	                	//revert board
+	            		updateAbstractBoard(to, from);
+	            		abstractBoard[to[0]][to[1]] = occupant;
+	            		//invalidate move
+	            		ui.draggable.addClass('invalid');
+	            		return false;
+	        		}
         		}
     		} else {
     			//check already checked
