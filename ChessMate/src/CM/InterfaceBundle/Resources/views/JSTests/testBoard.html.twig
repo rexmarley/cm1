@@ -161,7 +161,7 @@
 					assert.equal(occupiedByOtherPiece(0,-1,'w'), false);
 					assert.equal(occupiedByOtherPiece(0,8,'w'), false);
 				});
-				//test piece movement with dummy game
+				//test piece movement (dummyish game)
 				QUnit.test("testMoveValidation", function( assert ) {
 					//TEST PAWN
 					//invalid pawn movement - diagonal
@@ -223,12 +223,39 @@
 					assert.equal(validateKnight('w', [0,1], [1,4]), false);
 					//invalid move - 3 on y, 1 on x
 					assert.equal(validateKnight('w', [0,1], [3,2]), false);
-					//valid move
-					console.log(abstractBoard[0]);
-					console.log(abstractBoard[1]);
-					console.log(abstractBoard[2]);
+					//valid moves
 					assert.equal(validateKnight([0,1], [2,2]), true);
 					updateAbstractBoard([0,1],[2,2]);
+					assert.equal(validateKnight([7,6], [5,5]), true);
+					updateAbstractBoard([7,6],[5,5]);
+					assert.equal(validateKnight([2,2], [3,4]), true);
+					updateAbstractBoard([2,2],[3,4]);
+					assert.equal(validateKnight([5,5], [4,3]), true);
+					updateAbstractBoard([7,6],[5,5]);
+					//TEST BISHOP
+					//invalid x-axis
+					assert.equal(validateBishop([0,2], [0,0]), false);
+					//invalid y-axis
+					assert.equal(validateBishop([7,2], [4,2]), false);
+					//blocked diagonal
+					assert.equal(validateBishop([0,2], [3,5]), false);
+					assert.equal(validateBishop([7,2], [4,5]), false);
+					//valid moves
+					assert.equal(validateBishop([0,2], [2,0]), true);
+					updateAbstractBoard([0,2],[2,0]);
+					assert.equal(validateBishop([7,5], [2,0]), true);
+					updateAbstractBoard([7,5],[2,0]);
+					//TEST ROOK
+					//valid take on y-axis
+					assert.equal(validateRook([0,0], [2,0]), true);
+					updateAbstractBoard([0,0],[2,0]);
+					//blocked y-axis
+					assert.equal(validateRook([7,7], [4,7]), false);
+					//blocked x-axis
+					assert.equal(validateRook([2,0], [2,3]), false);
+					//invalid diagonal
+					assert.equal(validateRook([2,0], [6,4]), false);					
+					//Queen tests not required - same as bishop/rook
 					
 				});
 				
