@@ -105,6 +105,58 @@ function validateQueen(from, to) {
 	}	
 	return false;
 }
+
+/**
+ * Validate king movement
+ * @param from	[y,x]
+ * @param to	[y,x]
+ */
+function validateKing(colour, from, to) {
+	if (Math.abs(to[1] - from[1]) <= 1 && Math.abs(to[0] - from[0]) <= 1) {
+		return true;
+	} else if (unmoved[from[0]][from[1]] && to[0] == from[0] && !inCheck(colour)) {
+		//handle castling
+		if (to[1] == 2 || to[1] == 6) {
+			var rookFromCol = 0;
+			var start = 1;
+			var end = 4;
+			var rookToCol = 3;
+			if (to[1] == 6) {
+				rookFromCol = 7;
+				start = 5;
+				end = 7;
+				rookToCol = 5;
+			}
+			//check castle is unmoved
+			if (unmoved[from[0]][rookFromCol]) {
+				//check intermittent points are vacant
+				for (var i = start; i < end; i++) {
+					if (!vacant(from[0], i)) {
+						return false;
+					}
+					// if in check at intermittent points, return false
+					var nextSpace = [from[0], i];
+		    		updateAbstractBoard(from, nextSpace);
+		    		if (inCheck(colour)) {
+						//put king back in place
+			    		updateAbstractBoard(nextSpace, from);
+		    			return false;
+		    		}
+					//put king back in place
+		    		updateAbstractBoard(nextSpace, from);
+				}
+	        	//update abstract board
+	    		updateAbstractBoard([from[0], rookFromCol], [to[0], rookToCol]);
+	    		//set rook as moved - not actually necessary
+				unmoved[from[0]][rookFromCol] = false;
+				//flag castled - prevent recheck of inCheck()
+				castled = true;
+				return true;
+			}
+		}
+	}
+	return false;
+}
 	
 /**
  * Validate pawn movement
@@ -466,4 +518,4 @@ function checkEnPassantPerformed() {
 		enPassantAvailable = false;
 	}
 	return false;		
-}
+} 

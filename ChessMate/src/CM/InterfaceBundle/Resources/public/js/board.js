@@ -75,6 +75,12 @@ $(document).ready( function() {
         		}
     		} else {
     			//check already checked
+				//move castle
+    			if (to[1] == 2) {
+					$('#d_'+to[0]+1).append($('#'+colour+'_rook_1');
+    			} else {
+					$('#f_'+to[0]+1).append($('#'+colour+'_rook2');
+    			}
     			castled = false;
     		}
 			//allow piece to be taken
@@ -100,15 +106,8 @@ $(document).ready( function() {
     	}
     	
     	return valid;
-	}
-	
-	/**
-	 * Open piece-chooser dialog
-	 */
-	function openPieceChooser(colour) {
-		$('#choosePiece_'+colour).dialog("open");		
 	} 
-	
+
 	/**
 	 * Get validation for different pieces
 	 * @param colour 'w'/'b'
@@ -116,10 +115,10 @@ $(document).ready( function() {
 	 * @param to	[y,x]
 	 */
 	function validatePieceType(type, colour, from, to) {
-    	if (type == 'pawn') {
-    		return validatePawn(colour, from, to);
-    	} else if (type == 'rook') {
-    		return validateRook(from, to);
+		if (type == 'pawn') {
+			return validatePawn(colour, from, to);
+		} else if (type == 'rook') {
+			return validateRook(from, to);
 		} else if (type == 'knight') {
 			return validateKnight(from, to);
 		} else if (type == 'bishop') {
@@ -133,61 +132,10 @@ $(document).ready( function() {
 	}
 	
 	/**
-	 * Validate king movement
-	 * @param from	[y,x]
-	 * @param to	[y,x]
+	 * Open piece-chooser dialog
 	 */
-	function validateKing(colour, from, to) {
-		if (Math.abs(to[1] - from[1]) <= 1 && Math.abs(to[0] - from[0]) <= 1) {
-			return true;
-		} else if (unmoved[from[0]][from[1]] && to[0] == from[0] && !inCheck(colour)) {
-			//handle castling
-			if (to[1] == 2 || to[1] == 6) {
-				var rookFromCol = 0;
-				var start = 1;
-				var end = 4;
-				var rookToCol = 3;
-				var rookToLetter = 'd';
-				var rookNum = 1;
-				if (to[1] == 6) {
-					rookFromCol = 7;
-					start = 5;
-					end = 7;
-					rookToCol = 5;
-					rookToLetter = 'f';
-					rookNum = 2;
-				}
-				//check castle is unmoved
-				if (unmoved[from[0]][rookFromCol]) {
-					//check intermittent points are vacant
-					for (var i = start; i < end; i++) {
-						if (!vacant(from[0], i)) {
-							return false;
-						}
-						// if in check at intermittent points, return false
-						var nextSpace = [from[0], i];
-			    		updateAbstractBoard(from, nextSpace);
-			    		if (inCheck(colour)) {
-							//put king back in place
-				    		updateAbstractBoard(nextSpace, from);
-			    			return false;
-			    		}
-						//put king back in place
-			    		updateAbstractBoard(nextSpace, from);
-					}
-					//move castle
-					$('#'+rookToLetter+'_'+(to[0]+1)).append($('#'+colour+'_rook_'+rookNum));
-		        	//update abstract board
-		    		updateAbstractBoard([from[0], rookFromCol], [to[0], rookToCol]);
-		    		//set rook as moved - not actually necessary
-					unmoved[from[0]][rookFromCol] = false;
-					//flag castled - prevent recheck of inCheck()
-					castled = true;
-					return true;
-				}
-			}
-		}
-		return false;
+	function openPieceChooser(colour) {
+		$('#choosePiece_'+colour).dialog("open");		
 	}
 	
 	/**
