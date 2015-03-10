@@ -77,9 +77,9 @@ $(document).ready( function() {
     			//check already checked
 				//move castle
     			if (to[1] == 2) {
-					$('#d_'+to[0]+1).append($('#'+colour+'_rook_1');
+					$('#d_'+to[0]+1).append($('#'+colour+'_rook_1'));
     			} else {
-					$('#f_'+to[0]+1).append($('#'+colour+'_rook2');
+					$('#f_'+to[0]+1).append($('#'+colour+'_rook2'));
     			}
     			castled = false;
     		}
