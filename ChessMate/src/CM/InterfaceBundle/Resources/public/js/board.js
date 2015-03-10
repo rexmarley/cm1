@@ -61,10 +61,10 @@ $(document).ready( function() {
     	if(valid) {
     		//get target square occupant - in case of revert
     		var occupant = abstractBoard[to[0]][to[1]];
-        	//update abstract board
-    		updateAbstractBoard(from, to);
-    		if (!castled) {
-        		if (!enPassantPerformed) {
+    		if (!enPassantPerformed) {
+            	//update abstract board
+        		updateAbstractBoard(from, to);
+	    		if (!castled) {
 	        		//if in check, invalidate move
 	    			if (inCheck(piece['colour'])) {
 	                	//revert board
@@ -74,19 +74,19 @@ $(document).ready( function() {
 	            		ui.draggable.addClass('invalid');
 	            		return false;
 	        		}
-        		}
-    		} else {
-    			//check already checked
-				//move castle
-    			if (to[1] == 2) {
-					$('#d_'+to[0]+1).append($('#'+colour+'_rook_1'));
-    			} else {
-					$('#f_'+to[0]+1).append($('#'+colour+'_rook2'));
-    			}
-    			castled = false;
+	    		} else {
+	    			//check already checked
+					//move castle
+	    			if (to[1] == 2) {
+						$('#d_'+to[0]+1).append($('#'+piece['colour']+'_rook_1'));
+	    			} else {
+						$('#f_'+to[0]+1).append($('#'+piece['colour']+'_rook2'));
+	    			}
+	    			castled = false;
+	    		}
     		}
 			//allow piece to be taken
-    		if (!checkEnPassantPerformed()) {
+    		if (!checkEnPassantPerformed(to)) {
     			checkAndTakePiece(to);
     			//check for pawn reaching opposing end
     			if (piece['type'] == 'pawn') {

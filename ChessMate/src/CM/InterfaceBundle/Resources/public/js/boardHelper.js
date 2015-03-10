@@ -182,7 +182,7 @@ function validatePawn(colour, from, to) {
 		if (checkTakePiece(to, colour)) {
 			return true;
 		} else if (enPassantAvailable[0] == from[0] && enPassantAvailable[1] == to[1]) {
-			//use En passant
+			//perform En passant
 			//allow revert if in check
 			var epTaken = abstractBoard[from[0]][to[1]];
 			abstractBoard[from[0]][to[1]] = false;
@@ -493,11 +493,7 @@ function checkTakePiece(square, colour) {
 function checkApplyEnPassant(move, to, colour) {
 	if (move == 2) {
 		//get opponent's colour
-		if (colour == 'w') {
-			colour = 'b';
-		} else {
-			colour = 'w';
-		}
+		colour = getOpponentColour(colour);
 		//look left/right
 		if (abstractBoard[to[0]][to[1]-1] == colour+'Pawn' || abstractBoard[to[0]][to[1]+1] == colour+'Pawn') {
 			enPassantAvailable = to;
@@ -507,14 +503,15 @@ function checkApplyEnPassant(move, to, colour) {
 	
 /**
  * Check En passant has been performed
+ * @param moved the moved piece
  */
-function checkEnPassantPerformed() {
+function checkEnPassantPerformed(moved) {
 	if (enPassantPerformed) {
 		enPassantPerformed = false;
 		return true;
-	} 		
+	}
 	//check En passant time-out
-	if (enPassantAvailable) {
+	if (enPassantAvailable != moved) {
 		enPassantAvailable = false;
 	}
 	return false;		
