@@ -25,10 +25,10 @@
 				QUnit.test("testUpdateAbstractBoard", function( assert ) {
 					updateAbstractBoard([1,4],[3,2]);
 					assert.equal(abstractBoard[1][4], false);
-					assert.equal(abstractBoard[3][2], 'wPawn');
+					assert.equal(abstractBoard[3][2], 'w_pawn');
 					updateAbstractBoard([7,3],[4,3]);
 					assert.equal(abstractBoard[7][3], false);
-					assert.equal(abstractBoard[4][3], 'bQueen');
+					assert.equal(abstractBoard[4][3], 'b_queen');
 					//reset board
 					updateAbstractBoard([3,2],[1,4]);
 					updateAbstractBoard([4,3],[7,3]);						
