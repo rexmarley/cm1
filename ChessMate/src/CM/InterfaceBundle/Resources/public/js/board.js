@@ -153,7 +153,9 @@ $(document).ready( function() {
     	}
     	//prevent further movement
     	taken.removeClass('ui-draggable');
-    	taken.attr('disabled', true);
+    	taken.draggable({ disabled: true });
+    	//prevent transparency
+    	taken.removeClass('ui-state-disabled');
 	}
 	
 	/**
