@@ -53,6 +53,29 @@ function getGridRefFromAbstractIndices(y, x) {
 	//translate to grid ref
 	return x+'_'+(y + 1);
 }
+
+/**
+ * Get validation for different pieces
+ * @param colour 'w'/'b'
+ * @param from	[y,x]
+ * @param to	[y,x]
+ */
+function validatePieceType(type, colour, from, to) {
+	if (type == 'pawn') {
+		return validatePawn(colour, from, to);
+	} else if (type == 'rook') {
+		return validateRook(from, to);
+	} else if (type == 'knight') {
+		return validateKnight(from, to);
+	} else if (type == 'bishop') {
+		return validateBishop(from, to);
+	} else if (type == 'queen') {
+		return validateQueen(from, to);	
+	} else if (type == 'king') {
+		return validateKing(colour, from, to);
+	}
+	return false;
+}
 	
 /**
  * Validate rook movement

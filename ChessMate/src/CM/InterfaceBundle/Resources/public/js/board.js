@@ -78,9 +78,9 @@ $(document).ready( function() {
 	    			//check already checked
 					//move castle
 	    			if (to[1] == 2) {
-						$('#d_'+to[0]+1).append($('#'+piece['colour']+'_rook_1'));
+						$('#d_'+(to[0]+1)).append($('#'+piece['colour']+'_rook_1'));
 	    			} else {
-						$('#f_'+to[0]+1).append($('#'+piece['colour']+'_rook2'));
+						$('#f_'+(to[0]+1)).append($('#'+piece['colour']+'_rook2'));
 	    			}
 	    			castled = false;
 	    		}
@@ -108,29 +108,6 @@ $(document).ready( function() {
     	}
     	
     	return valid;
-	} 
-
-	/**
-	 * Get validation for different pieces
-	 * @param colour 'w'/'b'
-	 * @param from	[y,x]
-	 * @param to	[y,x]
-	 */
-	function validatePieceType(type, colour, from, to) {
-		if (type == 'pawn') {
-			return validatePawn(colour, from, to);
-		} else if (type == 'rook') {
-			return validateRook(from, to);
-		} else if (type == 'knight') {
-			return validateKnight(from, to);
-		} else if (type == 'bishop') {
-			return validateBishop(from, to);
-		} else if (type == 'queen') {
-			return validateQueen(from, to);	
-		} else if (type == 'king') {
-			return validateKing(colour, from, to);
-		}
-		return false;
 	}
 	
 	/**
