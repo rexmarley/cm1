@@ -16,8 +16,13 @@ $(document).ready( function() {
 		accept: '.piece',
 		drop: validateMove,
     });
+	
+	//piece-chooser settings
 	$('.ui-dialog').dialog({
 		 autoOpen: false,
+		 open: function(event, ui) {
+			 $(".ui-dialog-titlebar-close").hide();
+		 },
 		 show: {
 			 effect: "blind",
 			 duration: 1000
@@ -32,6 +37,41 @@ $(document).ready( function() {
 			 of: "#board"
 		 },
 		 modal: true,
+	});
+	
+	//swap piece on selection
+	$('.choosablePiece').click(function() {
+		//get selected piece
+		var piece = this.id.split('_');
+		var colour = piece[1];
+		var type = piece[2];
+		//get new id
+		var num = 3;
+		if (type == 'queen') {
+			num--;
+		}
+		var newID = colour+'_'+type;
+		//check for conflict
+		var conflict = $('#'+newID+'_'+num);
+		while (conflict.length) {
+			num++;
+			conflict = $('#'+newID+'_'+num);
+		}
+		//get pawn position
+		var endRow = 7;
+		if (colour == 'b') {
+			endRow = 0;
+		}
+		var pawnCol = $.inArray(colour+'_pawn', abstractBoard[endRow]);
+		//update abstract board
+		abstractBoard[endRow][pawnCol] = newID;
+		//update real board
+		var pawn = getOccupant(getGridRefFromAbstractIndices(endRow, pawnCol));
+		//change piece
+		pawn.html($(this).html());
+		//set new id
+		pawn.attr('id', newID+'_'+num);
+		$('#choosePiece_'+colour).dialog("close");
 	});
 
 	/**
@@ -84,7 +124,6 @@ $(document).ready( function() {
     			//check for pawn reaching opposing end
     			if (piece['type'] == 'pawn') {
     				if ((piece['colour'] == 'w' && to[0] == 7) || (piece['colour'] == 'b' && to[0] == 0)) {
-    					console.log('other side reached');
     					openPieceChooser(piece['colour']);
     				}
     			}

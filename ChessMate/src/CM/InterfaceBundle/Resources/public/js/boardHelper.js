@@ -4,14 +4,14 @@ letterAt = ['a','b','c','d','e','f','g','h'];
 
 //allow abstract validation
 abstractBoard = [
-	                ['wRook','wKnight','wBishop','wQueen','wKing','wBishop','wKnight','wRook'],
-	                ['wPawn','wPawn','wPawn','wPawn','wPawn','wPawn','wPawn','wPawn'],
+	                ['w_rook','w_knight','w_bishop','w_queen','w_king','w_bishop','w_knight','w_rook'],
+	                ['w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn'],
 	                [false, false, false, false, false, false, false, false],
 	                [false, false, false, false, false, false, false, false],
 	                [false, false, false, false, false, false, false, false],
 	                [false, false, false, false, false, false, false, false],
-		            ['bPawn','bPawn','bPawn','bPawn','bPawn','bPawn','bPawn','bPawn'],
-	                ['bRook','bKnight','bBishop','bQueen','bKing','bBishop','bKnight','bRook']
+		            ['b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn'],
+	                ['b_rook','b_knight','b_bishop','b_queen','b_king','b_bishop','b_knight','b_rook']
                 ];
 //include redundant middle board to avoid resolving indices
 unmoved = [
@@ -229,7 +229,7 @@ function validatePawn(colour, from, to) {
  * Check if king is in check
  */
 function inCheck(colour) {
-	var king = colour+'King';
+	var king = colour+'_king';
 	//get opponent colour
 	colour = getOpponentColour(colour);
 	//get king's position
@@ -241,7 +241,7 @@ function inCheck(colour) {
 			break;
 		}
 	}
-	//check in check by pawn
+	//check in check
 	if (inCheckByPawn(colour, kingSquare)) {
 		console.log('check by pawn');	
 		return true;
@@ -273,10 +273,10 @@ function inCheckOnDiagonal(colour, kingSquare) {
 	var blocks = [false,false,false,false];
 	for (var i = 1; i < 8; i++) {
 		var threats = [getPieceAt(row+i, col-i), getPieceAt(row+i, col+i), getPieceAt(row-i, col-i), getPieceAt(row-i, col+i)];
-		if ((!blocks[0] && (threats[0] == colour+'Bishop' || threats[0] == colour+'Queen'))
-			|| (!blocks[1] && (threats[1] == colour+'Bishop' || threats[1] == colour+'Queen'))
-			|| (!blocks[2] && (threats[2] == colour+'Bishop' || threats[2] == colour+'Queen'))
-			|| (!blocks[3] && (threats[3] == colour+'Bishop' || threats[3] == colour+'Queen'))
+		if ((!blocks[0] && (threats[0] == colour+'_bishop' || threats[0] == colour+'_queen'))
+			|| (!blocks[1] && (threats[1] == colour+'_bishop' || threats[1] == colour+'_queen'))
+			|| (!blocks[2] && (threats[2] == colour+'_bishop' || threats[2] == colour+'_queen'))
+			|| (!blocks[3] && (threats[3] == colour+'_bishop' || threats[3] == colour+'_queen'))
 			) {
 			return true;
 		}
@@ -296,7 +296,7 @@ function inCheckOnDiagonal(colour, kingSquare) {
 function inCheckOnXAxis(colour, kingSquare) {
 	var row = kingSquare[0];
 	for (var col = 0; col < 8; col++) {
-		if (abstractBoard[row][col] == colour+'Rook' || abstractBoard[row][col] == colour+'Queen') {
+		if (abstractBoard[row][col] == colour+'_rook' || abstractBoard[row][col] == colour+'_queen') {
 			if ((col + 1) == kingSquare[1] || (col - 1) == kingSquare[1] || !xAxisBlocked(kingSquare[1], col, row)) {
 				return true;
 			}
@@ -311,7 +311,7 @@ function inCheckOnXAxis(colour, kingSquare) {
 function inCheckOnYAxis(colour, kingSquare) {
 	var col = kingSquare[1];
 	for (var row = 0; row < 8; row++) {
-		if (abstractBoard[row][col] == colour+'Rook' || abstractBoard[row][col] == colour+'Queen') {
+		if (abstractBoard[row][col] == colour+'_rook' || abstractBoard[row][col] == colour+'_queen') {
 			if ((row + 1) == kingSquare[0] || (row - 1) == kingSquare[0] || !yAxisBlocked(kingSquare[0], row, col)) {
 				return true;
 			}
@@ -324,14 +324,14 @@ function inCheckOnYAxis(colour, kingSquare) {
  * Check if king is in check by knight
  */
 function inCheckByKnight(colour, kingSquare) {
-	if (pieceAt(kingSquare[0]+2, kingSquare[1]-1, colour+'Knight')
-		|| pieceAt(kingSquare[0]+2, kingSquare[1]+1, colour+'Knight')
-		|| pieceAt(kingSquare[0]+1, kingSquare[1]-2, colour+'Knight')
-		|| pieceAt(kingSquare[0]+1, kingSquare[1]+2, colour+'Knight')
-		|| pieceAt(kingSquare[0]-1, kingSquare[1]-2, colour+'Knight')
-		|| pieceAt(kingSquare[0]-1, kingSquare[1]+2, colour+'Knight')
-		|| pieceAt(kingSquare[0]-2, kingSquare[1]-1, colour+'Knight')
-		|| pieceAt(kingSquare[0]-2, kingSquare[1]+1, colour+'Knight')) {
+	if (pieceAt(kingSquare[0]+2, kingSquare[1]-1, colour+'_knight')
+		|| pieceAt(kingSquare[0]+2, kingSquare[1]+1, colour+'_knight')
+		|| pieceAt(kingSquare[0]+1, kingSquare[1]-2, colour+'_knight')
+		|| pieceAt(kingSquare[0]+1, kingSquare[1]+2, colour+'_knight')
+		|| pieceAt(kingSquare[0]-1, kingSquare[1]-2, colour+'_knight')
+		|| pieceAt(kingSquare[0]-1, kingSquare[1]+2, colour+'_knight')
+		|| pieceAt(kingSquare[0]-2, kingSquare[1]-1, colour+'_knight')
+		|| pieceAt(kingSquare[0]-2, kingSquare[1]+1, colour+'_knight')) {
 		return true;
 	}
 	return false;
@@ -345,8 +345,8 @@ function inCheckByPawn(colour, kingSquare) {
 	if (colour == 'w') {
 		dir = -1;
 	}
-	if (pieceAt(kingSquare[0]+dir, kingSquare[1]-1, colour+'Pawn')
-		|| pieceAt(kingSquare[0]+dir, kingSquare[1]+1, colour+'Pawn')) {
+	if (pieceAt(kingSquare[0]+dir, kingSquare[1]-1, colour+'_pawn')
+		|| pieceAt(kingSquare[0]+dir, kingSquare[1]+1, colour+'_pawn')) {
 		return true;
 	}
 	return false;
@@ -518,7 +518,7 @@ function checkApplyEnPassant(move, to, colour) {
 		//get opponent's colour
 		colour = getOpponentColour(colour);
 		//look left/right
-		if (abstractBoard[to[0]][to[1]-1] == colour+'Pawn' || abstractBoard[to[0]][to[1]+1] == colour+'Pawn') {
+		if (abstractBoard[to[0]][to[1]-1] == colour+'_pawn' || abstractBoard[to[0]][to[1]+1] == colour+'_pawn') {
 			enPassantAvailable = to;
 		}
 	}	
