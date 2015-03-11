@@ -14,6 +14,10 @@ body {
 	font-size: 15px;
 }
 
+div.ui-dialog {
+	cursor: pointer;	
+}
+
 div#board {
 	height: 48em;
 	width: 48em;

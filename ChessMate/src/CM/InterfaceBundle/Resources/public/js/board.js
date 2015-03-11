@@ -1,6 +1,6 @@
 $(document).ready( function() {	
 	//make pieces draggable
-	$('.piece').draggable({
+	$('.ui-draggable').draggable({
         containment : '#board',
         revert: function() {
         	//validate based on droppable.drop
@@ -25,20 +25,13 @@ $(document).ready( function() {
 		 hide: {
 			 effect: "explode",
 			 duration: 1000
-		 }
-	});   
-	//center piece-chooser on board - TODO: not working
-    var dContainer = $('#board');
-    var dialog = $('.ui-dialog');
-    var x1 = dContainer.offset().left;
-    var y1 = dContainer.offset().top;
-    var width = dialog.outerWidth();
-    var height = dialog.outerHeight();
-    var x2 = dContainer.width() + x1 - width;
-    var y2 = dContainer.height() + y1 - height;
-    //dialog.draggable("option", "containment", [x1, y1, x2, y2]);
-    dialog.draggable({
-        containment : [x1, y1, x2, y2]
+		 },
+		 position: {
+			 my: "center center",
+			 at: "center center",
+			 of: "#board"
+		 },
+		 modal: true,
 	});
 
 	/**
@@ -160,6 +153,7 @@ $(document).ready( function() {
     	}
     	//prevent further movement
     	taken.removeClass('ui-draggable');
+    	taken.attr('disabled', true);
 	}
 	
 	/**

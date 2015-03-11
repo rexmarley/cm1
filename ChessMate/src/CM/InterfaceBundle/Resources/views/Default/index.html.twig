@@ -2,72 +2,84 @@
 
  
 {% block body %}
-<h2>Chat with opponent:</h2>
-<table>
-<tr>
-<td><textarea>blah blah blah</textarea></td>
-<td rowspan=2><h2>Opponent:</h2></td>
-</tr>
-<tr>
-<td></td>
-</tr>
-</table>
-<div class="row">
-    <div class="col-md-6">
-		<div id="board">
-			{% set p = 0 %}
-			{% set colour = 'b' %}
-			{% for i in 8..1  %}
-				{% for j in 'a'..'h'  %}
-					{% if i is divisibleby(2) %}
-						{% if loop.index is divisibleby(2) %}
-							{% set  squareColour = 'dark' %}
+	<div class="row">
+	    <div class="col-md-6">
+			<div id="board">
+				{% set p = 0 %}
+				{% set colour = 'b' %}
+				{% for i in 8..1  %}
+					{% for j in 'a'..'h'  %}
+						{% if i is divisibleby(2) %}
+							{% if loop.index is divisibleby(2) %}
+								{% set  squareColour = 'dark' %}
+							{% else %}
+								{% set  squareColour = 'light' %}
+							{% endif %}
 						{% else %}
-							{% set  squareColour = 'light' %}
-						{% endif %}
-					{% else %}
-						{% if loop.index is divisibleby(2) %}
-							{% set  squareColour = 'light' %}
-						{% else %}
-							{% set  squareColour = 'dark' %}
-						{% endif %}	
-					{% endif %}		
-					<div id="{{j}}_{{i}}" class="square {{ squareColour }} ui-droppable">
-						{% if i < 3 or i > 6 %}
-							<div id="{{ pieces[p].id }}" class="piece {{ pieces[p].colour }} {{ pieces[p].type }} ui-draggable">{{ pieces[p].img | raw }}</div>
-							{% set p = p + 1 %}
-						{% endif %}
-					</div>
-				{% endfor %}
-			{% endfor %}
-		</div>
-	</div>
-	<div class="col-md-6">
-		<div id="piecesLost" class="row">
-		</div>	
-		<div id="piecesWon" class="row">
-			<div class="col-md-12">
-				<span>Taken Pieces:</span>
-				<div class="row">
-					{% for i in 1..15  %}
-						<div class="col-md-2 col-sm-2 col-xs-2"></div>
+							{% if loop.index is divisibleby(2) %}
+								{% set  squareColour = 'light' %}
+							{% else %}
+								{% set  squareColour = 'dark' %}
+							{% endif %}	
+						{% endif %}		
+						<div id="{{j}}_{{i}}" class="square {{ squareColour }} ui-droppable">
+							{% if i < 3 or i > 6 %}
+								<div id="{{ pieces[p].id }}" class="piece ui-draggable">{{ pieces[p].img | raw }}</div>
+								{% set p = p + 1 %}
+							{% endif %}
+						</div>
 					{% endfor %}
+				{% endfor %}
+			</div>
+		</div>
+		<div class="col-md-6">
+			<div id="piecesLost" class="row">
+				<div class="col-md-12">
+					<span>Pieces lost:</span>
+					<div class="row">
+						{% for i in 1..15  %}
+							<div class="col-md-2 col-sm-2 col-xs-2"></div>
+						{% endfor %}
+					</div>
 				</div>
 			</div>
-		</div>	
+			<div id="chatBox" class="row">
+				<div class="col-md-12">
+					<h2>Chat with opponent:</h2>
+					<table>
+						<tr>
+							<td><textarea>blah blah blah</textarea></td>
+							{#<td rowspan=2><h2>Opponent:</h2></td> #}
+						</tr>
+						<tr>
+							<td></td>
+						</tr>
+					</table>
+				</div>
+			</div>	
+			<div id="piecesWon" class="row">
+				<div class="col-md-12">
+					<span>Pieces won:</span>
+					<div class="row">
+						{% for i in 1..15  %}
+							<div class="col-md-2 col-sm-2 col-xs-2"></div>
+						{% endfor %}
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
-</div>
-<br><br>
-<div id="choosePiece_b" class="ui-dialog" title="Choose Piece">
-	<div id="pickBQueen" class="piece">&#9819;</div>
-	<div id="pickBRook" class="piece">&#9820;</div>
-	<div id="pickBBishop" class="piece">&#9821;</div>
-	<div id="pickBKnight" class="piece">&#9822;</div>
-</div>
-<div id="choosePiece_w" class="ui-dialog" title="Choose Piece">
-	<div id="pickWQueen" class="piece">&#9813;</div>
-	<div id="pickWRook" class="piece">&#9814;</div>
-	<div id="pickWBishop" class="piece">&#9815;</div>
-	<div id="pickWKnight" class="piece">&#9816;</div>
-</div>
+	<br><br>
+	<div id="choosePiece_b" class="ui-dialog" title="Choose Piece">
+		<div id="pickBQueen" class="piece">&#9819;</div>
+		<div id="pickBRook" class="piece">&#9820;</div>
+		<div id="pickBBishop" class="piece">&#9821;</div>
+		<div id="pickBKnight" class="piece">&#9822;</div>
+	</div>
+	<div id="choosePiece_w" class="ui-dialog" title="Choose Piece">
+		<div id="pickWQueen" class="piece">&#9813;</div>
+		<div id="pickWRook" class="piece">&#9814;</div>
+		<div id="pickWBishop" class="piece">&#9815;</div>
+		<div id="pickWKnight" class="piece">&#9816;</div>
+	</div>
 {% endblock %}
