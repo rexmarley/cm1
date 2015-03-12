@@ -9,7 +9,14 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller,
 use CM\InterfaceBundle\Entity\Game;
 
 class AjaxController extends Controller
-{    
+{   
+	/**
+	 * Moves are validated client-side
+	 * If successful, moves are validated server-side, to prevent tampering
+	 * 
+	 * @param Request $request
+	 * @return \Symfony\Component\HttpFoundation\JsonResponse
+	 */ 
     public function validateMoveAction(Request $request)
     {
     	//TODO: all in js but must also be checked server side to prevent tampering
@@ -22,9 +29,17 @@ class AjaxController extends Controller
     	
     	$em = $this->getDoctrine()->getManager();
     	
-    	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);    	
+    	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+
+    	//make sure valid user for game
+    	$user = $this->getUser();
+    	if (!$game->getPlayers()->contains($user)) {
+    		return new JsonResponse(array('valid' => false, 'checkMate' => false, 'board' => false));
+    	}
     	
-    	$valid = $this->validateMove($from, $to, $type, $colour, $game);
+    	$validator = $this->get('move_validator');
+    	
+    	$valid = $validator->validateMove($from, $to, $type, $colour, $game);
     	
     	if ($valid['valid']) {
     		//$game->setBoard($game->getBoard()->setBoard($valid['board']));
@@ -36,34 +51,5 @@ class AjaxController extends Controller
     	}
     	
     	return new JsonResponse(array('valid' => $valid['valid'], 'checkMate' => false, 'board' => $valid['board']));
-    }
-    
-    private function validateMove(array $from, array $to, $type, $colour, Game $game)
-    {
-    	//TODO: mysql PK=composite(userID1,userID2)
-    	//TODO: service
-    	//allow abstract validation
-    	$board = $game->getBoard()->getBoard();
-    	//include redundant middle board to avoid resolving indices
-    	$unmoved = $game->getBoard()->getUnmoved();
-		//temp
-    	//return array('valid' => false, 'board' => $board, 'unmoved' => $unmoved);
-    	//check piece type/colour matches origin
-    	if ($board[$from[0]][$from[1]] != $colour.'_'.$type) {
-    		return array('valid' => false, 'board' => $board, 'unmoved' => $unmoved);
-    	}
-    	echo $colour.'**********';
-    	echo $board[$to[0]][$to[1]][0].'**********';
-    	//check target square is not occupied by own piece
-    	if ($board[$to[0]][$to[1]] && $board[$to[0]][$to[1]][0] == $colour) {
-    		return array('valid' => false, 'board' => $board, 'unmoved' => $unmoved);
-    	}
-    	return array('valid' => true, 'board' => $board);//don't need board/unmoved
-    	
-    }
-    
-    private function validatePawn()
-    {
-    	
     }
 }
