@@ -171,7 +171,7 @@ function validateKing(colour, from, to) {
 	        	//update abstract board
 	    		updateAbstractBoard([from[0], rookFromCol], [to[0], rookToCol]);
 	    		//set rook as moved - not actually necessary
-				unmoved[from[0]][rookFromCol] = false;
+				//unmoved[from[0]][rookFromCol] = false;
 				//flag castled - prevent recheck of inCheck()
 				castled = true;
 				return true;
@@ -526,7 +526,7 @@ function checkApplyEnPassant(move, to, colour) {
 	
 /**
  * Check En passant has been performed
- * @param moved the moved piece
+ * @param moved the moved piece's start square
  */
 function checkEnPassantPerformed(moved) {
 	if (enPassantPerformed) {

@@ -1,5 +1,7 @@
-$(document).ready( function() {	
-	//make pieces draggable
+$(document).ready( function() {
+	/**
+	 * Make pieces draggable
+	 */
 	$('.ui-draggable').draggable({
         containment : '#board',
         revert: function() {
@@ -9,15 +11,19 @@ $(document).ready( function() {
                 return true;
             }
         }
-	});
-	
-	//make squares droppable
+	});	
+
+	/**
+	 * Make squares droppable
+	 */
 	$('.square').droppable({
 		accept: '.piece',
 		drop: validateMove,
     });
 	
-	//piece-chooser settings
+	/**
+	 * Piece-chooser settings
+	 */
 	$('.ui-dialog').dialog({
 		 autoOpen: false,
 		 open: function(event, ui) {
@@ -38,8 +44,10 @@ $(document).ready( function() {
 		 },
 		 modal: true,
 	});
-	
-	//swap piece on selection
+
+	/**
+	 * Swap pawn on selection
+	 */
 	$('.choosablePiece').click(function() {
 		//get selected piece
 		var piece = this.id.split('_');
@@ -71,6 +79,7 @@ $(document).ready( function() {
 		pawn.html($(this).html());
 		//set new id
 		pawn.attr('id', newID+'_'+num);
+		//close piece-chooser
 		$('#choosePiece_'+colour).dialog("close");
 	});
 
@@ -117,9 +126,12 @@ $(document).ready( function() {
 	    			}
 	    			castled = false;
 	    		}
+	        	//ajax move & validate server-side
+	        	ajaxMove(from, to, piece['type'], piece['colour']); //move down
+	        	//should only fail due to cheating --> display message and manually revert board
     		}
 			//allow piece to be taken
-    		if (!checkEnPassantPerformed(to)) {
+    		if (!checkEnPassantPerformed(to)) { //TODO: combine with above if ???
     			checkAndTakePiece(to);
     			//check for pawn reaching opposing end
     			if (piece['type'] == 'pawn') {
@@ -137,9 +149,33 @@ $(document).ready( function() {
     	} else {
     		//invalidate move
     		ui.draggable.addClass('invalid');
+    		return false;
     	}
-    	
     	return valid;
+	}
+	
+	function ajaxMove(from, to, type, colour) {
+    	//ajax move & validate server-side
+    	//TODO: change to app.php for live
+		//var valid = false;
+    	$.ajax({
+    		type: "POST",
+    	    //async: false,
+    		url: 'http://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/checkMove',
+    		data: { 'from' : from, 'to' : to , 'type' : type, 'colour' : colour },
+    		success: function(data) {
+    			//centre piece
+    			if (!data['valid']) {
+    				$('div.errors').html('<h2>Nice try but why cheat at chess? You\'re docked a minute!</h2>');
+    			    // show for 5 seconds
+    			    setTimeout(function() { $('div.errors h2').fadeOut(2000); }, 5000);
+    			    setTimeout(function() { $('div.errors').html('') }, 8000);
+    			    //revert board
+    				abstractBoard = data['board'];
+    				//could just cancel game for now
+    			}
+    		}
+    	});
 	}
 	
 	/**

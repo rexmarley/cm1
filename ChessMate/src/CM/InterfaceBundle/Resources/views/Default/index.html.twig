@@ -1,7 +1,10 @@
  {% extends '::base.html.twig' %}
-
  
 {% block body %}
+	<div class="row">
+	    <div class="errors col-md-6">
+		</div>
+	</div>
 	<div class="row">
 	    <div class="col-md-6">
 			<div id="board">
@@ -69,7 +72,6 @@
 			</div>
 		</div>
 	</div>
-	<br><br>
 	<div id="choosePiece_b" class="ui-dialog" title="Choose Piece">
 		<div id="pick_b_queen" class="piece choosablePiece">&#9819;</div>
 		<div id="pick_b_rook" class="piece choosablePiece">&#9820;</div>
