@@ -15,6 +15,10 @@ class DefaultController extends Controller
     		$name = $user->getUsername();
     	}
     	
+    	//find matching game or get computer opponent 
+    	
+    	$game = $this->get('game_factory')->get(600, $user, null);
+    	
     	$pieces = $this->getPieces();
     	
         return $this->render('CMInterfaceBundle:Default:index.html.twig', array('name' => $name, 'pieces' => $pieces));

@@ -65,7 +65,8 @@
         "twitter/bootstrap": "v3.0.0",
         "leafo/lessphp": "0.4.0",
         "jquery/jquery": "1.10.2",
-        "components/jqueryui": "1.10.4"
+        "components/jqueryui": "1.10.4",
+        "doctrine/doctrine-fixtures-bundle": "2.2.*"
     },
     "scripts": {
         "post-install-cmd": [

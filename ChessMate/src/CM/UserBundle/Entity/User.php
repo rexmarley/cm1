@@ -1,11 +1,12 @@
 <?php
-// src/Acme/UserBundle/Entity/User.php
+// src/CM/UserBundle/Entity/User.php
 
 namespace CM\UserBundle\Entity;
 
 use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\BooleanType;
+use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * @ORM\Entity
@@ -19,7 +20,15 @@ class User extends BaseUser
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    protected $id;
+    protected $id;    
+
+    /**
+     * Current games
+     *
+     * @var ArrayCollection $currentGames
+     *
+     * @ORM\ManyToOne(targetEntity="CM\InterfaceBundle\Entity\Game")
+     */
     
     /**
      * Is the user register or a guest
@@ -39,7 +48,7 @@ class User extends BaseUser
     public function __construct()
     {
         parent::__construct();
-        // your own logic
+        $this->currentGames = new ArrayCollection();
     }
     
     /**
