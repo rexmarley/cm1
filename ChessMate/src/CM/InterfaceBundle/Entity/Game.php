@@ -23,14 +23,14 @@ class Game
     protected $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="Board")
+     * @ORM\OneToOne(targetEntity="Board", cascade={"persist"})
      */
     private $board;
     
     /**
-     * Current games
+     * Players
      *
-     * @ORM\ManyToMany(targetEntity="CM\UserBundle\Entity\User", inversedBy="currentGames")
+     * @ORM\ManyToMany(targetEntity="CM\UserBundle\Entity\User", inversedBy="currentGames", cascade={"persist"})
      * @ORM\JoinTable(name="game_players",
      * joinColumns={@ORM\JoinColumn(name="game_id", referencedColumnName="id")},
      * inverseJoinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")})
@@ -44,6 +44,15 @@ class Game
     
     private $whiteTimeLeft;
     private $blackTimeLeft;
+    
+    /**
+     * Constructor
+     */
+    public function __construct($board)
+    {
+        $this->players = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->board = $board;
+    }
 
     /**
      * Get id
@@ -109,7 +118,7 @@ class Game
      */
     public function setWhitePlayer(\CM\UserBundle\Entity\User $whitePlayer = null)
     {
-        $this->whitePlayer = $whitePlayer;
+        $this->players->set(0, $whitePlayer);
 
         return $this;
     }
@@ -121,7 +130,7 @@ class Game
      */
     public function getWhitePlayer()
     {
-        return $this->whitePlayer;
+        return $this->players->get(0);
     }
 
     /**
@@ -132,7 +141,7 @@ class Game
      */
     public function setBlackPlayer(\CM\UserBundle\Entity\User $blackPlayer = null)
     {
-        $this->blackPlayer = $blackPlayer;
+       $this->players->set(1, $blackPlayer);
 
         return $this;
     }
@@ -144,14 +153,7 @@ class Game
      */
     public function getBlackPlayer()
     {
-        return $this->blackPlayer;
-    }
-    /**
-     * Constructor
-     */
-    public function __construct()
-    {
-        $this->players = new \Doctrine\Common\Collections\ArrayCollection();
+        return $this->players->get(1);
     }
 
     /**

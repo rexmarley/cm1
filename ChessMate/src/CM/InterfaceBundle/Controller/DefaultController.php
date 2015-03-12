@@ -16,16 +16,22 @@ class DefaultController extends Controller
     		$name = $user->getUsername();
     	}
     	
-    	//find matching game or get computer opponent 
+    	$em = $this->getDoctrine()->getManager();
     	
-    	$game = $this->get('game_factory')->createNewGame(600, $user, new User());
+    	//TODO: find matching game or get computer opponent 
+    	$user2 = $em->getRepository('CMUserBundle:User')->findOneBy(array('username' => 'Rex2'));
     	
-    	$pieces = $this->getPieces();
+    	$game = $this->get('game_factory')->createNewGame(600, $user, $user2);
+    	$em->persist($game);
+    	$em->flush();
+    			    	
+    	$pieces = $this->getHTMLPieces();
     	
-        return $this->render('CMInterfaceBundle:Default:index.html.twig', array('name' => $name, 'pieces' => $pieces));
+        return $this->render('CMInterfaceBundle:Default:index.html.twig', array('name' => $name, 'pieces' => $pieces, 'game' => $game));
     }
     
-    private function getPieces() {
+    private function getHTMLPieces() {
+    	//TODO: move to helper/service & switch white/black depending on player
     	$pieces = array(
     			array('id' => 'b_rook_1', 'img' => '&#9820;'),
     			array('id' => 'b_knight_1', 'img' => '&#9822;'),

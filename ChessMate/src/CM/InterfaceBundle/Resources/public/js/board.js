@@ -3,7 +3,7 @@ $(document).ready( function() {
 	 * Make pieces draggable
 	 */
 	$('.ui-draggable').draggable({
-        containment : '#board',
+        containment : '.board',
         revert: function() {
         	//validate based on droppable.drop
             if ($(this).hasClass('invalid')) {
@@ -40,7 +40,7 @@ $(document).ready( function() {
 		 position: {
 			 my: "center center",
 			 at: "center center",
-			 of: "#board"
+			 of: ".board"
 		 },
 		 modal: true,
 	});
@@ -158,11 +158,13 @@ $(document).ready( function() {
     	//ajax move & validate server-side
     	//TODO: change to app.php for live
 		//var valid = false;
+		//get game id
+		var game = $('.board').attr('id').split('_');
     	$.ajax({
     		type: "POST",
     	    //async: false,
     		url: 'http://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/checkMove',
-    		data: { 'from' : from, 'to' : to , 'type' : type, 'colour' : colour },
+    		data: { 'gameID' : game[1],'from' : from, 'to' : to , 'type' : type, 'colour' : colour },
     		success: function(data) {
     			//centre piece
     			if (!data['valid']) {

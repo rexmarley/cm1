@@ -31,11 +31,6 @@ class User extends BaseUser
     protected $currentGames;
     
     /**
-     * @ORM\OneToMany(targetEntity="CM\InterfaceBundle\Entity\BoardSquare", mappedBy="board")
-     */
-    private $squares;
-    
-    /**
      * Is the user register or a guest
      * 
      * @ORM\Column(type="boolean")
@@ -145,38 +140,5 @@ class User extends BaseUser
     public function getCurrentGames()
     {
         return $this->currentGames;
-    }
-
-    /**
-     * Add squares
-     *
-     * @param \CM\UserBundle\Entity\BoardSquare $squares
-     * @return User
-     */
-    public function addSquare(BoardSquare $squares)
-    {
-        $this->squares[] = $squares;
-
-        return $this;
-    }
-
-    /**
-     * Remove squares
-     *
-     * @param \CM\UserBundle\Entity\BoardSquare $squares
-     */
-    public function removeSquare(BoardSquare $squares)
-    {
-        $this->squares->removeElement($squares);
-    }
-
-    /**
-     * Get squares
-     *
-     * @return \Doctrine\Common\Collections\Collection 
-     */
-    public function getSquares()
-    {
-        return $this->squares;
     }
 }
