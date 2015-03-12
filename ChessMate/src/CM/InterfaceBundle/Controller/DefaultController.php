@@ -5,6 +5,7 @@ namespace CM\InterfaceBundle\Controller;
 use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken,
     Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use CM\UserBundle\Entity\User;
 
 class DefaultController extends Controller
 {    
@@ -17,7 +18,7 @@ class DefaultController extends Controller
     	
     	//find matching game or get computer opponent 
     	
-    	$game = $this->get('game_factory')->get(600, $user, null);
+    	$game = $this->get('game_factory')->createNewGame(600, $user, new User());
     	
     	$pieces = $this->getPieces();
     	

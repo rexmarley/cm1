@@ -32,7 +32,7 @@ class LastActiveListener
         if ($this->securityContext->getToken()) {
             $user = $this->securityContext->getToken()->getUser();
             //update last active time (every five mins) 
-            if ($user instanceof UserInterface && !$user->isOnline()) {
+            if ($user instanceof UserInterface && !$user->getIsOnline()) {
                 $user->setLastActiveTime(new \DateTime());
                 $this->userManager->updateUser($user);
             }

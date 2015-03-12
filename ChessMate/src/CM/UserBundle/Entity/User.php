@@ -7,6 +7,7 @@ use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\BooleanType;
 use Doctrine\Common\Collections\ArrayCollection;
+use CM\InterfaceBundle\Entity\BoardSquare;
 
 /**
  * @ORM\Entity
@@ -25,10 +26,14 @@ class User extends BaseUser
     /**
      * Current games
      *
-     * @var ArrayCollection $currentGames
-     *
-     * @ORM\ManyToOne(targetEntity="CM\InterfaceBundle\Entity\Game")
+     * @ORM\ManyToMany(targetEntity="CM\InterfaceBundle\Entity\Game", mappedBy="players")
      */
+    protected $currentGames;
+    
+    /**
+     * @ORM\OneToMany(targetEntity="CM\InterfaceBundle\Entity\BoardSquare", mappedBy="board")
+     */
+    private $squares;
     
     /**
      * Is the user register or a guest
@@ -94,7 +99,7 @@ class User extends BaseUser
      * 
      * @return Bool
      */
-    public function isOnline()
+    public function getIsOnline()
     {    
     	return $this->getLastActiveTime() > new \DateTime('5 minutes ago');
     }
@@ -107,5 +112,71 @@ class User extends BaseUser
     public function getId()
     {
         return $this->id;
+    }
+
+    /**
+     * Add currentGames
+     *
+     * @param \CM\InterfaceBundle\Entity\Game $currentGames
+     * @return User
+     */
+    public function addCurrentGame(\CM\InterfaceBundle\Entity\Game $currentGame)
+    {
+        $this->currentGames[] = $currentGame;
+
+        return $this;
+    }
+
+    /**
+     * Remove currentGames
+     *
+     * @param \CM\InterfaceBundle\Entity\Game $currentGames
+     */
+    public function removeCurrentGame(\CM\InterfaceBundle\Entity\Game $currentGame)
+    {
+        $this->currentGames->removeElement($currentGame);
+    }
+
+    /**
+     * Get currentGames
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getCurrentGames()
+    {
+        return $this->currentGames;
+    }
+
+    /**
+     * Add squares
+     *
+     * @param \CM\UserBundle\Entity\BoardSquare $squares
+     * @return User
+     */
+    public function addSquare(BoardSquare $squares)
+    {
+        $this->squares[] = $squares;
+
+        return $this;
+    }
+
+    /**
+     * Remove squares
+     *
+     * @param \CM\UserBundle\Entity\BoardSquare $squares
+     */
+    public function removeSquare(BoardSquare $squares)
+    {
+        $this->squares->removeElement($squares);
+    }
+
+    /**
+     * Get squares
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getSquares()
+    {
+        return $this->squares;
     }
 }

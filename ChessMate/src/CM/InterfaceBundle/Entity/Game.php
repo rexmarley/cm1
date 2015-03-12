@@ -26,16 +26,16 @@ class Game
      * @ORM\OneToOne(targetEntity="Board")
      */
     private $board;
-
+    
     /**
-     * @ORM\OneToOne(targetEntity="CM\UserBundle\Entity\User", inversedBy="currentGame")
-     */    
-    private $whitePlayer;    
-
-    /**
-     * @ORM\OneToOne(targetEntity="CM\UserBundle\Entity\User", inversedBy="currentGames")
-     */  
-    private $blackPlayer;
+     * Current games
+     *
+     * @ORM\ManyToMany(targetEntity="CM\UserBundle\Entity\User", inversedBy="currentGames")
+     * @ORM\JoinTable(name="game_players",
+     * joinColumns={@ORM\JoinColumn(name="game_id", referencedColumnName="id")},
+     * inverseJoinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")})
+     */
+    private $players;
     
     /**
      * @ORM\Column(type="integer")
@@ -145,5 +145,45 @@ class Game
     public function getBlackPlayer()
     {
         return $this->blackPlayer;
+    }
+    /**
+     * Constructor
+     */
+    public function __construct()
+    {
+        $this->players = new \Doctrine\Common\Collections\ArrayCollection();
+    }
+
+    /**
+     * Add players
+     *
+     * @param \CM\UserBundle\Entity\User $players
+     * @return Game
+     */
+    public function addPlayer(\CM\UserBundle\Entity\User $player)
+    {
+        $this->players[] = $player;
+
+        return $this;
+    }
+
+    /**
+     * Remove players
+     *
+     * @param \CM\UserBundle\Entity\User $players
+     */
+    public function removePlayer(\CM\UserBundle\Entity\User $player)
+    {
+        $this->players->removeElement($player);
+    }
+
+    /**
+     * Get players
+     *
+     * @return \Doctrine\Common\Collections\Collection 
+     */
+    public function getPlayers()
+    {
+        return $this->players;
     }
 }

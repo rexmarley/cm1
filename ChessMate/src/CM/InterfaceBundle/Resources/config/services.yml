@@ -2,6 +2,6 @@ services:
 #    cm_interface.example:
 #        class: CM\InterfaceBundle\Example
 #        arguments: [@service_id, "plain_value", %parameter%]
-    game.factory:
+    game_factory:
         class: CM\InterfaceBundle\Factories\GameFactory
 

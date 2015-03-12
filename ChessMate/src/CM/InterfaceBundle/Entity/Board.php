@@ -41,26 +41,26 @@ class Board
     }
 
     /**
-     * Add squares
+     * Add square
      *
      * @param \CM\InterfaceBundle\Entity\BoardSquare $squares
      * @return Board
      */
-    public function addSquare(\CM\InterfaceBundle\Entity\BoardSquare $squares)
+    public function addSquare(\CM\InterfaceBundle\Entity\BoardSquare $square)
     {
-        $this->squares[] = $squares;
+        $this->squares[] = $square;
 
         return $this;
     }
 
     /**
-     * Remove squares
+     * Remove square
      *
      * @param \CM\InterfaceBundle\Entity\BoardSquare $squares
      */
-    public function removeSquare(\CM\InterfaceBundle\Entity\BoardSquare $squares)
+    public function removeSquare(\CM\InterfaceBundle\Entity\BoardSquare $square)
     {
-        $this->squares->removeElement($squares);
+        $this->squares->removeElement($square);
     }
 
     /**
