@@ -157,6 +157,7 @@ class Board
     public function updateBoard(array $from, array $to)
     {
         $this->board[$to[0]][$to[1]] = $this->board[$from[0]][$from[1]];
+        $this->board[$from[0]][$from[1]] = false;
 
         return $this;
     }
