@@ -59,20 +59,6 @@ abstract class ValidationHelper
     	$this->board = $game->getBoard()->getBoard();
     	//$this->unmoved = $game->getBoard()->getUnmoved();    	
     }
-	
-	/**
-	 * Validate queen movement
-	 * @param from	[y,x]
-	 * @param to	[y,x]
-	 */
-	private function validateQueen($from, $to) {
-		if (($from[0] == $to[0] && !$this->xAxisBlocked($from[1], $to[1], $from[0])) 
-			|| ($from[1] == $to[1] && !$this->yAxisBlocked($from[0], $to[0], $from[1])) 
-			|| ($this->onDiagonal($from, $to) && !$this->diagonalBlocked($from[1], $from[0], $to[1], $to[0]))) {
-			return true;
-		}	
-		return false;
-	}
 
 	/**
 	 * Validate king movement
