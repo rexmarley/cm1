@@ -10,4 +10,10 @@ services:
         class: CM\InterfaceBundle\Helpers\Validation\RookValidator
     knight_validator:
         class: CM\InterfaceBundle\Helpers\Validation\KnightValidator
+    bishop_validator:
+        class: CM\InterfaceBundle\Helpers\Validation\BishopValidator
+    queen_validator:
+        class: CM\InterfaceBundle\Helpers\Validation\QueenValidator
+    king_validator:
+        class: CM\InterfaceBundle\Helpers\Validation\KingValidator
 

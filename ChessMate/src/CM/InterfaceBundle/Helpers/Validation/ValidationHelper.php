@@ -61,18 +61,6 @@ abstract class ValidationHelper
     }
 	
 	/**
-	 * Validate bishop movement
-	 * @param from	[y,x]
-	 * @param to	[y,x]
-	 */
-	private function validateBishop($from, $to) {
-		if ($this->onDiagonal($from, $to) && !$this->diagonalBlocked($from[1], $from[0], $to[1], $to[0])) {
-			return true;
-		}
-		return false;
-	}
-	
-	/**
 	 * Validate queen movement
 	 * @param from	[y,x]
 	 * @param to	[y,x]
