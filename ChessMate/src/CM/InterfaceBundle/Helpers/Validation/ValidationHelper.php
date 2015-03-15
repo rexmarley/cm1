@@ -12,8 +12,6 @@ use CM\InterfaceBundle\Entity\Board;
 abstract class ValidationHelper
 {
 // 	private $castled = false;
-// 	private $enPassantAvailable = false;
-// 	private $enPassantPerformed = false;
     private $game;
     private $board;
     //private $unmoved;
@@ -59,103 +57,6 @@ abstract class ValidationHelper
     	$this->board = $game->getBoard()->getBoard();
     	//$this->unmoved = $game->getBoard()->getUnmoved();    	
     }
-
-	/**
-	 * Validate king movement
-	 * @param string $colour
-	 * @param array  $from	[y,x]
-	 * @param array  $to	[y,x]
-	 */
-	private function validateKing($colour, $from, $to) {
-		if (abs($to[1] - $from[1]) <= 1 && abs($to[0] - $from[0]) <= 1) {
-			return true;
-		} else if ($this->unmoved[$from[0]][$from[1]] && $to[0] == $from[0] && !inCheck($colour)) {
-			//handle castling
-			if ($to[1] == 2 || $to[1] == 6) {
-				$rookFromCol = 0;
-				$start = 1;
-				$end = 4;
-				$rookToCol = 3;
-				if ($to[1] == 6) {
-					$rookFromCol = 7;
-					$start = 5;
-					$end = 7;
-					$rookToCol = 5;
-				}
-				//check castle is unmoved
-				if ($this->unmoved[$from[0]][$rookFromCol]) {
-					//check intermittent points are vacant
-					for ($i = $start; $i < $end; $i++) {
-						if (!vacant($from[0], $i)) {
-							return false;
-						}
-						// if in check at intermittent points, return false
-						$nextSpace = [$from[0], $i];
-			    		$this->updateAbstractBoard($from, $nextSpace);
-			    		if (inCheck($colour)) {
-							//put king back in place
-				    		$this->updateAbstractBoard($nextSpace, $from);
-			    			return false;
-			    		}
-						//put king back in place
-			    		$this->updateAbstractBoard($nextSpace, $from);
-					}
-		        	//update abstract board
-		    		$this->updateAbstractBoard([$from[0], $rookFromCol], [$to[0], $rookToCol]);
-		    		//set rook as moved - not actually necessary
-					//unmoved[from[0]][rookFromCol] = false;
-					//flag castled - prevent recheck of inCheck()
-					$this->castled = true;
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-		
-	/**
-	 * Validate pawn movement
-	 * @param string $colour
-	 * @param array  $from	[y,x]
-	 * @param array  $to	[y,x]
-	 */
-	private function validatePawn($colour, $from, $to) {
-		$spaces = 1;
-		if ($this->unmoved[$from[0]][$from[1]]) {
-			//allow initial movement of 2 spaces
-			$spaces = 2;
-		}
-		//allow moving forward
-		$dir = $to[0] - $from[0];
-		$move = abs($dir);
-		if ($this->vacant($to[0], $to[1]) && $from[1] == $to[1] && $move <= $spaces) {
-			if (($colour == 'w' && $to[0] > $from[0]) || ($colour == 'b' && $to[0] < $from[0])) {
-				$this->checkApplyEnPassant($move, $to, $colour);
-				return true;
-			}
-		} else if ($this->onDiagonal($from, $to) && (($colour == 'w' && $dir == 1) || $colour == 'b' && $dir == -1))  {
-			if ($this->checkTakePiece($to, $colour)) {
-				return true;
-			} else if ($this->enPassantAvailable[0] == $from[0] && $this->enPassantAvailable[1] == $to[1]) {
-				//perform En passant
-				//allow revert if in check
-				$epTaken = $this->board[$from[0]][$to[1]];
-				$this->board[$from[0]][$to[1]] = false;
-	        	//update abstract board
-	    		$this->updateAbstractBoard($from, $to);
-	    		if ($this->inCheck($colour)) {
-					//revert ------------------------->not needed for server side
-	            	$this->updateAbstractBoard($to, $from); 
-					$this->board[$to[0]][$to[1]] = $epTaken;
-					return false;				
-				}
-				$this->enPassantAvailable = false;
-				$this->enPassantPerformed = true;
-				return true;
-			}
-		}
-		return false;
-	}
 
 	/**
 	 * Check if king is in check
@@ -439,21 +340,5 @@ abstract class ValidationHelper
 			return true;
 		}
 		return false;
-	}
-		
-	/**
-	 * Check En passant has been performed
-	 * @param moved the moved piece's start square
-	 */
-	private function checkEnPassantPerformed($moved) {
-		if ($this->enPassantPerformed) {
-			$this->enPassantPerformed = false;
-			return true;
-		}
-		//check En passant time-out
-		if ($this->enPassantAvailable != $moved) {
-			$this->enPassantAvailable = false;
-		}
-		return false;		
 	}
 }
