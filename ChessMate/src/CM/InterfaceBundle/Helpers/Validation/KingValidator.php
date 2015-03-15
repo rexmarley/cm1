@@ -14,13 +14,13 @@ class KingValidator extends ValidationHelper
 	 * Validate king movement
 	 * @param array  $move
 	 */
-	private function validatePiece($move) {
+	protected function validatePiece($move) {
     	$from = $move['from'];
     	$to = $move['to'];
     	$colour = $move['pColour'];
 		if (abs($to[1] - $from[1]) <= 1 && abs($to[0] - $from[0]) <= 1) {
 			return true;
-		} else if ($this->unmoved[$from[0]][$from[1]] && $to[0] == $from[0] && !inCheck($colour)) {
+		} else if (!$this->game->getBoard()->getPieceIsMoved($from[0], $from[1]) && $to[0] == $from[0] && !inCheck($colour)) {
 			//handle castling
 			if ($to[1] == 2 || $to[1] == 6) {
 				$rookFromCol = 0;
@@ -34,7 +34,7 @@ class KingValidator extends ValidationHelper
 					$rookToCol = 5;
 				}
 				//check castle is unmoved
-				if ($this->unmoved[$from[0]][$rookFromCol]) {
+				if (!$this->game->getBoard()->getPieceIsMoved($from[0], $rookFromCol)) {
 					//check intermittent points are vacant
 					for ($i = $start; $i < $end; $i++) {
 						if (!vacant($from[0], $i)) {
@@ -73,7 +73,7 @@ class KingValidator extends ValidationHelper
 			$colour = $this->getOpponentColour($colour);
 			//look left/right - TODO: out of bounds?
 			if ($this->board[$to[0]][$to[1]-1] == $colour.'_pawn' || $this->board[$to[0]][$to[1]+1] == $colour.'_pawn') {
-				$this->board->setEnPassantAvailable($to);
+				$this->game->getBoard()->setEnPassantAvailable($to);
 			}
 		}
 	}

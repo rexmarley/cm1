@@ -12,7 +12,7 @@ class AjaxController extends Controller
 {   
 	/**
 	 * Moves are validated client-side
-	 * If successful, moves are validated server-side, to prevent tampering
+	 * If valid, move is validated server-side, to prevent tampering
 	 * 
 	 * @param Request $request
 	 * @return \Symfony\Component\HttpFoundation\JsonResponse
@@ -39,12 +39,13 @@ class AjaxController extends Controller
     	//get piece validator 
     	$validator = $this->get($move['pType'].'_validator');
     	//validate move
-    	$valid = $validator->validateMove($move);    	
+    	$valid = $validator->validateMove($move, $game);
     	if ($valid['valid']) {
-    		$game->getBoard()->updateBoard($move['from'], $move['to']);
+    		//$game->getBoard()->updateBoard($move['from'], $move['to']);
+    		$game->setBoard($valid['board']);
     		$em->flush();
     	}
     	
-    	return new JsonResponse(array('valid' => $valid['valid'], 'checkMate' => false, 'board' => $valid['board']));
+    	return new JsonResponse(array('valid' => $valid['valid'], 'checkMate' => false, 'board' => $game->getBoard())); //or game?
     }
 }

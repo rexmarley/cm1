@@ -14,12 +14,12 @@ class PawnValidator extends ValidationHelper
 	 * Validate pawn movement
 	 * @param array  $move
 	 */
-	private function validatePiece($move) {
+	protected function validatePiece($move) {
     	$from = $move['from'];
     	$to = $move['to'];
     	$colour = $move['pColour'];
 		$spaces = 1;
-		if ($this->unmoved[$from[0]][$from[1]]) {
+		if (!$this->game->getBoard()->getPieceIsMoved($from[0], $from[1])) {
 			//allow initial movement of 2 spaces
 			$spaces = 2;
 		}
@@ -33,7 +33,7 @@ class PawnValidator extends ValidationHelper
 				$valid = true;
 			}
 		} else if ($this->onDiagonal($from, $to) && (($colour == 'w' && $dir == 1) || $colour == 'b' && $dir == -1))  {
-    		$enPassantAvailable = $this->board->getEnPassantAvailable();
+    		$enPassantAvailable = $this->game->getBoard()->getEnPassantAvailable();
     		if (checkTakePiece($to, $colour)) {
 				//allow diagonal take
 				$valid = true;    			
@@ -42,7 +42,7 @@ class PawnValidator extends ValidationHelper
 			else if ($enPassantAvailable[0] == $from[0] && $enPassantAvailable[1] == $to[1]) {
 				//take pawn
 				$this->board[$from[0]][$to[1]] = false;
-				$this->board->setEnPassantAvailable(null);
+				$this->game->getBoard()->setEnPassantAvailable(null);
 				$valid = true;    
 			}
 		}

@@ -156,6 +156,15 @@ class Board
     public function setPieceAsMoved($row, $column) {
     	$this->unmoved[$row][$column] = false;
     }
+    
+    /**
+     * Check if piece is moved
+     * @param int $row
+     * @param int $column
+     */
+    public function getPieceIsMoved($row, $column) {
+    	return !$this->unmoved[$row][$column];
+    }
 
     /**
      * Update board

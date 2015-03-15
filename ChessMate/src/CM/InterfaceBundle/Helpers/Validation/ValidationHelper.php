@@ -12,8 +12,8 @@ use CM\InterfaceBundle\Entity\Board;
 abstract class ValidationHelper
 {
 // 	private $castled = false;
-    private $game;
-    private $board;
+    protected $game;
+    protected $board;
     //private $unmoved;
 	
 	/**
@@ -43,13 +43,21 @@ abstract class ValidationHelper
     			return array('valid' => false);
     		}
     		//mark piece as moved
-    		$this->board->setPieceAsMoved($move['from'][0], $move['from'][1]);
+    		$this->game->getBoard()->setPieceAsMoved($move['from'][0], $move['from'][1]);
     		//remove any lingering En passant
-    		$this->board->setEnPassantAvailable(null);
+    		$this->game->getBoard()->setEnPassantAvailable(null);
     		return array('valid' => true, 'board' => $this->board); //return $game?
     	}
 
     	return array('valid' => false);
+    }
+    
+    /**
+     * Overridden function
+     * @return boolean
+     */
+    protected function validatePiece($move) {
+    	return false; 
     }
     
     protected function setGlobals($game) {

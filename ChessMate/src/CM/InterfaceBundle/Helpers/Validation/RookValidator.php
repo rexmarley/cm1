@@ -15,7 +15,7 @@ class RookValidator extends ValidationHelper
 	 * Validate rook movement
 	 * @param array  $move
 	 */
-	private function validatePiece($move) {
+	protected function validatePiece($move) {
     	$from = $move['from'];
     	$to = $move['to'];
     	if (($from[0] == $to[0] && !$this->xAxisBlocked($from[1], $to[1], $from[0]))
