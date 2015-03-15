@@ -8,4 +8,6 @@ services:
         class: CM\InterfaceBundle\Helpers\Validation\PawnValidator
     rook_validator:
         class: CM\InterfaceBundle\Helpers\Validation\RookValidator
+    knight_validator:
+        class: CM\InterfaceBundle\Helpers\Validation\KnightValidator
 

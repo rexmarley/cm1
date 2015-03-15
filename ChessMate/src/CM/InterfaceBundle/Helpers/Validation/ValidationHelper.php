@@ -59,18 +59,6 @@ abstract class ValidationHelper
     	$this->board = $game->getBoard()->getBoard();
     	//$this->unmoved = $game->getBoard()->getUnmoved();    	
     }
-		
-	/**
-	 * Validate knight movement
-	 * @param from	[y,x]
-	 * @param to	[y,x]
-	 */
-	private function validateKnight($from, $to) {
-		if ((($to[0] - $from[0])*($to[0] - $from[0])) + (($to[1] - $from[1])*($to[1] - $from[1])) == 5) {
-			return true;
-		}
-		return false;
-	}
 	
 	/**
 	 * Validate bishop movement
