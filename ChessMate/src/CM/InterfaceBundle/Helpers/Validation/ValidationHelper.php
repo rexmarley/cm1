@@ -69,7 +69,7 @@ abstract class ValidationHelper
 	/**
 	 * Check if king is in check
 	 */
-	private function inCheck($colour) {
+	protected function inCheck($colour) {
 		$king = $colour.'_king';
 		//get opponent colour
 		$colour = $this->getOpponentColour($colour);
@@ -101,7 +101,7 @@ abstract class ValidationHelper
 	/**
 	 * Check if in check on diagonal
 	 */
-	private function inCheckOnDiagonal($colour, $kingSquare) {
+	protected function inCheckOnDiagonal($colour, $kingSquare) {
 		$row = $kingSquare[0];
 		$col = $kingSquare[1];
 		$blocks = [false,false,false,false];
@@ -133,7 +133,7 @@ abstract class ValidationHelper
 	/**
 	 * Check if in check on x-axis
 	 */
-	private function inCheckOnXAxis($colour, $kingSquare) {
+	protected function inCheckOnXAxis($colour, $kingSquare) {
 		$row = $kingSquare[0];
 		for ($col = 0; $col < 8; $col++) {
 			if ($this->board[$row][$col] == $colour.'_rook' || $this->board[$row][$col] == $colour.'_queen') {
@@ -148,7 +148,7 @@ abstract class ValidationHelper
 	/**
 	 * Check if in check on y-axis
 	 */
-	private function inCheckOnYAxis($colour, $kingSquare) {
+	protected function inCheckOnYAxis($colour, $kingSquare) {
 		$col = $kingSquare[1];
 		for ($row = 0; $row < 8; $row++) {
 			if ($this->board[$row][$col] == $colour.'_rook' || $this->board[$row][$col] == $colour.'_queen') {
@@ -163,7 +163,7 @@ abstract class ValidationHelper
 	/**
 	 * Check if king is in check by knight
 	 */
-	private function inCheckByKnight($colour, $kingSquare) {
+	protected function inCheckByKnight($colour, $kingSquare) {
 		if ($this->pieceAt($kingSquare[0]+2, $kingSquare[1]-1, $colour.'_knight')
 			|| $this->pieceAt($kingSquare[0]+2, $kingSquare[1]+1, $colour.'_knight')
 			|| $this->pieceAt($kingSquare[0]+1, $kingSquare[1]-2, $colour.'_knight')
@@ -180,7 +180,7 @@ abstract class ValidationHelper
 	/**
 	 * Check if king is in check by pawn
 	 */
-	private function inCheckByPawn($colour, $kingSquare) {
+	protected function inCheckByPawn($colour, $kingSquare) {
 		$dir = 1;
 		if ($colour == 'w') {
 			$dir = -1;
@@ -195,7 +195,7 @@ abstract class ValidationHelper
 	/**
 	 * Check given piece is at given square
 	 */
-	private function pieceAt($row, $column, $piece) {
+	protected function pieceAt($row, $column, $piece) {
 		if ($row > -1 && $row < 8 && $column > -1 && $column < 8) {
 			if ($this->board[$row][$column] == $piece) {
 				return true;
@@ -207,7 +207,7 @@ abstract class ValidationHelper
 	/**
 	 * Get piece/false at given square
 	 */
-	private function getPieceAt($row, $column) {
+	protected function getPieceAt($row, $column) {
 		if ($row > -1 && $row < 8 && $column > -1 && $column < 8) {
 			return $this->board[$row][$column];
 		}
@@ -217,7 +217,7 @@ abstract class ValidationHelper
 	/**
 	 * Get opponent's colour
 	 */
-	private function getOpponentColour($colour) {
+	protected function getOpponentColour($colour) {
 		if ($colour == 'w') {
 			$colour = 'b';
 		} else {
@@ -232,7 +232,7 @@ abstract class ValidationHelper
 	 * @param from	[y,x]
 	 * @param to	[y,x]
 	 */
-	private function updateAbstractBoard($from, $to) {
+	protected function updateAbstractBoard($from, $to) {
 		$this->board[$to[0]][$to[1]] = $this->board[$from[0]][$from[1]];
 		$this->board[$from[0]][$from[1]] = false;
 	}
@@ -243,7 +243,7 @@ abstract class ValidationHelper
 	 * @param to	y2
 	 * @param row
 	 */
-	private function xAxisBlocked($from, $to, $row) {
+	protected function xAxisBlocked($from, $to, $row) {
 		//get x-axis direction
 		$range = abs($to - $from);
 		$x = ($to - $from) / $range;
@@ -263,7 +263,7 @@ abstract class ValidationHelper
 	 * @param to	x2
 	 * @param column
 	 */
-	private function yAxisBlocked($from, $to, $column) {
+	protected function yAxisBlocked($from, $to, $column) {
 		//get y-axis direction
 		$range = abs($to - $from);
 		$y = ($to - $from) / $range;
@@ -280,7 +280,7 @@ abstract class ValidationHelper
 	/**
 	 * Check if diagonal squares are blocked
 	 */
-	private function diagonalBlocked($fromX, $fromY, $toX, $toY) {
+	protected function diagonalBlocked($fromX, $fromY, $toX, $toY) {
 		$range = abs($fromX - $toX);
 		//get x-axis direction
 		$xDir = ($toX - $fromX) / $range;
@@ -303,21 +303,21 @@ abstract class ValidationHelper
 	 * 
 	 * @return Boolean
 	 */
-	private function onDiagonal($from, $to) {
+	protected function onDiagonal($from, $to) {
 		return abs($to[0] - $from[0]) == abs($to[1] - $from[1]);
 	}
 	
 	/**
 	 * Check if target square is unoccupied
 	 */
-	private function vacant($row, $column) {
+	protected function vacant($row, $column) {
 		return $this->board[$row][$column] === false;
 	}
 
 	/**
 	 * Check if target square is occupied by own piece
 	 */
-	private function occupiedByOwnPiece($row, $column, $colour) {
+	protected function occupiedByOwnPiece($row, $column, $colour) {
 		if ($row > -1 && $row < 8 && $column > -1 && $column < 8) {
 			if (!$this->vacant($row, $column) && $this->board[$row][$column][0] == $colour) {
 				return true;
@@ -330,7 +330,7 @@ abstract class ValidationHelper
 	/**
 	 * Check if target square is occupied by other piece
 	 */
-	private function occupiedByOtherPiece($row, $column, $colour) {
+	protected function occupiedByOtherPiece($row, $column, $colour) {
 		if ($row > -1 && $row < 8 && $column > -1 && $column < 8) {
 			if (!$this->vacant($row, $column) && $this->board[$row][$column][0] != $colour) {
 				return true;
@@ -343,7 +343,7 @@ abstract class ValidationHelper
 	/**
 	 * Check for takeable piece
 	 */
-	private function checkTakePiece($square, $colour) {
+	protected function checkTakePiece($square, $colour) {
 		if ($this->occupiedByOtherPiece($square[0], $square[1], $colour)) {
 			return true;
 		}
