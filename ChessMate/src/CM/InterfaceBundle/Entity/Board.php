@@ -30,12 +30,11 @@ class Board
      */
     protected $unmoved;
 
-//     /**
-//      * The game pieces
-//      *
-//      * @ORM\OneToMany(targetEntity="CM\InterfaceBundle\Entity\Pieces\AbstractPiece", mappedBy="board")
-//      */
-//     protected $pieces;
+    /**
+     * The position of a pawn vulnerable to En passant
+     * @ORM\Column(type="array", nullable=true)
+     */
+    protected $enPassantAvailable;
 
     public function __construct()
     {
@@ -75,6 +74,7 @@ class Board
     {
     	$this->setDefaultBoard();
     	$this->setDefaultUnmoved();
+    	$this->enPassantAvailable = null;
     }
 
     /**
@@ -147,6 +147,15 @@ class Board
     {
         return $this->unmoved;
     }
+    
+    /**
+     * Mark piece as moved
+     * @param int $row
+     * @param int $column
+     */
+    public function setPieceAsMoved($row, $column) {
+    	$this->unmoved[$row][$column] = false;
+    }
 
     /**
      * Update board
@@ -162,36 +171,26 @@ class Board
         return $this;
     }
 
-//     /**
-//      * Add pieces
-//      *
-//      * @param \CM\InterfaceBundle\Entity\Pieces\AbstractPiece $piece
-//      * @return Board
-//      */
-//     public function addPiece(\CM\InterfaceBundle\Entity\Pieces\AbstractPiece $piece)
-//     {
-//         $this->pieces[] = $piece;
+    /**
+     * Set indices for a piece vulnerable to En passant
+     *
+     * @param array $pawnPosition The vulnerable pawn's position
+     * @return Board
+     */
+    public function setEnPassantAvailable(array $pawnPosition)
+    {
+        $this->enPassantAvailable = $pawnPosition;
 
-//         return $this;
-//     }
+        return $this;
+    }
 
-//     /**
-//      * Remove pieces
-//      *
-//      * @param \CM\InterfaceBundle\Entity\Pieces\AbstractPiece $piece
-//      */
-//     public function removePiece(\CM\InterfaceBundle\Entity\Pieces\AbstractPiece $piece)
-//     {
-//         $this->pieces->removeElement($piece);
-//     }
-
-//     /**
-//      * Get pieces
-//      *
-//      * @return \Doctrine\Common\Collections\Collection 
-//      */
-//     public function getPieces()
-//     {
-//         return $this->pieces;
-//     }
+    /**
+     * Get indices for a piece vulnerable to En passant
+     *
+     * @return null if En passant is unavailable
+     */
+    public function getEnPassantAvailable()
+    {
+        return $this->enPassantAvailable;
+    }
 }

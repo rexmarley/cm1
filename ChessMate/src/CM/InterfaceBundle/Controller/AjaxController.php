@@ -19,35 +19,30 @@ class AjaxController extends Controller
 	 */ 
     public function validateMoveAction(Request $request)
     {
-    	//TODO: all in js but must also be checked server side to prevent tampering
-    	//--> and another thing; no point checking check mate client-side
-    	$from = $request->request->get('from');
-    	$to = $request->request->get('to');
-    	$type = $request->request->get('type');
-    	$colour = $request->request->get('colour');    	
-    	$gameID = $request->request->get('gameID');
-    	
+    	//find game
     	$em = $this->getDoctrine()->getManager();
-    	
+    	$gameID = $request->request->get('gameID');
     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-
     	//make sure valid user for game
     	$user = $this->getUser();
     	if (!$game->getPlayers()->contains($user)) {
     		return new JsonResponse(array('valid' => false, 'checkMate' => false, 'board' => false));
     	}
-    	
-    	$validator = $this->get('move_validator');
-    	
-    	$valid = $validator->validateMove($from, $to, $type, $colour, $game);
-    	
+    	//get move details
+    	$move = array(
+    			'from' => $request->request->get('from'),
+    			'to' => $request->request->get('to'),
+    			'pColour' => $request->request->get('colour'),
+    			'pType' => $request->request->get('type'),
+    			'newPiece' => $request->request->get('newPiece')
+    	);
+    	//get piece validator 
+    	$validator = $this->get($move['pType'].'_validator');
+    	//validate move
+    	$valid = $validator->validateMove($move);    	
     	if ($valid['valid']) {
-    		//$game->setBoard($game->getBoard()->setBoard($valid['board']));
-    		$game->getBoard()->updateBoard($from, $to);
+    		$game->getBoard()->updateBoard($move['from'], $move['to']);
     		$em->flush();
-//     		echo '<pre>';
-//     		var_dump($game->getBoard()->getBoard());
-//     		echo '</pre>';
     	}
     	
     	return new JsonResponse(array('valid' => $valid['valid'], 'checkMate' => false, 'board' => $valid['board']));

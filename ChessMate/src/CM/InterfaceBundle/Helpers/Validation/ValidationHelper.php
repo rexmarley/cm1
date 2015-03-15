@@ -1,109 +1,64 @@
 <?php
 
-namespace CM\InterfaceBundle\Helpers;
+namespace CM\InterfaceBundle\Helpers\Validation;
 
 use CM\InterfaceBundle\Entity\Game;
 use CM\UserBundle\Entity\User;
 use CM\InterfaceBundle\Entity\Board;
+
 /**
  * Move validator
  */
-class ValidationHelper
+abstract class ValidationHelper
 {
-	private $castled = false;
-	private $enPassantAvailable = false;
-	private $enPassantPerformed = false;
+// 	private $castled = false;
+// 	private $enPassantAvailable = false;
+// 	private $enPassantPerformed = false;
     private $game;
     private $board;
-    private $unmoved;
+    //private $unmoved;
 	
 	/**
 	 * Validate chess move
 	 *
-	 * @param array $from
-	 * @param array $to
-	 * @param string $type
-	 * @param string $colour
-	 * @param Game $game
+	 * @param array $move [from, to, pieceType, pieceColour]
+	 * @param Game $game The game
 	 *
 	 * @return Game
 	 */
-    public function validateMove(array $from, array $to, $type, $colour, Game $game)
+    public function validateMove(array $move, Game $game)
     {
-    	$this->game = $game;
-    	$board = $game->getBoard()->getBoard();
-    	$unmoved = $game->getBoard()->getUnmoved();
-    	$this->board = $board;
-    	$this->unmoved = $unmoved;
+    	$this->setGlobals($game);
     	//check piece type/colour matches origin
     	//and target square is not occupied by own piece
-    	if (($board[$from[0]][$from[1]] != $colour.'_'.$type)
-    			|| ($board[$to[0]][$to[1]] && $board[$to[0]][$to[1]][0] == $colour) ) {
-    		return array('valid' => false, 'board' => $board, 'unmoved' => $unmoved);
-    	}
+    	if (($this->board[$move['from'][0]][$move['from'][1]] != $move['pColour'].'_'.$move['pType'])
+    		|| ($this->board[$move['to'][0]][$move['to'][1]] && $this->board[$move['to'][0]][$move['to'][1]][0] == $move['pColour']) ) {
+    		return array('valid' => false);
+    	}    	
     	//validate piece
-    	$valid = $this->validatePieceType($type, $colour, $from, $to);    	
-
+    	$valid = $this->validatePiece($move);
     	if($valid) {
-    		//get target square occupant - in case of revert
-    		$occupant = $this->board[$to[0]][$to[1]];
-    		if (!$this->enPassantPerformed) {
-    			//update abstract board
-    			$this->updateAbstractBoard($from, $to);
-    			if (!$this->castled) {
-    				//if in check, invalidate move
-    				if ($this->inCheck($colour)) {
-    					//revert board
-    					$this->updateAbstractBoard($to, $from);
-    					$this->board[$to[0]][$to[1]] = $occupant;
-    					$valid = false;
-    					break;
-    				}
-    			} else {
-    				//check already checked
-    				$this->castled = false;
-    			}
+    		//move piece
+    		$this->updateAbstractBoard($move['from'], $move['to']);
+    		//if in check, invalidate move
+    		if ($this->inCheck($move['pColour'])) {
+    			return array('valid' => false);
     		}
-    		//allow piece to be taken
-    		if (!$this->checkEnPassantPerformed($to)) { //TODO: combine with above if ???
-    			//$this->checkAndTakePiece($to);
-    			//check for pawn reaching opposing end
-//     			if ($type == 'pawn') {
-//     				if (($colour == 'w' && to[0] == 7) || (piece['colour'] == 'b' && to[0] == 0)) {
-//     					openPieceChooser(piece['colour']);
-//     				}
-//     			}
-    		}
-    		$this->unmoved[$from[0]][$from[1]] = false;
+    		//mark piece as moved
+    		$this->board->setPieceAsMoved($move['from'][0], $move['from'][1]);
+    		//remove any lingering En passant
+    		$this->board->setEnPassantAvailable(null);
+    		return array('valid' => true, 'board' => $this->board); //return $game?
     	}
 
-    	return array('valid' => $valid, 'board' => $board, 'unmoved' => $unmoved); //return $game?
-    	 
+    	return array('valid' => false);
     }
-
-	/**
-	 * Get validation for different pieces
-	 * @param string type	e.g. pawn
-	 * @param string colour 'w'/'b'
-	 * @param array from	[y,x]
-	 * @param array to		[y,x]
-	 */
-	private function validatePieceType($type, $colour, $from, $to) {
-		if ($type == 'pawn') {
-			return $this->validatePawn($colour, $from, $to);
-		} else if ($type == 'rook') {
-			return $this->validateRook($from, $to);
-		} else if ($type == 'knight') {
-			return $this->validateKnight($from, $to);
-		} else if ($type == 'bishop') {
-			return $this->validateBishop($from, $to);
-		} else if ($type == 'queen') {
-			return $this->validateQueen($from, $to);	
-		} else if ($type == 'king') {
-			return $this->validateKing($colour, $from, $to);
-		}
-		return false;
-	}
+    
+    protected function setGlobals($game) {
+    	$this->game = $game;
+    	$this->board = $game->getBoard()->getBoard();
+    	//$this->unmoved = $game->getBoard()->getUnmoved();    	
+    }
 	
 	/**
 	 * Validate rook movement
@@ -536,20 +491,6 @@ class ValidationHelper
 			return true;
 		}
 		return false;
-	}
-	
-	/**
-	 * Mark a piece as vulnerable to En passant
-	 */
-	private function checkApplyEnPassant($move, $to, $colour) {
-		if ($move == 2) {
-			//get opponent's colour
-			$colour = $this->getOpponentColour($colour);
-			//look left/right
-			if ($this->board[$to[0]][$to[1]-1] == $colour.'_pawn' || $this->board[$to[0]][$to[1]+1] == $colour.'_pawn') {
-				$this->enPassantAvailable = $to;
-			}
-		}	
 	}
 		
 	/**
