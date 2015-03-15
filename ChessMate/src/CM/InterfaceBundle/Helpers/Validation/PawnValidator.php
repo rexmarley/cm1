@@ -62,8 +62,9 @@ class PawnValidator extends ValidationHelper
 		if ($move == 2) {
 			//get opponent's colour
 			$colour = $this->getOpponentColour($colour);
-			//look left/right - TODO: out of bounds?
-			if ($this->board[$to[0]][$to[1]-1] == $colour.'_pawn' || $this->board[$to[0]][$to[1]+1] == $colour.'_pawn') {
+			//look left/right
+			if (($to[1] > 0 && $this->board[$to[0]][$to[1]-1] == $colour.'_pawn')
+					 || ($to[1] < 7 && $this->board[$to[0]][$to[1]+1] == $colour.'_pawn')) {
 				$this->board->setEnPassantAvailable($to);
 			}
 		}

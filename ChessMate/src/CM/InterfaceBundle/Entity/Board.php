@@ -183,10 +183,10 @@ class Board
     /**
      * Set indices for a piece vulnerable to En passant
      *
-     * @param array $pawnPosition The vulnerable pawn's position
+     * @param array|null $pawnPosition The vulnerable pawn's position
      * @return Board
      */
-    public function setEnPassantAvailable(array $pawnPosition)
+    public function setEnPassantAvailable($pawnPosition)
     {
         $this->enPassantAvailable = $pawnPosition;
 

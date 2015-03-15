@@ -40,12 +40,14 @@ class AjaxController extends Controller
     	$validator = $this->get($move['pType'].'_validator');
     	//validate move
     	$valid = $validator->validateMove($move, $game);
+    	$board = $game->getBoard();
     	if ($valid['valid']) {
     		//$game->getBoard()->updateBoard($move['from'], $move['to']);
-    		$game->setBoard($valid['board']);
+    		$board->setBoard($valid['board']);
+    		$game->setBoard($board);
     		$em->flush();
     	}
     	
-    	return new JsonResponse(array('valid' => $valid['valid'], 'checkMate' => false, 'board' => $game->getBoard())); //or game?
+    	return new JsonResponse(array('valid' => $valid['valid'], 'checkMate' => false, 'board' => $board->getBoard())); //or game?
     }
 }
