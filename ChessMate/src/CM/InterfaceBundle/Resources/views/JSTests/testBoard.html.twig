@@ -33,7 +33,7 @@
 					updateAbstractBoard([3,2],[1,4]);
 					updateAbstractBoard([4,3],[7,3]);						
 				});
-				//test checking if x-axis is blocked (using default piece positions)
+				//test x-axis blocked (using default piece positions)
 				QUnit.test("testXAxisBlocked", function( assert ) {
 					//test unblocked moving left
 					assert.equal(xAxisBlocked(3,0,2), false);
@@ -52,7 +52,7 @@
 					assert.equal(xAxisBlocked(1,7,6), true);
 					assert.equal(xAxisBlocked(3,5,7), true);
 				});
-				//test checking if y-axis is blocked (using default piece positions)
+				//test y-axis blocked (using default piece positions)
 				QUnit.test("testYAxisBlocked", function( assert ) {
 					//test unblocked moving forward
 					assert.equal(yAxisBlocked(1,5,2), false);
@@ -67,7 +67,7 @@
 					assert.equal(yAxisBlocked(7,2,3), true);
 					assert.equal(yAxisBlocked(7,3,4), true);
 				});
-				//test checking if two squares are diagonal (using default piece positions)
+				//test that two squares are diagonal (using default piece positions)
 				QUnit.test("testOnDiagonal", function( assert ) {
 					//test on diagonal
 						//moving forwards
@@ -92,7 +92,7 @@
 							//moving right
 							assert.equal(onDiagonal([6,3],[3,7]), false);
 				});
-				//test checking if diagonal is blocked (using default piece positions)
+				//test diagonal blocked (using default piece positions)
 				//fromX, fromY, toX, toY
 				QUnit.test("testDiagonalBlocked", function( assert ) {
 					//test unblocked moving forward
@@ -124,7 +124,7 @@
 					assert.equal(diagonalBlocked(0,7,4,3), true);
 					assert.equal(diagonalBlocked(1,4,5,0), true);
 				});
-				//test checking if square is unoccupied
+				//test square unoccupied
 				QUnit.test("testVacantSquare", function( assert ) {
 					assert.equal(vacant(2,5), true);
 					assert.equal(vacant(3,2), true);
@@ -135,7 +135,7 @@
 					assert.equal(vacant(6,7), false);
 					assert.equal(vacant(7,0), false);
 				});
-				//test checking if square is occupied by own piece
+				//test square occupied by own piece
 				QUnit.test("testoccupiedByOwnPiece", function( assert ) {
 					assert.equal(occupiedByOwnPiece(0,1,'w'), true);
 					assert.equal(occupiedByOwnPiece(0,1,'b'), false);
@@ -148,7 +148,7 @@
 					assert.equal(occupiedByOwnPiece(0,-1,'w'), false);
 					assert.equal(occupiedByOwnPiece(0,8,'w'), false);
 				});
-				//test checking if square is occupied by other piece
+				//test square occupied by other piece
 				QUnit.test("testoccupiedByOtherPiece", function( assert ) {
 					assert.equal(occupiedByOtherPiece(0,1,'w'), false);
 					assert.equal(occupiedByOtherPiece(0,1,'b'), true);
@@ -231,7 +231,6 @@
 					assert.equal(validateKnight([2,2], [3,4]), true);
 					updateAbstractBoard([2,2],[3,4]);
 					assert.equal(validateKnight([5,5], [4,3]), true);
-					updateAbstractBoard([7,6],[5,5]);
 					//TEST BISHOP
 					//invalid x-axis
 					assert.equal(validateBishop([0,2], [0,0]), false);
@@ -254,11 +253,120 @@
 					//blocked x-axis
 					assert.equal(validateRook([2,0], [2,3]), false);
 					//invalid diagonal
-					assert.equal(validateRook([2,0], [6,4]), false);					
-					//Queen tests not required - same as bishop/rook
-					
-				});
-				
+					assert.equal(validateRook([2,0], [6,4]), false);
+					//move pawn out of way
+					updateAbstractBoard([2,1],[3,1]);
+					//valid rook on x-axis
+					assert.equal(validateRook([2,0], [2,3]), true);
+					updateAbstractBoard([2,0], [2,3]);
+					//TEST QUEEN - not really required: same as bishop/rook
+					//valid take on y
+					assert.equal(validateQueen([7,3], [2,3]), true);
+					updateAbstractBoard([7,3], [2,3]);
+					//valid move on x
+					assert.equal(validateQueen([0,3], [0,0]), true);
+					updateAbstractBoard([0,3], [0,0]);
+					//valid diagonals
+					//fwd+left
+					assert.equal(validateQueen([2,3], [4,1]), true);
+					updateAbstractBoard([2,3], [4,1]);
+					//fwd+right
+					assert.equal(validateQueen([0,0], [3,3]), true);
+					updateAbstractBoard([0,0], [3,3]);
+					//bkwd+right
+					assert.equal(validateQueen([4,1], [2,3]), true);
+					updateAbstractBoard([4,1], [2,3]);
+					//bkwd+left
+					assert.equal(validateQueen([3,3], [1,1]), true);
+					updateAbstractBoard([3,3], [1,1]);
+					//blocked x
+					assert.equal(validateQueen([2,3], [2,6]), false);
+					//blocked y
+					assert.equal(validateQueen([2,3], [0,3]), false);
+					//blocked diagonal
+					assert.equal(validateQueen([2,3], [0,1]), false);
+					//shift pieces around
+					updateAbstractBoard([7,2], [5,0]);
+					updateAbstractBoard([7,1], [5,2]);
+					updateAbstractBoard([1,6], [3,6]);
+					updateAbstractBoard([0,6], [2,7]);
+					updateAbstractBoard([0,5], [1,6]);
+					//TEST KING
+					//invalid long castle - passes through check on y
+					updateAbstractBoard([1,1], [3,3]);
+					assert.equal(validateKing('b', [7,4], [7,2]), false);
+					//shift pieces
+					updateAbstractBoard([3,3], [4,4]);
+					updateAbstractBoard([2,3], [3,3]);
+					//invalid long castle - passes through check on diagonal
+					assert.equal(validateKing('b', [7,4], [7,2]), false);
+					//invalid long castle - in check on y
+					updateAbstractBoard([4,4], [5,4]);
+					assert.equal(validateKing('b', [7,4], [7,2]), false);
+					//invalid short castle - passes through check on diagonal
+					assert.equal(validateKing('w', [0,4], [0,6]), false);
+					//invalid short castle - in check on x
+					updateAbstractBoard([3,3], [0,0]);
+					assert.equal(validateKing('w', [0,4], [0,6]), false);
+					//remove check
+					updateAbstractBoard([0,0], [1,0]);
+					updateAbstractBoard([3,1], [4,1]);
+					//valid short castle - don't actually move
+					assert.equal(validateKing('w', [0,4], [0,6]), true);
+					//mark king as moved
+					unmoved[0][4] = false;
+					//invalid short castle - already moved
+					assert.equal(validateKing('w', [0,4], [0,6]), false);
+					//remove check
+					updateAbstractBoard([1,0], [5,4]);
+					//valid long castle
+					assert.equal(validateKing('b', [7,4], [7,2]), true);
+					//King movement
+					//invalid two spaces on x
+					assert.equal(validateKing('w', [0,4], [0,2]), false);
+					//invalid two spaces on y
+					assert.equal(validateKing('w', [0,4], [2,4]), false);
+					//invalid two spaces on diagonal
+					assert.equal(validateKing('w', [0,4], [2,6]), false);
+					//valid x
+					assert.equal(validateKing('w', [0,4], [0,5]), true);
+					updateAbstractBoard([0,4], [0,5]);
+					//valid y
+					assert.equal(validateKing('w', [0,5], [1,5]), true);
+					updateAbstractBoard([0,5], [1,5]);
+					//valid diagonal
+					assert.equal(validateKing('w', [1,5], [2,6]), true);
+					updateAbstractBoard([1,5], [2,6]);
+					//test not in check
+					assert.equal(inCheck('w'), false);
+					assert.equal(abstractBoard[5][5], 'b_knight');
+					//test in check by knight
+					updateAbstractBoard([5,5], [4,7]);
+					assert.equal(inCheck('w'), true);
+					//move out of check
+					updateAbstractBoard([2,6], [3,7]);
+					//test in check on diagonal
+					updateAbstractBoard([5,4], [5,5]);
+					assert.equal(inCheck('w'), true);
+					//block check on diagonal
+					updateAbstractBoard([3,6], [4,6]);
+					assert.equal(inCheck('w'), false);
+					//check blocked on x-axis
+					updateAbstractBoard([5,5], [3,3]);
+					assert.equal(inCheck('w'), false);
+					//check on x
+					//check on y already tested
+					updateAbstractBoard([3,4], [5,5]);
+					assert.equal(inCheck('w'), true);
+					updateAbstractBoard([5,5],[3,4]);
+					//shift pieces
+					updateAbstractBoard([6,5],[5,5]);
+					updateAbstractBoard([4,6],[5,5]);
+					//check by pawn
+					updateAbstractBoard([6,6], [4,6]);
+					assert.equal(inCheck('w'), true);					
+					//CHECKMATE exclusively tested server-side
+				});				
 			</script>
 		</head>
 		<body>
