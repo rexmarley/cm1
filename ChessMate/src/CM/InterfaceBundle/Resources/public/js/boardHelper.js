@@ -28,6 +28,7 @@ unmoved = [
 enPassantAvailable = false;
 enPassantPerformed = false;
 castled = false;
+newPiece = false;
 	
 /**
  * Resolve grid reference to array indices

@@ -23,7 +23,7 @@ class AjaxController extends Controller
     	$em = $this->getDoctrine()->getManager();
     	$gameID = $request->request->get('gameID');
     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-    	//make sure valid user for game
+    	//make sure valid user for game TODO: must also be player's turn!
     	$user = $this->getUser();
     	if (!$game->getPlayers()->contains($user)) {
     		return new JsonResponse(array('valid' => false, 'checkMate' => false, 'board' => false));

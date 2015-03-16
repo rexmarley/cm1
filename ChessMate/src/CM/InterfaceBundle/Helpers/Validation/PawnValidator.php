@@ -34,7 +34,7 @@ class PawnValidator extends ValidationHelper
 			}
 		} else if ($this->onDiagonal($from, $to) && (($colour == 'w' && $dir == 1) || $colour == 'b' && $dir == -1))  {
     		$enPassantAvailable = $this->game->getBoard()->getEnPassantAvailable();
-    		if (checkTakePiece($to, $colour)) {
+    		if ($this->checkTakePiece($to, $colour)) {
 				//allow diagonal take
 				$valid = true;    			
     		}
@@ -43,7 +43,7 @@ class PawnValidator extends ValidationHelper
 				//take pawn
 				$this->board[$from[0]][$to[1]] = false;
 				$this->game->getBoard()->setEnPassantAvailable(null);
-				$valid = true;    
+				return true;    
 			}
 		}
 		if ($valid) {
@@ -65,7 +65,7 @@ class PawnValidator extends ValidationHelper
 			//look left/right
 			if (($to[1] > 0 && $this->board[$to[0]][$to[1]-1] == $colour.'_pawn')
 					 || ($to[1] < 7 && $this->board[$to[0]][$to[1]+1] == $colour.'_pawn')) {
-				$this->board->setEnPassantAvailable($to);
+				$this->enPassant = $to;
 			}
 		}
 	}

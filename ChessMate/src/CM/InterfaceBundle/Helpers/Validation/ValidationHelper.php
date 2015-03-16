@@ -11,10 +11,9 @@ use CM\InterfaceBundle\Entity\Board;
  */
 abstract class ValidationHelper
 {
-// 	private $castled = false;
     protected $game;
     protected $board;
-    //private $unmoved;
+    protected $enPassant = null;
 	
 	/**
 	 * Validate chess move
@@ -44,8 +43,8 @@ abstract class ValidationHelper
     		}
     		//mark piece as moved
     		$this->game->getBoard()->setPieceAsMoved($move['from'][0], $move['from'][1]);
-    		//remove any lingering En passant
-    		$this->game->getBoard()->setEnPassantAvailable(null);
+    		//add/remove En passant
+    		$this->game->getBoard()->setEnPassantAvailable($this->enPassant);
     		return array('valid' => true, 'board' => $this->board); //return $game?
     	}
 

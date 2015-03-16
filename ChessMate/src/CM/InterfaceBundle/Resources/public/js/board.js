@@ -58,12 +58,12 @@ $(document).ready( function() {
 		if (type == 'queen') {
 			num--;
 		}
-		var newID = colour+'_'+type;
+		newPiece = colour+'_'+type;
 		//check for conflict
-		var conflict = $('#'+newID+'_'+num);
+		var conflict = $('#'+newPiece+'_'+num);
 		while (conflict.length) {
 			num++;
-			conflict = $('#'+newID+'_'+num);
+			conflict = $('#'+newPiece+'_'+num);
 		}
 		//get pawn position
 		var endRow = 7;
@@ -72,13 +72,13 @@ $(document).ready( function() {
 		}
 		var pawnCol = $.inArray(colour+'_pawn', abstractBoard[endRow]);
 		//update abstract board
-		abstractBoard[endRow][pawnCol] = newID;
+		abstractBoard[endRow][pawnCol] = newPiece;
 		//update real board
 		var pawn = getOccupant(getGridRefFromAbstractIndices(endRow, pawnCol));
 		//change piece
 		pawn.html($(this).html());
 		//set new id
-		pawn.attr('id', newID+'_'+num);
+		pawn.attr('id', newPiece+'_'+num);
 		//close piece-chooser
 		$('#choosePiece_'+colour).dialog("close");
 	});
@@ -122,16 +122,16 @@ $(document).ready( function() {
 	    			if (to[1] == 2) {
 						$('#d_'+(to[0]+1)).append($('#'+piece['colour']+'_rook_1'));
 	    			} else {
-						$('#f_'+(to[0]+1)).append($('#'+piece['colour']+'_rook2'));
+						$('#f_'+(to[0]+1)).append($('#'+piece['colour']+'_rook_2'));
 	    			}
 	    			castled = false;
 	    		}
-	        	//ajax move & validate server-side
-	        	ajaxMove(from, to, piece['type'], piece['colour']); //move down
-	        	//should only fail due to cheating --> display message and manually revert board
     		}
-			//allow piece to be taken
-    		if (!checkEnPassantPerformed(to)) { //TODO: combine with above if ???
+        	//ajax move & validate server-side
+        	ajaxMove(from, to, piece['type'], piece['colour']); //move down
+        	//should only fail due to cheating --> display message and manually revert board
+			//(TODO disable board on success?)
+    		if (!checkEnPassantPerformed(to)) {
     			checkAndTakePiece(to);
     			//check for pawn reaching opposing end
     			if (piece['type'] == 'pawn') {
@@ -145,7 +145,6 @@ $(document).ready( function() {
 			unmoved[from[0]][from[1]] = false;
     		//center piece
     		$(this).append(ui.draggable.css('position','static'));
-			//(TODO disable board?)
     	} else {
     		//invalidate move
     		ui.draggable.addClass('invalid');
@@ -163,8 +162,8 @@ $(document).ready( function() {
     	$.ajax({
     		type: "POST",
     	    //async: false,
-    		url: 'http://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/checkMove',
-    		data: { 'gameID' : game[1],'from' : from, 'to' : to , 'type' : type, 'colour' : colour },
+    		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/checkMove',
+    		data: { 'gameID' : game[1],'from' : from, 'to' : to , 'type' : type, 'colour' : colour, 'newPiece' : newPiece },
     		success: function(data) {
     			//centre piece
     			if (!data['valid']) {

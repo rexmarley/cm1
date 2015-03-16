@@ -20,7 +20,7 @@ class KingValidator extends ValidationHelper
     	$colour = $move['pColour'];
 		if (abs($to[1] - $from[1]) <= 1 && abs($to[0] - $from[0]) <= 1) {
 			return true;
-		} else if (!$this->game->getBoard()->getPieceIsMoved($from[0], $from[1]) && $to[0] == $from[0] && !inCheck($colour)) {
+		} else if (!$this->game->getBoard()->getPieceIsMoved($from[0], $from[1]) && $to[0] == $from[0] && !$this->inCheck($colour)) {
 			//handle castling
 			if ($to[1] == 2 || $to[1] == 6) {
 				$rookFromCol = 0;
@@ -37,13 +37,13 @@ class KingValidator extends ValidationHelper
 				if (!$this->game->getBoard()->getPieceIsMoved($from[0], $rookFromCol)) {
 					//check intermittent points are vacant
 					for ($i = $start; $i < $end; $i++) {
-						if (!vacant($from[0], $i)) {
+						if (!$this->vacant($from[0], $i)) {
 							return false;
 						}
 						// if in check at intermittent points, return false
 						$nextSpace = [$from[0], $i];
 			    		$this->updateAbstractBoard($from, $nextSpace);
-			    		if (inCheck($colour)) {
+			    		if ($this->inCheck($colour)) {
 							//put king back in place
 				    		$this->updateAbstractBoard($nextSpace, $from);
 			    			return false;
@@ -53,10 +53,6 @@ class KingValidator extends ValidationHelper
 					}
 		        	//move rook
 		    		$this->updateAbstractBoard([$from[0], $rookFromCol], [$to[0], $rookToCol]);
-		    		//set rook as moved - not actually necessary
-					//unmoved[from[0]][rookFromCol] = false;
-					//flag castled - prevent recheck of inCheck()
-					$this->castled = true;
 					return true;
 				}
 			}
