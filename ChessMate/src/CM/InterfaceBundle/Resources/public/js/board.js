@@ -44,7 +44,7 @@ $(document).ready( function() {
 		 },
 		 modal: true,
 	});
-
+	
 	/**
 	 * Swap pawn on selection
 	 */
@@ -81,7 +81,13 @@ $(document).ready( function() {
 		pawn.attr('id', newPiece+'_'+num);
 		//close piece-chooser
 		$('#choosePiece_'+colour).dialog("close");
+    	//ajax move & validate server-side
+    	//should only fail due to cheating --> display message and manually revert board
+		//(TODO disable board on success?)
+    	ajaxMove(gFrom, [endRow, pawnCol], 'pawn', colour);	
 	});
+	//global var for swapping pawn
+	gFrom = [];
 
 	/**
 	 * Validate chess move
@@ -103,7 +109,7 @@ $(document).ready( function() {
     	if(valid) {
     		//get target square occupant - in case of revert
     		var occupant = abstractBoard[to[0]][to[1]];
-    		if (!enPassantPerformed) {
+    		if (!checkEnPassantPerformed(to)) {
             	//update abstract board
         		updateAbstractBoard(from, to);
 	    		if (!castled) {
@@ -126,21 +132,21 @@ $(document).ready( function() {
 	    			}
 	    			castled = false;
 	    		}
-    		}
-        	//ajax move & validate server-side
-        	ajaxMove(from, to, piece['type'], piece['colour']); //move down
-        	//should only fail due to cheating --> display message and manually revert board
-			//(TODO disable board on success?)
-    		if (!checkEnPassantPerformed(to)) {
+	    		//check for takeable piece
     			checkAndTakePiece(to);
-    			//check for pawn reaching opposing end
-    			if (piece['type'] == 'pawn') {
-    				if ((piece['colour'] == 'w' && to[0] == 7) || (piece['colour'] == 'b' && to[0] == 0)) {
-    					openPieceChooser(piece['colour']);
-    				}
-    			}
     		} else {
 				takePiece(getGridRefFromAbstractIndices(from[0],to[1]));
+			}
+			//check for pawn reaching opposing end
+			if (piece['type'] == 'pawn' && (piece['colour'] == 'w' && to[0] == 7) || (piece['colour'] == 'b' && to[0] == 0)) {
+				//ajax move on piece selection
+				gFrom = from;
+				openPieceChooser(piece['colour']);
+			} else {
+	        	//ajax move & validate server-side
+	        	//should only fail due to cheating --> display message and manually revert board
+				//(TODO disable board on success?)
+	        	ajaxMove(from, to, piece['type'], piece['colour']);				
 			}
 			unmoved[from[0]][from[1]] = false;
     		//center piece
@@ -165,14 +171,14 @@ $(document).ready( function() {
     		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/checkMove',
     		data: { 'gameID' : game[1],'from' : from, 'to' : to , 'type' : type, 'colour' : colour, 'newPiece' : newPiece },
     		success: function(data) {
-    			//centre piece
+    			//console.log(data['board']);
     			if (!data['valid']) {
     				$('div.errors').html('<h2>Nice try but why cheat at chess? You\'re docked a minute!</h2>');
     			    // show for 5 seconds
     			    setTimeout(function() { $('div.errors h2').fadeOut(2000); }, 5000);
     			    setTimeout(function() { $('div.errors').html('') }, 8000);
     			    //revert board
-    				abstractBoard = data['board'];
+    				//abstractBoard = data['board'];
     				//could just cancel game for now
     			}
     		}

@@ -50,6 +50,7 @@ class PawnValidator extends ValidationHelper
 			//check for pawn reaching opposing end
 			if (($colour == 'w' && $to[0] == 7) || ($colour == 'b' && $to[0] == 0)) {
 				$this->board[$to[0]][$to[1]] = $move['newPiece'];
+				$this->pieceSwapped = true;
 			}
 		}
 		return $valid;

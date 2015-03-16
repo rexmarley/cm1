@@ -14,6 +14,7 @@ abstract class ValidationHelper
     protected $game;
     protected $board;
     protected $enPassant = null;
+    protected $pieceSwapped = false;
 	
 	/**
 	 * Validate chess move
@@ -36,13 +37,15 @@ abstract class ValidationHelper
     	$valid = $this->validatePiece($move);
     	if($valid) {
     		//move piece
-    		$this->updateAbstractBoard($move['from'], $move['to']);
+    		if (!$this->pieceSwapped) {
+    			$this->updateAbstractBoard($move['from'], $move['to']);
+    		}
     		//if in check, invalidate move
     		if ($this->inCheck($move['pColour'])) {
     			return array('valid' => false);
     		}
     		//mark piece as moved
-    		$this->game->getBoard()->setPieceAsMoved($move['from'][0], $move['from'][1]);
+    		$this->game->getBoard()->setPieceAsMoved($move['from'][0], $move['from'][1]); //TODO: check persistence
     		//add/remove En passant
     		$this->game->getBoard()->setEnPassantAvailable($this->enPassant);
     		return array('valid' => true, 'board' => $this->board); //return $game?

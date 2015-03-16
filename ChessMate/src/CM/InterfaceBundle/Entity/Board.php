@@ -169,13 +169,28 @@ class Board
     /**
      * Update board
      *
-     * @param array $board
+     * @param array $from	[y,x]
+     * @param array $to		[y,x]
      * @return Board
      */
     public function updateBoard(array $from, array $to)
     {
         $this->board[$to[0]][$to[1]] = $this->board[$from[0]][$from[1]];
         $this->board[$from[0]][$from[1]] = false;
+
+        return $this;
+    }
+
+    /**
+     * Set Piece
+     *
+     * @param array $square [y,x]
+     * @param string $piece
+     * @return Board
+     */
+    public function setPiece(array $square, $piece)
+    {
+        $this->board[$square[0]][$square[1]] = $piece;
 
         return $this;
     }
