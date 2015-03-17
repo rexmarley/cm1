@@ -1,10 +1,10 @@
 cm_interface_play:
     path:     /play
-    defaults: { _controller: "CMInterfaceBundle:Default:play" }
+    defaults: { _controller: "CMInterfaceBundle:Game:play" }
 
 cm_interface_guest:
     path:     /guest/play
-    defaults: { _controller: "CMInterfaceBundle:Default:guestPlay" }
+    defaults: { _controller: "CMInterfaceBundle:Game:guestPlay" }
     
 cm_interface_login:
     path:     /
