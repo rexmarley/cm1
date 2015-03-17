@@ -7,7 +7,7 @@
 	</div>
 	<div class="row">
 	    <div class="col-md-6">
-		    {{ render(controller('CMInterfaceBundle:Game:showBoard', { 'gameID': null })) }}
+		    {{ render(controller('CMInterfaceBundle:Game:showBoard', { 'gameID': game.id })) }}
 		</div>
 		<div class="col-md-6">
 			<div id="piecesLost" class="row">

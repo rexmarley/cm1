@@ -244,23 +244,16 @@ function inCheck(colour) {
 	}
 	//check in check
 	if (inCheckByPawn(colour, kingSquare)) {
-		console.log('check by pawn');	
 		return true;
 	} else if (inCheckByKnight(colour, kingSquare)) {
-		console.log('check by knight');
 		return true;
 	} else if (inCheckOnXAxis(colour, kingSquare)) {
-		console.log('check on x-axis');
 		return true;
 	} else if (inCheckOnYAxis(colour, kingSquare)) {
-		console.log('check on y-axis');
 		return true;
 	} else if (inCheckOnDiagonal(colour, kingSquare)) {
-		console.log('check on diagonal');
 		return true;
 	}
-	
-	console.log('no check');	
 	
 	return false;
 }

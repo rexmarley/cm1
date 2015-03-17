@@ -81,10 +81,13 @@ $(document).ready( function() {
 		pawn.attr('id', newPiece+'_'+num);
 		//close piece-chooser
 		$('#choosePiece_'+colour).dialog("close");
-    	//ajax move & validate server-side
-    	//should only fail due to cheating --> display message and manually revert board
-		//(TODO disable board on success?)
-    	ajaxMove(gFrom, [endRow, pawnCol], 'pawn', colour);	
+		//ajax move if real game
+		if ($('.board').attr('id').charAt(5) != 'x') {
+	    	//ajax move & validate server-side
+	    	//should only fail due to cheating --> display message and manually revert board
+			//(TODO disable board on success?)
+			ajaxMove(gFrom, [endRow, pawnCol], 'pawn', colour);
+		}
 	});
 	//global var for swapping pawn
 	gFrom = [];
@@ -142,7 +145,7 @@ $(document).ready( function() {
 				//ajax move on piece selection
 				gFrom = from;
 				openPieceChooser(piece['colour']);
-			} else {
+			} else if ($('.board').attr('id').charAt(5) != 'x') {
 	        	//ajax move & validate server-side
 	        	//should only fail due to cheating --> display message and manually revert board
 				//(TODO disable board on success?)
