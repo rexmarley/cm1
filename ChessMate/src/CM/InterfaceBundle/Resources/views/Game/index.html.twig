@@ -1,5 +1,11 @@
- {% extends '::base.html.twig' %}
- 
+{% extends '::base.html.twig' %}
+
+{% if game is defined %}
+	{% set gameID = game.id %}
+{% else %}
+	{% set gameID = null %}
+{% endif %}
+
 {% block body %}
 	<div class="row">
 	    <div class="errors col-md-6">
@@ -7,13 +13,18 @@
 	</div>
 	<div class="row">
 	    <div class="col-md-6">
-		    {{ render(controller('CMInterfaceBundle:Game:showBoard', { 'gameID': null })) }}
+		    {{ render(controller('CMInterfaceBundle:Game:showBoard', { 'gameID': gameID })) }}
 		</div>
 		<div class="col-md-6">
-			{# if game is defined else render start game options #}
-			{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Lost'}) }}
-			{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}
-			{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Won'}) }}
+			{% if game is defined %}
+				{# if game is defined else render start game options #}
+				{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Lost'}) }}
+				{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}
+				{{ include('CMInterfaceBundle:Game:gameOptions.html.twig', {}) }}
+				{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Won'}) }}
+			{% else %}
+				{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}			
+			{% endif %}
 		</div>
 	</div>
 {% endblock %}

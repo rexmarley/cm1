@@ -1,6 +1,22 @@
 cm_interface_play:
     path:     /play
     defaults: { _controller: "CMInterfaceBundle:Game:play" }
+    
+cm_new_game:
+    path:     /newGame
+    defaults: { _controller: "CMInterfaceBundle:Game:newGame" }
+    
+cm_offer_draw:
+    path:     /draw
+    defaults: { _controller: "CMInterfaceBundle:Game:offerDraw" }
+    
+cm_resign_game:
+    path:     /resign
+    defaults: { _controller: "CMInterfaceBundle:Game:resign" }
+    
+cm_toggle_chat:
+    path:     /toggleChat
+    defaults: { _controller: "CMInterfaceBundle:Game:toggleChat" }
 
 cm_interface_guest:
     path:     /guest/play

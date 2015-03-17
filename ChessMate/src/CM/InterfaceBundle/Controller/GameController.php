@@ -20,7 +20,27 @@ class GameController extends Controller
         		array('gameID' => $gameID, 'pieces' => $pieces));	
 	}
 	
-    public function playAction()
+    public function newGameAction()
+    {
+    	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());
+    }
+	
+    public function resignAction()
+    {
+    	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
+    }
+	
+    public function offerDrawAction()
+    {
+    	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
+    }
+	
+    public function toggleChatAction()
+    {
+    	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
+    }
+	
+    public function playAction($gameID = null)
     {    	
     	$user = $this->getUser();
     	if ($user) {
@@ -31,10 +51,13 @@ class GameController extends Controller
     	
     	//TODO: find matching game or get computer opponent 
     	$user2 = $em->getRepository('CMUserBundle:User')->findOneBy(array('username' => 'Rex2'));
-    	
-    	$game = $this->get('game_factory')->createNewGame(600, $user, $user2);
-    	$em->persist($game);
-    	$em->flush();
+    	if (is_null($gameID)) {
+    		$game = $this->get('game_factory')->createNewGame(600, $user, $user2);
+    		$em->persist($game);
+    		$em->flush();
+    	} else {
+    		$game = $em->getRepository('CMUserBundle:User')->findOne($gameID);
+    	}
     			    	
     	$pieces = $this->getHTMLPieces();
     	
