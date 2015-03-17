@@ -1,0 +1,34 @@
+<div id ="game_{{ gameID }}" class="board">
+	{% set p = 0 %}
+	{% set colour = 'b' %}
+	{% set drag = '' %}
+	{% if gameID == 'x' %}
+		{% set drag = 'ui-draggable' %}
+	{% endif %}
+	{% for i in 8..1  %}
+		{% for j in 'a'..'h'  %}
+			{% if i is divisibleby(2) %}
+				{% if loop.index is divisibleby(2) %}
+					{% set  squareColour = 'dark' %}
+				{% else %}
+					{% set  squareColour = 'light' %}
+				{% endif %}
+			{% else %}
+				{% if loop.index is divisibleby(2) %}
+					{% set  squareColour = 'light' %}
+				{% else %}
+					{% set  squareColour = 'dark' %}
+				{% endif %}	
+			{% endif %}		
+			<div id="{{j}}_{{i}}" class="square {{ squareColour }} ui-droppable">
+				{% if i < 3 or i > 6 %}
+					{% if i == 2 %}
+						{% set drag = 'ui-draggable' %}
+					{% endif %}
+					<div id="{{ pieces[p].id }}" class="piece {{ drag }}">{{ pieces[p].img | raw }}</div>
+					{% set p = p + 1 %}
+				{% endif %}
+			</div>
+		{% endfor %}
+	{% endfor %}
+</div>

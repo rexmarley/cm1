@@ -12,14 +12,12 @@ class GameController extends Controller
 	public function showBoardAction($gameID = null) {
 		if (is_null($gameID)) {  
 			$gameID = 'x';
-			$drag = '';
 		} else {
-			$drag = 'ui-draggable';
 			//get white/black specific board
 		}
     	$pieces = $this->getHTMLPieces();
         return $this->render('CMInterfaceBundle:Default:board.html.twig', 
-        		array('gameID' => $gameID, 'pieces' => $pieces, 'drag' => $drag));	
+        		array('gameID' => $gameID, 'pieces' => $pieces));	
 	}
 	
     public function playAction()
