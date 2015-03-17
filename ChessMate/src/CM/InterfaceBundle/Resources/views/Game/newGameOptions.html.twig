@@ -1,50 +1,62 @@
 <form action="{{ path('cm_new_game', {})}}" method="POST">
 	<div id="newGameOptions">
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-md-4 col-md-offset-4">
+				<h1><u>Start Game</u></h1>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-11 col-md-offset-1">
 				<h2>Opponent:</h2>
-				<input type="radio" name="opponent" value="human" checked>Human
-				<input type="radio" name="opponent" value="computer">Computer
+				<div class="row">
+					<div class="col-md-3 col-md-offset-1">
+						<input type="radio" name="opponent" value=1 checked>&nbsp;<label>Human<label>
+					</div>
+					<div class="col-md-3">
+						<input type="radio" name="opponent" value=2>&nbsp;<label>Computer<label>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-md-11 col-md-offset-1">
 				<h2>Skill Level:</h2>
-				<input type="radio" name="skill" value=1 checked>Best Match
-				<input type="radio" name="skill" value=2 checked>Lesser
-				<input type="radio" name="skill" value=3 checked>Greater
+				<div class="row">
+					<div class="col-md-4 col-md-offset-1">
+						<input type="radio" name="skill" value=1 checked>&nbsp;<label id="skill1">Best Match</label>
+					</div>
+					<div class="col-md-3">
+						<input type="radio" name="skill" value=2>&nbsp;<label id="skill2">Lesser</label>
+					</div>
+					<div class="col-md-3">
+						<input type="radio" name="skill" value=3>&nbsp;<label id="skill3">Greater</label>
+					</div>
+				</div>
 			</div>
 		</div>
 		<div class="row">
-			<div class="col-md-12">
-				<h2>Time per player (mins.):</h2>
-				<input type="radio" name="duration" value=3>3
-				<br>
-				<input type="radio" name="duration" value=5>5
-				<br>
-				<input type="radio" name="duration" value=10 checked>10
-				<br>
-				<input type="radio" name="duration" value=20>20
-				<br>
-				<input type="radio" name="duration" value=30>30
+			<div class="col-md-11 col-md-offset-1">
+				<h2>Time per player:</h2>
+				<div class="row">
+					<div class="col-md-11 col-md-offset-1">
+						<input type="radio" name="duration" value=3>&nbsp;<label>3 minutes</label>
+						<br>
+						<input type="radio" name="duration" value=5>&nbsp;<label>5 minutes</label>
+						<br>
+						<input type="radio" name="duration" value=10 checked>&nbsp;<label>10 minutes</label>
+						<br>
+						<input type="radio" name="duration" value=20>&nbsp;<label>20 minutes</label>
+						<br>
+						<input type="radio" name="duration" value=30>&nbsp;<label>30 minutes</label>
+					</div>
+				</div>
 			</div>
 		</div>
+		<br>
 		<div class="row">
-			<div class="col-md-12">
+			<div class="col-md-4 col-md-offset-4">
 		    	<input type="submit" class="btn btn-large btn-primary" value="Find Match"/>
 			</div>
 		</div>
 	</div>
 </form>
-
-<script type="text/javascript">
-$(document).ready( function() {
-	
-	/**
-	 * Change skill labels on selectin of human/computer opponent
-	 */
-	$("radio[name='skill']").on('change', function() {
-		  console.log(this.value);
-	});
-});
-</script>
