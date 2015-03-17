@@ -20,10 +20,10 @@
 				{# if game is defined else render start game options #}
 				{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Lost'}) }}
 				{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}
-				{{ include('CMInterfaceBundle:Game:gameOptions.html.twig', {}) }}
+				{{ include('CMInterfaceBundle:Game:midGameOptions.html.twig', {}) }}
 				{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Won'}) }}
 			{% else %}
-				{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}			
+				{{ include('CMInterfaceBundle:Game:newGameOptions.html.twig', {}) }}			
 			{% endif %}
 		</div>
 	</div>
