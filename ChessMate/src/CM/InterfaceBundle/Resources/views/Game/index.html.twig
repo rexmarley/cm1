@@ -10,41 +10,10 @@
 		    {{ render(controller('CMInterfaceBundle:Game:showBoard', { 'gameID': game.id })) }}
 		</div>
 		<div class="col-md-6">
-			<div id="piecesLost" class="row">
-				<div class="col-md-12">
-					<span>Pieces lost:</span>
-					<div class="row">
-						{% for i in 1..15  %}
-							<div class="col-md-2 col-sm-2 col-xs-2"></div>
-						{% endfor %}
-					</div>
-				</div>
-			</div>
-			<div id="chatBox" class="row">
-				<div class="col-md-12">
-					{# if game is defined else render start game options #}
-					<h2>Chat with opponent:</h2>
-					<table>
-						<tr>
-							<td><textarea>blah blah blah</textarea></td>
-							{#<td rowspan=2><h2>Opponent:</h2></td> #}
-						</tr>
-						<tr>
-							<td></td>
-						</tr>
-					</table>
-				</div>
-			</div>	
-			<div id="piecesWon" class="row">
-				<div class="col-md-12">
-					<span>Pieces won:</span>
-					<div class="row">
-						{% for i in 1..15  %}
-							<div class="col-md-2 col-sm-2 col-xs-2"></div>
-						{% endfor %}
-					</div>
-				</div>
-			</div>
+			{# if game is defined else render start game options #}
+			{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Lost'}) }}
+			{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}
+			{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Won'}) }}
 		</div>
 	</div>
 	<div id="choosePiece_b" class="ui-dialog hidden" title="Choose Piece">

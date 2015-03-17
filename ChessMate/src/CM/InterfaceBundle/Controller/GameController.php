@@ -16,7 +16,7 @@ class GameController extends Controller
 			//get white/black specific board
 		}
     	$pieces = $this->getHTMLPieces();
-        return $this->render('CMInterfaceBundle:Default:board.html.twig', 
+        return $this->render('CMInterfaceBundle:Game:board.html.twig', 
         		array('gameID' => $gameID, 'pieces' => $pieces));	
 	}
 	
@@ -38,7 +38,7 @@ class GameController extends Controller
     			    	
     	$pieces = $this->getHTMLPieces();
     	
-        return $this->render('CMInterfaceBundle:Default:index.html.twig', array('name' => $name, 'pieces' => $pieces, 'game' => $game));
+        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('name' => $name, 'pieces' => $pieces, 'game' => $game));
     }
     
     private function getHTMLPieces() {
@@ -108,6 +108,6 @@ class GameController extends Controller
 		$event = new InteractiveLoginEvent($this->get("request"), $token);
 		$this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
     	
-        return $this->render('CMInterfaceBundle:Default:index.html.twig', array('name' => $name));
+        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('name' => $name));
     }
 }

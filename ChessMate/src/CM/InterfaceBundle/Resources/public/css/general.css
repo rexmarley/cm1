@@ -45,12 +45,23 @@ div.piece {
 	text-align: center;
 }
 
-div#piecesWon {
+div.piecesWonLost {
 	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
 	min-height: 10em;
 	outline: 1px solid #bdb7b7;
 	margin-right: 2em;
 	margin-top: 1em;
+}
+
+div#chatBox {
+	min-height: 10em;	
+}
+
+div#chatBox textarea {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    width:94%;
 }
 
 img#logo {
