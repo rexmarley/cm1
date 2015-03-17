@@ -15,7 +15,8 @@ body {
 }
 
 div.ui-dialog {
-	cursor: pointer;	
+	cursor: pointer;
+	display: none;	
 }
 
 div.board {
