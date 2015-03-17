@@ -12,6 +12,8 @@ body {
 	background: linear-gradient(#6881E6,#ffffff) no-repeat;
 	height:100%;
 	font-size: 15px;
+	padding-left: 15px;
+    padding-right: 15px;
 }
 
 div.ui-dialog {
@@ -73,7 +75,7 @@ div#chatBox textarea {
 div#newGameOptions {
 	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
 	outline: 1px solid #bdb7b7;
-	margin-right: 2em;
+	margin-left: 3%;
 	margin-top: 1em;
 	font-size: 1.4em;
 	padding: 1% 3% 3% 3%;
