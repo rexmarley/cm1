@@ -53,6 +53,11 @@ div.piecesWonLost {
 	margin-top: 1em;
 }
 
+div.piecesWonLost span {
+	font-size: 1.1em;
+	font-weight:bold;
+}
+
 div#chatBox {
 	min-height: 10em;	
 }
