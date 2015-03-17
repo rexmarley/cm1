@@ -33,6 +33,7 @@ div.square {
 	float: left;
     height: 6em;
     width: 6em;
+    overflow: hidden;
 }
 
 div.light {
