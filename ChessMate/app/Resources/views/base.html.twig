@@ -17,8 +17,8 @@
     </head>
     <body>
 		<div class="container-fluid">
-    		{% if name is defined %}
-    			{% set subtitle = ': Welcome ' ~ name ~ '!'%}
+    		{% if app.user %}
+    			{% set subtitle = ': Welcome ' ~ app.user.username ~ '!'%}
     		{%  else %}
     			{% set subtitle = '' %}    			
     		{% endif %}

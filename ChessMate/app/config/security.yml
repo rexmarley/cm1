@@ -22,7 +22,7 @@ security:
                 login_path: /login
                 provider: fos_userbundle                
                 always_use_default_target_path: false
-                default_target_path:            /play
+                default_target_path:            /game/start
             logout:
                 path:   /logout
                 target: /login
@@ -31,5 +31,5 @@ security:
             #    realm: "Secured Demo Area"
 
     access_control:
-        - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: https }
+        - { path: ^/game, roles: ROLE_USER, requires_channel: https }
         - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: https }

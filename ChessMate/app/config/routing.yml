@@ -1,6 +1,6 @@
 cm_interface:
     resource: "@CMInterfaceBundle/Resources/config/routing.yml"
-    prefix:   /
+    prefix:   /game
 
 cm_user:
     resource: "@CMUserBundle/Resources/config/routing.yml"

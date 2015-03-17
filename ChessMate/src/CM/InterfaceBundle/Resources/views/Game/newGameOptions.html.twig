@@ -1,7 +1,50 @@
-<form>
-	<div id="newGameOptions" class="row">
-		<div class="col-md-4">
-	    	<a  href="{{ path('cm_new_game', {}) }}" class="btn btn-large btn-primary">Find Match</a>
+<form action="{{ path('cm_new_game', {})}}" method="POST">
+	<div id="newGameOptions">
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Opponent:</h2>
+				<input type="radio" name="opponent" value="human" checked>Human
+				<input type="radio" name="opponent" value="computer">Computer
+			</div>
 		</div>
-	</div>	
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Skill Level:</h2>
+				<input type="radio" name="skill" value=1 checked>Best Match
+				<input type="radio" name="skill" value=2 checked>Lesser
+				<input type="radio" name="skill" value=3 checked>Greater
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+				<h2>Time per player (mins.):</h2>
+				<input type="radio" name="duration" value=3>3
+				<br>
+				<input type="radio" name="duration" value=5>5
+				<br>
+				<input type="radio" name="duration" value=10 checked>10
+				<br>
+				<input type="radio" name="duration" value=20>20
+				<br>
+				<input type="radio" name="duration" value=30>30
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-md-12">
+		    	<input type="submit" class="btn btn-large btn-primary" value="Find Match"/>
+			</div>
+		</div>
+	</div>
 </form>
+
+<script type="text/javascript">
+$(document).ready( function() {
+	
+	/**
+	 * Change skill labels on selectin of human/computer opponent
+	 */
+	$("radio[name='skill']").on('change', function() {
+		  console.log(this.value);
+	});
+});
+</script>

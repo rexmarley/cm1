@@ -40,11 +40,18 @@ class GameController extends Controller
     	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
     }
 	
+    public function startAction()
+    {
+    	$pieces = $this->getHTMLPieces();
+    	
+        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('pieces' => $pieces));
+    }
+	
     public function playAction($gameID = null)
     {    	
     	$user = $this->getUser();
     	if ($user) {
-    		$name = $user->getUsername();
+    		//$name = $user->getUsername();
     	}
     	
     	$em = $this->getDoctrine()->getManager();
@@ -61,7 +68,7 @@ class GameController extends Controller
     			    	
     	$pieces = $this->getHTMLPieces();
     	
-        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('name' => $name, 'pieces' => $pieces, 'game' => $game));
+        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('pieces' => $pieces, 'game' => $game));
     }
     
     private function getHTMLPieces() {

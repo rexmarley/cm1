@@ -16,7 +16,7 @@
 		    {{ render(controller('CMInterfaceBundle:Game:showBoard', { 'gameID': gameID })) }}
 		</div>
 		<div class="col-md-6">
-			{% if game is defined %}
+			{% if gameID %}
 				{# if game is defined else render start game options #}
 				{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Lost'}) }}
 				{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}

@@ -3,5 +3,5 @@ fos_user:
 
 cm_interface:
     resource: "@CMInterfaceBundle/Resources/config/routing.yml"
-    prefix:   /
+    prefix:   /game
     
