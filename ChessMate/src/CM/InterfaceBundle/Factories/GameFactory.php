@@ -19,15 +19,18 @@ class GameFactory
      *
      * @return Game
      */
-    public function createNewGame($length, User $whitePlayer, User $blackPlayer)
+    public function createNewGame($length, User $whitePlayer, User $blackPlayer = null)
     {
     	//create board
-    	$board = new Board();
-    	
+    	$board = new Board();    	
         $game = new Game($board);
+        
         $game->setLength($length);
         $game->addPlayer($whitePlayer);
-        $game->addPlayer($blackPlayer);
+        if (!is_null($blackPlayer)) {
+        	$game->addPlayer($blackPlayer);
+        	$game->setInProgress(true);
+        }
 
         return $game;
     }

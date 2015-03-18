@@ -3,7 +3,7 @@ cm_interface_start:
     defaults: { _controller: "CMInterfaceBundle:Game:start" }
     
 cm_interface_play:
-    path:     /play
+    path:     /play/{gameID}
     defaults: { _controller: "CMInterfaceBundle:Game:play" }
     
 cm_new_game:
@@ -33,9 +33,5 @@ cm_validate_move:
 cm_js_testBoard:
     path:     /tests
     defaults: { _controller: "CMInterfaceBundle:JSTests:testJS" }
-    
-cm_interface_login:
-    path:     /
-    defaults: { _controller: "FOSUserBundle:Security:login" }
 
     

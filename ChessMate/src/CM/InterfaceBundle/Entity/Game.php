@@ -42,6 +42,11 @@ class Game
      */
     private $length;
     
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $inProgress;
+    
     private $whiteTimeLeft;
     private $blackTimeLeft;
     
@@ -52,6 +57,7 @@ class Game
     {
         $this->players = new \Doctrine\Common\Collections\ArrayCollection();
         $this->board = $board;
+        $this->inProgress = false;
     }
 
     /**
@@ -85,6 +91,29 @@ class Game
     public function getLength()
     {
         return $this->length;
+    }
+
+    /**
+     * Set game in progress
+     *
+     * @param boolean $inProgress
+     * @return Game
+     */
+    public function setInProgress($inProgress)
+    {
+        $this->inProgress = $inProgress;
+
+        return $this;
+    }
+
+    /**
+     * Check if game is in progress
+     *
+     * @return boolean 
+     */
+    public function getInProgress()
+    {
+        return $this->inProgress;
     }
 
     /**

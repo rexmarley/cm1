@@ -1,6 +1,10 @@
 cm_interface:
     resource: "@CMInterfaceBundle/Resources/config/routing.yml"
     prefix:   /game
+    
+cm_interface_login:
+    path:     /
+    defaults: { _controller: "FOSUserBundle:Security:login" }
 
 cm_user:
     resource: "@CMUserBundle/Resources/config/routing.yml"

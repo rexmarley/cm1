@@ -53,8 +53,15 @@ div.piecesWonLost {
 	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
 	min-height: 10em;
 	outline: 1px solid #bdb7b7;
-	margin-right: 2em;
-	margin-top: 1em;
+}
+
+div#midGame {
+	margin: 3%;	
+}
+
+div#midGameOptions {
+	padding:2%; 
+	margin-left:3%;
 }
 
 div.piecesWonLost span {
@@ -70,7 +77,9 @@ div#chatBox textarea {
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
-    width:94%;
+    width:100%;
+    height: 10em;
+    margin-bottom: 3%;
 }
 
 div#newGameOptions {

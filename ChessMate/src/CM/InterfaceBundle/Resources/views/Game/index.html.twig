@@ -18,10 +18,13 @@
 		<div class="col-md-6">
 			{% if gameID %}
 				{# if game is defined else render start game options #}
-				{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Lost'}) }}
-				{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}
-				{{ include('CMInterfaceBundle:Game:midGameOptions.html.twig', {}) }}
-				{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Won'}) }}
+				<div id="midGame">
+					{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Lost'}) }}
+					{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}
+					{{ include('CMInterfaceBundle:Game:midGameOptions.html.twig', {}) }}
+					<br>
+					{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Won'}) }}
+				</div>
 			{% else %}
 				{{ include('CMInterfaceBundle:Game:newGameOptions.html.twig', {}) }}			
 			{% endif %}
