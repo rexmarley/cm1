@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller,
 	Symfony\Component\HttpFoundation\Response,
 	Symfony\Component\HttpFoundation\JsonResponse;
 use CM\InterfaceBundle\Entity\Game;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class AjaxController extends Controller
 {   
@@ -26,7 +27,8 @@ class AjaxController extends Controller
     	//make sure valid user for game TODO: must also be player's turn!
     	$user = $this->getUser();
     	if (!$game->getPlayers()->contains($user)) {
-    		return new JsonResponse(array('valid' => false, 'checkMate' => false, 'board' => false));
+    		//return new JsonResponse(array('valid' => false, 'checkMate' => false, 'board' => false));
+	    	throw new AccessDeniedException('You are not part of this game!');
     	}
     	//get move details
     	$move = array(

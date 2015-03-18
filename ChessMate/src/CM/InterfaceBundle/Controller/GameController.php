@@ -7,6 +7,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller,
     Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
 use CM\UserBundle\Entity\User;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class GameController extends Controller
 {    
@@ -75,7 +76,7 @@ class GameController extends Controller
 	    	//make sure valid user for game
 	    	$user = $this->getUser();
 	    	if (!$game->getPlayers()->contains($user)) {
-	    		//throw error
+	    		throw new AccessDeniedException('You are not part of this game!');
 	    	} else {
 	    		//valid user
 		    	if ($game->getPlayers()->indexOf($user) == 0) {
@@ -85,7 +86,7 @@ class GameController extends Controller
 		    	}
 	    	}
 	    } else {
-	    	//throw error
+	    	throw $this->createNotFoundException('Game not found!');
 	    }
 	    	
 	    $pieces = $this->getHTMLPieces($colour);
@@ -192,14 +193,16 @@ class GameController extends Controller
     	return $pieces;
     }
      
-    public function guestPlayAction()
-    {    	
+    public function guestAction()
+    {   	
      	$userManager = $this->get('fos_user.user_manager');	
      	//get inactive guest account
 		$em = $this->getDoctrine()->getManager();
 		$user = $em->getRepository('CMUserBundle:User')->findInactiveGuest();
 		if (!$user) {
-			$name = "Guest 00" . rand(1,1000);
+			//create new guest accounts as needed
+			$id = $em->createQuery('SELECT MAX(u.id) FROM CMUserBundle:User u')->getSingleScalarResult() + 1;
+			$name = "Guest0".$id;
 			$user = $userManager->createUser();
 			$user->setUsername($name);		
 			$user->setEmail($name);
@@ -219,6 +222,6 @@ class GameController extends Controller
 		$event = new InteractiveLoginEvent($this->get("request"), $token);
 		$this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
     	
-        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('name' => $name));
+    	return $this->redirect($this->generateUrl('cm_interface_start', array()));
     }
 }

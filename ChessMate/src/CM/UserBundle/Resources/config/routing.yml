@@ -4,4 +4,8 @@ fos_user:
 cm_interface:
     resource: "@CMInterfaceBundle/Resources/config/routing.yml"
     prefix:   /game
+
+cm_interface_guest:
+    path:     /guest
+    defaults: { _controller: "CMInterfaceBundle:Game:guest" }
     

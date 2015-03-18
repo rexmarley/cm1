@@ -21,10 +21,6 @@ cm_resign_game:
 cm_toggle_chat:
     path:     /toggleChat
     defaults: { _controller: "CMInterfaceBundle:Game:toggleChat" }
-
-cm_interface_guest:
-    path:     /guest/play
-    defaults: { _controller: "CMInterfaceBundle:Game:guestPlay" }
     
 cm_validate_move:
     path:     /checkMove
