@@ -36,6 +36,11 @@ class Game
      * inverseJoinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")})
      */
     private $players;
+
+    /**
+     * @ORM\OneToOne(targetEntity="CM\UserBundle\Entity\User", cascade={"persist"})
+     */
+    private $activePlayer;
     
     /**
      * @ORM\Column(type="integer")
@@ -168,7 +173,7 @@ class Game
      * @param \CM\UserBundle\Entity\User $blackPlayer
      * @return Game
      */
-    public function setBlackPlayer(\CM\UserBundle\Entity\User $blackPlayer = null)
+    public function setBlackPlayer(\CM\UserBundle\Entity\User $blackPlayer)
     {
        $this->players->set(1, $blackPlayer);
 
@@ -183,6 +188,29 @@ class Game
     public function getBlackPlayer()
     {
         return $this->players->get(1);
+    }
+
+    /**
+     * Set active player
+     *
+     * @param \CM\UserBundle\Entity\User $player
+     * @return Game
+     */
+    public function setActivePlayer(\CM\UserBundle\Entity\User $player)
+    {
+        $this->activePlayer = $player;
+
+        return $this;
+    }
+
+    /**
+     * Get active player
+     *
+     * @return \CM\UserBundle\Entity\User 
+     */
+    public function getActivePlayer()
+    {
+        return $this->activePlayer;
     }
 
     /**

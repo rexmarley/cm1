@@ -88,7 +88,7 @@ class GameController extends Controller
      * 
      * @return string
      */
-    private function getPlayerColour(Game $game, User $user) {
+    private function getPlayerColour($game, $user) {
     	if ($game->getPlayers()->get(0) == $user) {
     		return 'w';
     	}
@@ -99,9 +99,10 @@ class GameController extends Controller
      * Check game exists and is valid for user
      * 
      * @param Game $game
+     * @param User $user
      * @throws AccessDeniedException
      */
-    private function checkGameValidity(Game $game, User $user)
+    private function checkGameValidity($game, $user)
     {
 	    if ($game) {
 	    	//make sure valid user for game

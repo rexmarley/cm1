@@ -1,7 +1,7 @@
 <form action="{{ path('cm_new_game', {})}}" method="POST">
 	<div id="newGameOptions">
 		<div class="row">
-			<div class="col-md-5 col-md-offset-4 col-sm-5 col-sm-offset-4 col-md-5 col-md-offset-4">
+			<div class="col-md-5 col-md-offset-4 col-sm-5 col-sm-offset-4 col-xs-5 col-xs-offset-4">
 				<center><h1><u>Start Game</u></h1></center>
 			</div>
 		</div>
@@ -18,7 +18,12 @@
 				</div>
 			</div>
 		</div>
-		<div class="row">
+    	{% if not app.user.registered %}
+    		{% set skillHidden = 'hidden' %}
+    	{% else %}
+    		{% set skillHidden = 'visible' %}
+    	{% endif %}
+		<div id="skillLevel" class="row {{ skillHidden }}">
 			<div class="col-md-11 col-md-offset-1 col-sm-11 col-sm-offset-1">
 				<h2>Skill Level:</h2>
 				<div class="row">
