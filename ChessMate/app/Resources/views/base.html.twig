@@ -23,20 +23,36 @@
     			{% set subtitle = '' %}    			
     		{% endif %}
 	    	<div id="header" class="row">
-			   	<div class="col-md-1">
-	    			<img id="logo" src="{{ asset('bundles/cminterface/images/logo.png') }}"/>
+			   	<div class="col-md-9 col-sm-12 col-xs-12">
+				   	<table>
+					   	<tr>
+						   	<td>
+				    			<img id="logo" src="{{ asset('bundles/cminterface/images/logo.png') }}"/>
+						   	</td>
+						   	<td>
+				    			<span>Chess Mate{{ subtitle }}</span>
+						   	</td>
+	    			  	</tr>
+				   	</table>
 	    		</div>
-			   	<div class="col-md-9">
-	    			<label>Chess Mate{{ subtitle }}</label>
-	    		</div>
-			   	<div id="userOptions" class="col-md-2">
-    				{% if app.user and app.user.registered %}
-	    				<a  href="{{ path('fos_user_profile_edit', {}) }}" class="btn btn-large btn-primary">Edit Profile</a>
-	    				<a  href="{{ path('fos_user_security_logout', {}) }}" class="btn btn-large btn-warning">Log-out</a>
-	    			{% elseif app.user %}
-	    				<a  href="{{ path('fos_user_registration_register', {}) }}" class="btn btn-large btn-primary">Register</a>
-	    			{% endif %}
-	    		</div>
+			   	<div class="col-md-3 col-sm-6 col-xs-12">
+	    				{% if app.user and app.user.registered %}
+					    	<div id="userOptions" class="row">
+							   	<div class="col-md-6 col-sm-4 col-xs-4">
+				    				<a  href="{{ path('fos_user_profile_edit', {}) }}" class="btn btn-large btn-primary">Edit Profile</a>
+			    				</div>
+							   	<div class="col-md-6 col-sm-4 col-xs-4">
+				    				<a  href="{{ path('fos_user_security_logout', {}) }}" class="btn btn-large btn-warning">Log-out</a>
+			    				</div>
+			    			</div>
+		    			{% elseif app.user %}
+					    	<div class="row">
+							   	<div class="col-md-12">
+			    					<a  href="{{ path('fos_user_registration_register', {}) }}" class="btn btn-large btn-primary">Register</a>
+			    				</div>
+			    			</div>
+		    			{% endif %}
+    			</div>
 	    	</div>
         {% block body %}{% endblock %}
 	    </div>
