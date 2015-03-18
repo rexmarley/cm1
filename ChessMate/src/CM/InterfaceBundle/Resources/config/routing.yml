@@ -15,7 +15,7 @@ cm_offer_draw:
     defaults: { _controller: "CMInterfaceBundle:Game:offerDraw" }
     
 cm_resign_game:
-    path:     /resign
+    path:     /resign/{gameID}
     defaults: { _controller: "CMInterfaceBundle:Game:resign" }
     
 cm_toggle_chat:

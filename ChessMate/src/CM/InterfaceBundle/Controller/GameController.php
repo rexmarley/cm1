@@ -8,25 +8,33 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller,
 use CM\UserBundle\Entity\User;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
+use CM\InterfaceBundle\Entity\Game;
 
 class GameController extends Controller
 {    
 	public function showBoardAction($gameID = null) {
 		if (is_null($gameID)) {  
 			$gameID = 'x';
+			$colour = 'w';
 		} else {
+		    $user = $this->getUser();	
+	    	$em = $this->getDoctrine()->getManager();
+	    	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+		    //authenticate user/game
+		    $this->checkGameValidity($game, $user);
+		    //get player colour
+	    	$colour = $this->getPlayerColour($game, $user);
 			//get white/black specific board
 		}
-    	$pieces = $this->getHTMLPieces();
+    	//get game pieces
+	    $pieces = $this->getHTMLPieces($colour);
+
         return $this->render('CMInterfaceBundle:Game:board.html.twig', 
-        		array('gameID' => $gameID, 'pieces' => $pieces));	
+        		array('gameID' => $gameID, 'pieces' => $pieces, 'player' => $colour));	
 	}
 	
     public function newGameAction(Request $request)
     {
-//     	echo '<pre>';
-//     	var_dump($request->request->get('opponent'));
-//     	echo '</pre>';
     	$user = $this->getUser();
     	//get game variables
     	$opponent = $request->request->get('opponent');
@@ -42,9 +50,7 @@ class GameController extends Controller
 	    	if ($game) {
 	    		$playing = $game->getPlayers()->indexOf($user);
 	    		if ($playing === false) {
-		    		echo 'found game';
 		    		$game->setBlackPlayer($user);
-		    		//$colour = 'b';
 		    		$game->setInProgress(true);
 	    			$em->flush();
 	    		}
@@ -56,47 +62,68 @@ class GameController extends Controller
 	    		$em->flush();
 	    	}
     	} else {
-    		//computer
+    		//computer TODO client-side 
     	}
     	
     	return $this->redirect($this->generateUrl('cm_interface_play', array('gameID' => $game->getId())));
     }
 	
     public function playAction($gameID)
-    {    	
-    	$user = $this->getUser();
-    	if ($user) {
-    		//$name = $user->getUsername();
-    	}
-    	
+    {
+	    $user = $this->getUser();	
     	$em = $this->getDoctrine()->getManager();
-	    //TODO: skill
 	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+	    //authenticate user/game
+	    $this->checkGameValidity($game, $user);
+
+	    return $this->render('CMInterfaceBundle:Game:index.html.twig', array('game' => $game));
+    }
+    
+    /**
+     * Get player's colour
+     * User validity must already be checked
+     * 
+     * @param Game $game
+     * @param User $user
+     * 
+     * @return string
+     */
+    private function getPlayerColour(Game $game, User $user) {
+    	if ($game->getPlayers()->get(0) == $user) {
+    		return 'w';
+    	}
+    	return 'b';  	
+    }
+    
+    /**
+     * Check game exists and is valid for user
+     * 
+     * @param Game $game
+     * @throws AccessDeniedException
+     */
+    private function checkGameValidity(Game $game, User $user)
+    {
 	    if ($game) {
 	    	//make sure valid user for game
-	    	$user = $this->getUser();
 	    	if (!$game->getPlayers()->contains($user)) {
 	    		throw new AccessDeniedException('You are not part of this game!');
-	    	} else {
-	    		//valid user
-		    	if ($game->getPlayers()->indexOf($user) == 0) {
-		    		$colour = 'w';
-		    	} else {
-		    		$colour = 'b';
-		    	}
 	    	}
 	    } else {
 	    	throw $this->createNotFoundException('Game not found!');
-	    }
-	    	
-	    $pieces = $this->getHTMLPieces($colour);
-	    	
-	    return $this->render('CMInterfaceBundle:Game:index.html.twig', array('pieces' => $pieces, 'game' => $game));
+	    }    	
     }
 	
-    public function resignAction()
+    public function resignAction($gameID)
     {
-    	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
+	    $user = $this->getUser();	
+    	$em = $this->getDoctrine()->getManager();
+	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+	    //authenticate user/game
+	    $this->checkGameValidity($game, $user);
+    	//cancel game
+    	$game->setInProgress(false);    	
+    	
+    	return $this->redirect($this->generateUrl('cm_interface_start', array()));	
     }
 	
     public function offerDrawAction()
@@ -118,7 +145,7 @@ class GameController extends Controller
     
     private function getHTMLPieces($for = 'w') {
     	//TODO: move to helper/service & switch white/black depending on player
-    	if ($for = 'w') {
+    	if ($for == 'w') {
 	    	$pieces = array(
 	    			array('id' => 'b_rook_1', 'img' => '&#9820;'),
 	    			array('id' => 'b_knight_1', 'img' => '&#9822;'),

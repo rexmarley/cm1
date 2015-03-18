@@ -5,6 +5,7 @@ namespace CM\InterfaceBundle\Factories;
 use CM\InterfaceBundle\Entity\Game;
 use CM\UserBundle\Entity\User;
 use CM\InterfaceBundle\Entity\Board;
+
 /**
  * Chess game factory
  */

@@ -1,13 +1,19 @@
+{% set p = 0 %}
+{% set drag = '' %}
+{% set tRow = 8 %}
+{% set bRow = 1 %}
+{% set alt = 0 %}
+{% if gameID == 'x' %}
+	{% set drag = 'ui-draggable' %}
+{% elseif player == 'b' %}
+	{% set tRow = 1 %}
+	{% set bRow = 8 %}
+	{% set alt = 1 %}
+{% endif %}
 <div id ="game_{{ gameID }}" class="board">
-	{% set p = 0 %}
-	{% set colour = 'b' %}
-	{% set drag = '' %}
-	{% if gameID == 'x' %}
-		{% set drag = 'ui-draggable' %}
-	{% endif %}
-	{% for i in 8..1  %}
+	{% for i in tRow..bRow  %}
 		{% for j in 'a'..'h'  %}
-			{% if i is divisibleby(2) %}
+			{% if (i+alt) is divisibleby(2) %}
 				{% if loop.index is divisibleby(2) %}
 					{% set  squareColour = 'dark' %}
 				{% else %}
