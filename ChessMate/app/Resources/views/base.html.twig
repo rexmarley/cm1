@@ -26,7 +26,7 @@
 			   	<div class="col-md-9 col-sm-12 col-xs-12">
 				   	<table>
 					   	<tr>
-						   	<td>
+						   	<td id="logo_td">
 				    			<img id="logo" src="{{ asset('bundles/cminterface/images/logo.png') }}"/>
 						   	</td>
 						   	<td>
@@ -45,7 +45,7 @@
 				    				<a  href="{{ path('fos_user_security_logout', {}) }}" class="btn btn-large btn-warning">Log-out</a>
 			    				</div>
 			    			</div>
-		    			{% elseif app.user %}
+		    			{% elseif pieces is defined %}
 					    	<div class="row">
 							   	<div class="col-md-12">
 			    					<a  href="{{ path('fos_user_registration_register', {}) }}" class="btn btn-large btn-primary">Register</a>

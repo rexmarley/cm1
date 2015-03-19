@@ -1,21 +1,28 @@
 {% extends '::base.html.twig' %}
 
-{% if game is defined %}
-	{% set gameID = game.id %}
-{% else %}
-	{% set gameID = null %}
-{% endif %}
-
 {% block body %}
 	<div class="row">
 	    <div class="errors col-md-6">
 		</div>
 	</div>
+	{% if game is defined %}
+		{% set gameID = game.id %}
+		{% set offset = "" %}
+	{% else %}
+		{% set gameID = null %}
+		{% set offset = "col-md-offset-3" %}
+		<div class="row">
+		    <div class="col-md-6 col-md-offset-3">
+    			<a id="startGame" class="btn btn-large btn-success">Start Game</a>
+			</div>
+		</div>
+		{{ include('CMInterfaceBundle:Game:newGameOptions.html.twig', {}) }}
+	{% endif %}
 	<div class="row">
-	    <div class="col-md-7">
+	    <div class="col-md-6 {{ offset }}">
 		    {{ render(controller('CMInterfaceBundle:Game:showBoard', { 'gameID': gameID })) }}
 		</div>
-		<div class="col-md-5 col-sm-12">
+		<div class="col-md-6 col-sm-12">
 			{% if gameID %}
 				{# if game is defined else render start game options #}
 				<div id="midGame">
@@ -24,9 +31,7 @@
 					{{ include('CMInterfaceBundle:Game:midGameOptions.html.twig', {}) }}
 					<br>
 					{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Won'}) }}
-				</div>
-			{% else %}
-				{{ include('CMInterfaceBundle:Game:newGameOptions.html.twig', {}) }}			
+				</div>			
 			{% endif %}
 		</div>
 	</div>

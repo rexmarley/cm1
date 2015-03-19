@@ -9,6 +9,7 @@ use CM\UserBundle\Entity\User;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use CM\InterfaceBundle\Entity\Game;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class GameController extends Controller
 {    
@@ -42,30 +43,29 @@ class GameController extends Controller
     	$duration = $request->request->get('duration') * 60; //TODO: mins. or secs.?
     	
     	//create/join game
-    	if ($opponent == 1) {
-    		//human
-	    	$em = $this->getDoctrine()->getManager();
-	    	//TODO: skill
-	    	$game = $em->getRepository('CMInterfaceBundle:Game')->findOneBy(array('inProgress' => false, 'length' => $duration));
-	    	if ($game) {
-	    		$playing = $game->getPlayers()->indexOf($user);
-	    		if ($playing === false) {
-		    		$game->setBlackPlayer($user);
-		    		$game->setInProgress(true);
-	    			$em->flush();
-	    		}
-	    	} else {
-	    		//create new game
-    			$game = $this->get('game_factory')->createNewGame($duration, $user);
-	    		$em->persist($game);
-    			//wait for match - 10 seconds?
-	    		$em->flush();
-	    	}
-    	} else {
+	    if ($opponent == 2) {
     		//computer TODO client-side 
     	}
-    	
-    	return $this->redirect($this->generateUrl('cm_interface_play', array('gameID' => $game->getId())));
+    	//human
+	    $em = $this->getDoctrine()->getManager();
+	    //TODO: skill
+	    $game = $em->getRepository('CMInterfaceBundle:Game')->findOneBy(array('inProgress' => false, 'length' => $duration));
+	    if ($game) {
+	    	$playing = $game->getPlayers()->indexOf($user);
+	    	if ($playing === false) {
+		   		$game->setBlackPlayer($user);
+		   		$game->setInProgress(true);
+	    		$em->flush();
+	    	}
+	    } else {
+	    	//create new game
+    		$game = $this->get('game_factory')->createNewGame($duration, $user);
+	    	$em->persist($game);
+    		//wait for match - 10 seconds?
+	    	$em->flush();
+	    }
+    	return new JsonResponse(array('gameURL' => $this->generateUrl('cm_interface_play', array('gameID' => $game->getId()))));
+    	//return $this->redirect($this->generateUrl('cm_interface_play', array('gameID' => $game->getId())));
     }
 	
     public function playAction($gameID)

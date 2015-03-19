@@ -22,30 +22,6 @@ $(document).ready( function() {
     });
 	
 	/**
-	 * Piece-chooser settings
-	 */
-	$('.ui-dialog').dialog({
-		 autoOpen: false,
-		 open: function(event, ui) {
-			 $(".ui-dialog-titlebar-close").hide();
-		 },
-		 show: {
-			 effect: "blind",
-			 duration: 1000
-		 },
-		 hide: {
-			 effect: "explode",
-			 duration: 1000
-		 },
-		 position: {
-			 my: "center center",
-			 at: "center center",
-			 of: ".board"
-		 },
-		 modal: true,
-	});
-	
-	/**
 	 * Swap pawn on selection
 	 */
 	$('.choosablePiece').click(function() {

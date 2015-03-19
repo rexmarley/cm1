@@ -22,4 +22,51 @@ $(document).ready( function() {
 			  }
 		  }
 	});
+	
+	/**
+	 * Dialog settings e.g. piece-chooser
+	 */
+	$('.ui-dialog').dialog({
+		 autoOpen: false,
+		 open: function(event, ui) {
+			 $(".ui-dialog-titlebar-close").hide();
+		 },
+		 show: {
+			 effect: "blind",
+			 duration: 1000
+		 },
+		 hide: {
+			 effect: "explode",
+			 duration: 1000
+		 },
+		 position: {
+			 my: "center center",
+			 at: "center center",
+			 of: ".board"
+		 },
+		 modal: true,
+	});
+	$('#newGameOptions').dialog({
+		 open: function(event, ui) {
+			 $(".ui-dialog-titlebar-close").show();
+		 },
+	});
+	
+	$('a#startGame').on('click', function() {
+		$('#newGameOptions').dialog("open");
+	});
+	
+    $("a#findGame").on('click', function() {
+        //ajax form
+        var form = $('#newGameForm'),
+        	url = form.attr('action'),
+            opponent = form.find('input[name="opponent"]').val(),
+            skill = form.find('input[name="skill"]').val(),
+            duration = form.find('input[name="duration"]').val();
+        var posting = $.post(url, {'opponent': opponent, 'skill': skill, 'duration': duration });
+
+        posting.done(function(data) {
+            window.location = data['gameURL'];
+        });
+    });
 });
