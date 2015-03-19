@@ -1,5 +1,5 @@
-<form id="newGameForm" action="{{ path('cm_new_game', {})}}" method="POST">
-	<div id="newGameOptions" class="ui-dialog">
+<div id="newGameOptions" class="ui-dialog">
+	<form id="newGameForm" action="{{ path('cm_new_game', {})}}" method="POST">
 		<center><h1><u>Start Game</u></h1></center>
 		<h2>Opponent:</h2>
 		<input type="radio" name="opponent" value=1 checked>&nbsp;<label>Human</label>
@@ -23,7 +23,17 @@
 		<br>
 		<input type="radio" name="duration" value=5>&nbsp;<label>5</label>
 		<input type="radio" name="duration" value=20>&nbsp;<label>20</label>
-		<input type="radio" name="duration" value=20>&nbsp;<label>60</label>
+		<input type="radio" name="duration" value=60>&nbsp;<label>60</label>
 	    <center><a id="findGame" class="btn btn-large btn-primary">Find Match</a></center>
-	</div>
-</form>
+	</form>
+</div>
+
+<div id="findingGameDialog" class="ui-dialog">
+	<h2>Finding game<span id="loadingDots"></span></h2>
+	<br>
+	<center>
+		<a id="cancelSearch" class="btn btn-large btn-danger">Cancel</a>
+		<a id="relaxSearch" class="btn btn-large btn-warning">Relax search</a>
+		<a id="playComputer" class="btn btn-large btn-primary">Play computer</a>
+	</center>
+</div>

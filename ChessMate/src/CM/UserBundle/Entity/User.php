@@ -38,6 +38,13 @@ class User extends BaseUser
     protected $registered;
     
     /**
+     * Glicko2 rating
+     * 
+     * @ORM\Column(type="integer")
+     */
+    protected $rating;
+    
+    /**
      * Time of last activity
      *
      * @var \Datetime
@@ -49,12 +56,12 @@ class User extends BaseUser
     {
         parent::__construct();
         $this->currentGames = new ArrayCollection();
+        $this->rating = 1500;
     }
     
     /**
-     * set user as registered or guest
+     * Set user as registered or guest
      *
-     * @return Bool
      */
     public function setRegistered($reg) {
     	$this->registered = $reg;
@@ -67,6 +74,22 @@ class User extends BaseUser
      */
     public function getRegistered() {
     	return $this->registered;
+    }
+    
+    /**
+     * Set user rating
+     */
+    public function setRating($rating) {
+    	$this->rating = $rating;
+    }
+    
+    /**
+     * Get user rating
+     *
+     * @return Integer
+     */
+    public function getRating() {
+    	return $this->rating;
     }
     
     /**

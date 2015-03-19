@@ -11,8 +11,8 @@ use Doctrine\Common\Collections\ArrayCollection;
 /**
  * @ORM\Entity
  * @ORM\Table(name="game")
+ * @ORM\Entity(repositoryClass="CM\InterfaceBundle\Repository\GameRepository")
  */
- // @ORM\Entity(repositoryClass="CM\UserBundle\Repository\UserRepository")
 class Game
 {
     /**

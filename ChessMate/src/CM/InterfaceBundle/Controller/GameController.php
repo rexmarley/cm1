@@ -37,20 +37,22 @@ class GameController extends Controller
     public function newGameAction(Request $request)
     {
     	$user = $this->getUser();
+	    $em = $this->getDoctrine()->getManager();
     	//get game variables
     	$opponent = $request->request->get('opponent');
-    	$skill = $request->request->get('skill');
-    	$duration = $request->request->get('duration') * 60; //TODO: mins. or secs.?
-    	
-    	//create/join game
-	    if ($opponent == 2) {
-    		//computer TODO client-side 
+	    $duration = $request->request->get('duration') * 60; //TODO: mins. or secs.?
+    	if ($opponent == 'any') {
+    		//find any new game
+	    	$game = $em->getRepository('CMInterfaceBundle:Game')->findAnyNewGame($user);
+    	} else {
+	    	$skill = $request->request->get('skill');
+    		//find match
+	    	$game = $em->getRepository('CMInterfaceBundle:Game')->findMatchingNewGame($user, $duration, $skill);
     	}
-    	//human
-	    $em = $this->getDoctrine()->getManager();
-	    //TODO: skill
-	    $game = $em->getRepository('CMInterfaceBundle:Game')->findOneBy(array('inProgress' => false, 'length' => $duration));
+    	//create/join game
 	    if ($game) {
+			$game = $game[0];
+		    $gameID = $game->getId();
 	    	$playing = $game->getPlayers()->indexOf($user);
 	    	if ($playing === false) {
 		   		$game->setBlackPlayer($user);
@@ -61,11 +63,19 @@ class GameController extends Controller
 	    	//create new game
     		$game = $this->get('game_factory')->createNewGame($duration, $user);
 	    	$em->persist($game);
-    		//wait for match - 10 seconds?
 	    	$em->flush();
+		    $gameID = $game->getId();
+		    //wait for other player to join
+		    //extend time-limit to 5 mins. - user has option to cancel
+		    set_time_limit(300);
+		    while ($game->getInProgress() == false) {
+		    	//wait 1 second between checks
+		    	sleep(1);
+		    	$em->refresh($game);
+		    }
 	    }
-    	return new JsonResponse(array('gameURL' => $this->generateUrl('cm_interface_play', array('gameID' => $game->getId()))));
-    	//return $this->redirect($this->generateUrl('cm_interface_play', array('gameID' => $game->getId())));
+
+    	return new JsonResponse(array('gameURL' => $this->generateUrl('cm_interface_play', array('gameID' => $gameID))));
     }
 	
     public function playAction($gameID)
@@ -222,33 +232,38 @@ class GameController extends Controller
     }
      
     public function guestAction()
-    {   	
-     	$userManager = $this->get('fos_user.user_manager');	
-     	//get inactive guest account
-		$em = $this->getDoctrine()->getManager();
-		$user = $em->getRepository('CMUserBundle:User')->findInactiveGuest();
-		if (!$user) {
-			//create new guest accounts as needed
-			$id = $em->createQuery('SELECT MAX(u.id) FROM CMUserBundle:User u')->getSingleScalarResult() + 1;
-			$name = "Guest0".$id;
-			$user = $userManager->createUser();
-			$user->setUsername($name);		
-			$user->setEmail($name);
-			$user->setPassword("");
-			$user->setRegistered(false);
-			$user->setLastActiveTime(new \DateTime());
-		} else {
-			$user = $user[0];
-			$name = $user->getUsername();
-			$user->setLastActiveTime(new \DateTime());
-		}
-		$userManager->updateUser($user);
-		//set login token
-		$token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
-		$this->get("security.context")->setToken($token);		
-		// fire login
-		$event = new InteractiveLoginEvent($this->get("request"), $token);
-		$this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
+    {
+    	//check user is not already logged in
+    	if (!$this->getUser()) {
+	     	//get inactive guest account
+	     	$userManager = $this->get('fos_user.user_manager');
+			$em = $this->getDoctrine()->getManager();
+			$user = $em->getRepository('CMUserBundle:User')->findInactiveGuest();
+			if (!$user) {
+				//create new guest accounts as needed
+				$id = $em->createQuery('SELECT MAX(u.id) FROM CMUserBundle:User u')->getSingleScalarResult() + 1;
+				$name = "Guest0".$id;
+				$user = $userManager->createUser();
+				$user->setUsername($name);		
+				$user->setEmail($name);
+				$user->setPassword("");
+				$user->setRegistered(false);
+				$user->setLastActiveTime(new \DateTime());
+			} else {
+				$user = $user[0];
+				$name = $user->getUsername();
+				$user->setLastActiveTime(new \DateTime());
+			}
+			//give guest average rating
+			$user->setRating(1000);
+			$userManager->updateUser($user);
+			//set login token
+			$token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
+			$this->get("security.context")->setToken($token);		
+			// fire login
+			$event = new InteractiveLoginEvent($this->get("request"), $token);
+			$this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
+    	}
     	
     	return $this->redirect($this->generateUrl('cm_interface_start', array()));
     }

@@ -6,7 +6,6 @@ use Doctrine\ORM\EntityRepository;
 
 /**
  * UserRepository
- *  php app/console doctrine:generate:entities UserBundle
  */
 class UserRepository extends EntityRepository
 {
