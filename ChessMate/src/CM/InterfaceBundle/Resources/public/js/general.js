@@ -56,17 +56,66 @@ $(document).ready( function() {
 		$('#newGameOptions').dialog("open");
 	});
 	
+	//ajax var for aborts
+	posting = null;;
     $("a#findGame").on('click', function() {
         //ajax form
-        var form = $('#newGameForm'),
-        	url = form.attr('action'),
-            opponent = form.find('input[name="opponent"]').val(),
-            skill = form.find('input[name="skill"]').val(),
-            duration = form.find('input[name="duration"]').val();
-        var posting = $.post(url, {'opponent': opponent, 'skill': skill, 'duration': duration });
-
-        posting.done(function(data) {
-            window.location = data['gameURL'];
-        });
+    	ajaxNewGame(true);
+        //change dialog
+		$('#newGameOptions').dialog("close");
+		//reset relax search
+		$('a#relaxSearch').show();
+		$('#findingGameDialog p').html('');
+		$('#findingGameDialog').dialog("open");
+		var loading = 0;
+		setInterval(function() {
+		    if(loading < 3) {
+		        $('#findingGameDialog span').append('.');
+		        loading++;
+		    } else {
+		        $('#findingGameDialog span').html('');
+		        loading = 0;
+		    }
+		}, 600);
     });
+	
+	function ajaxNewGame(matchSearch) {
+        //ajax form
+        var form = $('#newGameForm'),
+        	url = form.attr('action');
+        var opponent = form.find('input[name="opponent"]').val();
+        if (opponent == 1) {
+        	//human opponent
+            if (matchSearch) {
+                var skill = form.find('input[name="skill"]').val(),
+                	duration = form.find('input[name="duration"]').val();
+                posting = $.post(url, {'opponent': opponent, 'skill': skill, 'duration': duration });    
+            } else {
+            	posting = $.post(url, {'opponent': 'any' });    
+            }
+            posting.done(function(data) {
+                location.href = data['gameURL'];
+            });	        	
+        } else {
+        	//computer opponent TODO
+        }
+	}
+	
+	$('a#cancelSearch').on('click', function() {
+		posting.abort();
+		$('#findingGameDialog').dialog("close");
+	});
+	
+	$('a#relaxSearch').on('click', function() {
+		//create new ajax call
+		posting.abort();
+    	ajaxNewGame(false);
+		$(this).hide();
+		$('#findingGameDialog').append('<center><p style="color:#0000ff;">Search relaxed</p></center>');
+	});
+	
+	$('a#playComputer').on('click', function() {
+		posting.abort();
+		$('#findingGameDialog').dialog("close");
+	});
 });
