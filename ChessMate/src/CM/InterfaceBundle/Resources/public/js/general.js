@@ -46,6 +46,7 @@ $(document).ready( function() {
 		 },
 		 modal: true,
 	});
+	
 	$('#newGameOptions').dialog({
 		 open: function(event, ui) {
 			 $(".ui-dialog-titlebar-close").show();
@@ -57,7 +58,7 @@ $(document).ready( function() {
 	});
 	
 	//ajax var for aborts
-	posting = null;;
+	posting = null;
     $("a#findGame").on('click', function() {
         //ajax form
     	ajaxNewGame(true);
@@ -83,12 +84,12 @@ $(document).ready( function() {
         //ajax form
         var form = $('#newGameForm'),
         	url = form.attr('action');
-        var opponent = form.find('input[name="opponent"]').val();
+        var opponent = form.find('input[name="opponent"]:checked').val();
         if (opponent == 1) {
         	//human opponent
             if (matchSearch) {
-                var skill = form.find('input[name="skill"]').val(),
-                	duration = form.find('input[name="duration"]').val();
+                var skill = form.find('input[name="skill"]:checked').val(),
+                	duration = form.find('input[name="duration"]:checked').val();
                 posting = $.post(url, {'opponent': opponent, 'skill': skill, 'duration': duration });    
             } else {
             	posting = $.post(url, {'opponent': 'any' });    

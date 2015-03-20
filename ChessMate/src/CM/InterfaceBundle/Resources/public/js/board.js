@@ -21,6 +21,15 @@ $(document).ready( function() {
 		drop: validateMove,
     });
 	
+	//Temp workaround for hidden overflow hiding draggable
+	$('.square').mouseover(function() {
+		$(this).removeClass('clipped');
+	});
+	
+	$('.square').mouseleave(function() {
+		$(this).addClass('clipped');
+	});
+
 	/**
 	 * Swap pawn on selection
 	 */
@@ -159,6 +168,19 @@ $(document).ready( function() {
     			    //revert board
     				//abstractBoard = data['board'];
     				//could just cancel game for now
+    			} else {
+    				//update abstract board
+    				abstractBoard = data['board'];
+    				//get opponent's valid move
+    				from = data['from'];
+    				to = data['to'];
+    				var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
+    				var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
+    				//move piece
+    				var moved = getOccupant(gridFrom);
+    				moved.position({
+    		            of: 'div#'+gridTo
+    		        });
     			}
     		}
     	});

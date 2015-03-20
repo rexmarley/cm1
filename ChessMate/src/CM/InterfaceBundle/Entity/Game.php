@@ -38,9 +38,12 @@ class Game
     private $players;
 
     /**
-     * @ORM\OneToOne(targetEntity="CM\UserBundle\Entity\User", cascade={"persist"})
+     * The index of the active player
+     * 0 = white
+     * 1 = black
+     * @ORM\Column(type="integer")
      */
-    private $activePlayer;
+    private $activePlayerIndex;
     
     /**
      * @ORM\Column(type="integer")
@@ -63,6 +66,8 @@ class Game
         $this->players = new \Doctrine\Common\Collections\ArrayCollection();
         $this->board = $board;
         $this->inProgress = false;
+    	//set white as active
+    	$this->setActivePlayerIndex(0);
     }
 
     /**
@@ -191,17 +196,46 @@ class Game
     }
 
     /**
-     * Set active player
-     *
-     * @param \CM\UserBundle\Entity\User $player
+     * Set active player index
+     * @param int index
+     * 
      * @return Game
      */
-    public function setActivePlayer(\CM\UserBundle\Entity\User $player)
+    public function setActivePlayerIndex($index)
     {
-        $this->activePlayer = $player;
+        if ($index == 0 || $index == 1) {
+        	$this->activePlayerIndex = $index;
+        }
 
         return $this;
     }
+    
+
+    /**
+     * Get active player index
+     *
+     * @return \CM\UserBundle\Entity\User 
+     */
+    public function getActivePlayerIndex()
+    {
+        return $this->activePlayerIndex;
+    }
+
+    /**
+     * Switch active player
+     * 
+     * @return Game
+     */
+    public function switchActivePlayer()
+    {
+        if ($this->activePlayerIndex == 0) {
+        	$this->activePlayerIndex = 1;
+        } else {
+        	$this->activePlayerIndex = 0;
+        }
+
+        return $this;
+    }    
 
     /**
      * Get active player
@@ -210,7 +244,7 @@ class Game
      */
     public function getActivePlayer()
     {
-        return $this->activePlayer;
+        return $this->players->get($this->activePlayerIndex);
     }
 
     /**

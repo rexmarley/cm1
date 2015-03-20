@@ -45,7 +45,7 @@
 				    				<a  href="{{ path('fos_user_security_logout', {}) }}" class="btn btn-large btn-warning">Log-out</a>
 			    				</div>
 			    			</div>
-		    			{% elseif app.user is defined %}
+		    			{% elseif pieces is defined %}
 					    	<div class="row">
 							   	<div class="col-md-12">
 			    					<a  href="{{ path('fos_user_registration_register', {}) }}" class="btn btn-large btn-primary">Register</a>

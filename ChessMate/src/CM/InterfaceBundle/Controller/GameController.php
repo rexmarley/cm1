@@ -49,17 +49,20 @@ class GameController extends Controller
     		//find match
 	    	$game = $em->getRepository('CMInterfaceBundle:Game')->findMatchingNewGame($user, $duration, $skill);
     	}
-    	//create/join game
+    	//find/create game
 	    if ($game) {
+	    	//echo 'aaaaaaaaaaaa'; exit;
+	    	//join existing game
 			$game = $game[0];
 		    $gameID = $game->getId();
-	    	$playing = $game->getPlayers()->indexOf($user);
-	    	if ($playing === false) {
+	    	$player = $game->getPlayers()->indexOf($user);
+	    	if ($player === false) {
 		   		$game->setBlackPlayer($user);
 		   		$game->setInProgress(true);
 	    		$em->flush();
 	    	}
 	    } else {
+	    	//echo 'bbbbbbbbbbbb'; exit;
 	    	//create new game
     		$game = $this->get('game_factory')->createNewGame($duration, $user);
 	    	$em->persist($game);
@@ -67,7 +70,7 @@ class GameController extends Controller
 		    $gameID = $game->getId();
 		    //wait for other player to join
 		    //extend time-limit to 5 mins. - user has option to cancel
-		    set_time_limit(300);
+		    //set_time_limit(300);
 		    while ($game->getInProgress() == false) {
 		    	//wait 1 second between checks
 		    	sleep(1);
@@ -255,7 +258,8 @@ class GameController extends Controller
 				$user->setLastActiveTime(new \DateTime());
 			}
 			//give guest average rating
-			$user->setRating(1000);
+			//$user->setRating(1000);
+			$user->setRating(1410);
 			$userManager->updateUser($user);
 			//set login token
 			$token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());

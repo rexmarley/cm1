@@ -72,7 +72,8 @@ class GameRepository extends EntityRepository
 				AND g.length = :length'
 		)
 		->setMaxResults(1)
-		->setParameters($queryParams)
+		->setParameters($queryParams)//;
+		//echo $game->getSQL(); exit;
 		->getResult();
 		
 		return $game;

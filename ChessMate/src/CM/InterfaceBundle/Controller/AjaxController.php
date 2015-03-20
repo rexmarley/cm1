@@ -24,11 +24,13 @@ class AjaxController extends Controller
     	$em = $this->getDoctrine()->getManager();
     	$gameID = $request->request->get('gameID');
     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-    	//make sure valid user for game TODO: must also be player's turn!
     	$user = $this->getUser();
-    	if (!$game->getPlayers()->contains($user)) {
-    		//return new JsonResponse(array('valid' => false, 'checkMate' => false, 'board' => false));
+    	//make sure valid user for game & turn
+	    $player = $game->getPlayers()->indexOf($user);
+    	if ($player === false) {
 	    	throw new AccessDeniedException('You are not part of this game!');
+    	} else if ($game->getActivePlayerIndex() != $player) {
+    		throw new AccessDeniedException('It is not your turn!');
     	}
     	//get move details
     	$move = array(
@@ -47,9 +49,27 @@ class AjaxController extends Controller
     		//$game->getBoard()->updateBoard($move['from'], $move['to']);
     		$board->setBoard($valid['board']);
     		$game->setBoard($board);
+    		//get opponent
+    		$opponent = $game->getPlayers()->get(0);
+    		if ($user == $opponent) {
+    			$opponent = $game->getPlayers()->get(1);
+    		}
+    		$game->switchActivePlayer();
     		$em->flush();
+    		//wait for opponents move - 5 mins. max
+		    set_time_limit(300);
+		    while ($game->getActivePlayerIndex() != $player) {
+		    	//wait 1 second between checks
+		    	sleep(1);
+		    	$em->refresh($game);
+		    }
+		    //return opponent's valid move    	
+	    	return new JsonResponse(
+	    		array('valid' => true, 'checkMate' => false, 'board' => $board->getBoard(), 'from' => $move['from'], 'to' => $move['to'])
+	    	);
+		    
     	}
     	
-    	return new JsonResponse(array('valid' => $valid['valid'], 'checkMate' => false, 'board' => $board->getBoard())); //or game?
+    	return new JsonResponse(array('valid' => false));
     }
 }

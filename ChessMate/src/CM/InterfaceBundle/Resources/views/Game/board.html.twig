@@ -26,7 +26,7 @@
 					{% set  squareColour = 'dark' %}
 				{% endif %}	
 			{% endif %}		
-			<div id="{{j}}_{{i}}" class="square {{ squareColour }} ui-droppable">
+			<div id="{{j}}_{{i}}" class="square {{ squareColour }} ui-droppable clipped">
 				{% if i < 3 or i > 6 %}
 					{% if i == 2 %}
 						{% set drag = 'ui-draggable' %}
