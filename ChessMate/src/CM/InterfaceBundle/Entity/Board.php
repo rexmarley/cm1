@@ -31,6 +31,16 @@ class Board
     protected $unmoved;
 
     /**
+     * @ORM\Column(type="array")
+     */
+    protected $lastMoveFrom;
+
+    /**
+     * @ORM\Column(type="array")
+     */
+    protected $lastMoveTo;
+
+    /**
      * The position of a pawn vulnerable to En passant
      * @ORM\Column(type="array", nullable=true)
      */
@@ -39,6 +49,8 @@ class Board
     public function __construct()
     {
         $this->setDefaults();
+        $this->lastMoveFrom = array();
+        $this->lastMoveTo = array();
         //$this->pieces = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -104,6 +116,54 @@ class Board
     public function getBoard()
     {
         return $this->board;
+    }
+
+    /**
+     * Set last move 'from' index
+     *
+     * @param array $from[y,x]
+     * 
+     * @return Board
+     */
+    public function setLastMoveFrom(array $from)
+    {
+        $this->lastMoveFrom = $from;
+
+        return $this;
+    }
+
+    /**
+     * Get last move 'from' index
+     *
+     * @return array 
+     */
+    public function getLastMoveFrom()
+    {
+        return $this->lastMoveFrom;
+    }
+
+    /**
+     * Set last move 'to' index
+     *
+     * @param array $to[y,x]
+     * 
+     * @return Board
+     */
+    public function setLastMoveTo(array $to)
+    {
+        $this->lastMoveTo = $to;
+
+        return $this;
+    }
+
+    /**
+     * Get last move 'to' index
+     *
+     * @return array 
+     */
+    public function getLastMoveTo()
+    {
+        return $this->lastMoveTo;
     }
 
     /**

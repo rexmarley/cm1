@@ -70,7 +70,7 @@ class GameController extends Controller
 		    $gameID = $game->getId();
 		    //wait for other player to join
 		    //extend time-limit to 5 mins. - user has option to cancel
-		    //set_time_limit(300);
+		    set_time_limit(300);
 		    while ($game->getInProgress() == false) {
 		    	//wait 1 second between checks
 		    	sleep(1);

@@ -48,6 +48,9 @@ class AjaxController extends Controller
     	if ($valid['valid']) {
     		//$game->getBoard()->updateBoard($move['from'], $move['to']);
     		$board->setBoard($valid['board']);
+    		//set last move for retrieval by opponent
+    		$board->setLastMoveFrom($move['from']);
+    		$board->setLastMoveTo($move['to']);
     		$game->setBoard($board);
     		//get opponent
     		$opponent = $game->getPlayers()->get(0);
@@ -57,19 +60,58 @@ class AjaxController extends Controller
     		$game->switchActivePlayer();
     		$em->flush();
     		//wait for opponents move - 5 mins. max
-		    set_time_limit(300);
-		    while ($game->getActivePlayerIndex() != $player) {
-		    	//wait 1 second between checks
-		    	sleep(1);
-		    	$em->refresh($game);
-		    }
+    		$game = $this->waitForTurn($game, $player, $em);
+// 		    set_time_limit(300);
+// 		    while ($game->getActivePlayerIndex() != $player) {
+// 		    	//wait 1 second between checks
+// 		    	sleep(1);
+// 		    	$em->refresh($game);
+// 		    }
+		    //get updated board
+    		$board = $game->getBoard();
 		    //return opponent's valid move    	
 	    	return new JsonResponse(
-	    		array('valid' => true, 'checkMate' => false, 'board' => $board->getBoard(), 'from' => $move['from'], 'to' => $move['to'])
+	    		array('valid' => true, 
+	    				'checkMate' => false, 
+	    				'board' => $board->getBoard(), 
+	    				'from' => $board->getLastMoveFrom(), 
+	    				'to' => $board->getLastMoveTo())
 	    	);
 		    
     	}
     	
     	return new JsonResponse(array('valid' => false));
+    }
+    
+    function getFirstMoveAction(Request $request) {
+    	//find game
+    	$em = $this->getDoctrine()->getManager();
+    	$gameID = $request->request->get('gameID');
+    	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+    	$user = $this->getUser();
+    	//make sure valid user for game & turn
+	    $player = $game->getPlayers()->indexOf($user);
+    	$game = $this->waitForTurn($game, $player, $em);
+		//get updated board
+    	$board = $game->getBoard();
+		//return opponent's valid move    	
+	    return new JsonResponse(
+	    	array('valid' => true,
+	    			'board' => $board->getBoard(), 
+	    			'from' => $board->getLastMoveFrom(), 
+	    			'to' => $board->getLastMoveTo()
+	    	));    	
+    }
+    
+    function waitForTurn($game, $playerIndex, $em) {
+    	//wait for opponents move - 5 mins. max
+		set_time_limit(300);
+		while ($game->getActivePlayerIndex() != $playerIndex) {
+			//wait 1 second between checks
+			sleep(1);
+			$em->refresh($game);
+		}
+
+		return $game;
     }
 }
