@@ -7,6 +7,7 @@ use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\BooleanType;
 use Doctrine\Common\Collections\ArrayCollection;
+use CM\InterfaceBundle\Entity\GameSearch;
 
 /**
  * @ORM\Entity
@@ -20,14 +21,21 @@ class User extends BaseUser
      * @ORM\Column(type="integer")
      * @ORM\GeneratedValue(strategy="AUTO")
      */
-    protected $id;    
+    protected $id;
 
     /**
      * Current games
      *
-     * @ORM\ManyToMany(targetEntity="CM\InterfaceBundle\Entity\Game", mappedBy="players")
+     * @ORM\ManyToMany(targetEntity="CM\InterfaceBundle\Entity\Game", inversedBy="players")
      */
     protected $currentGames;
+    
+//     /**
+//      * Game searches
+//      *
+//      * @ORM\ManyToOne(targetEntity="CM\InterfaceBundle\Entity\GameSearch", inversedBy="player1", cascade={"persist", "remove"})
+//      */
+//     private $gameSearches;
     
     /**
      * Is the user register or a guest
@@ -55,6 +63,7 @@ class User extends BaseUser
     {
         parent::__construct();
         $this->currentGames = new ArrayCollection();
+        //$this->gameSearches = new ArrayCollection();
         $this->rating = 1500;
     }
     
@@ -132,7 +141,7 @@ class User extends BaseUser
     }
 
     /**
-     * Add currentGames
+     * Add game to user
      *
      * @param \CM\InterfaceBundle\Entity\Game $currentGames
      * @return User
@@ -145,7 +154,7 @@ class User extends BaseUser
     }
 
     /**
-     * Remove currentGames
+     * Remove game
      *
      * @param \CM\InterfaceBundle\Entity\Game $currentGames
      */
@@ -155,7 +164,7 @@ class User extends BaseUser
     }
 
     /**
-     * Get currentGames
+     * Get current games
      *
      * @return \Doctrine\Common\Collections\Collection 
      */
@@ -163,4 +172,37 @@ class User extends BaseUser
     {
         return $this->currentGames;
     }
+
+//     /**
+//      * Add game search
+//      *
+//      * @param GameSearch $gameSearch
+//      * @return User
+//      */
+//     public function addGameSearch(GameSearch $gameSearch)
+//     {
+//         $this->gameSearches->add($gameSearch);
+
+//         return $this;
+//     }
+
+//     /**
+//      * Remove game search
+//      *
+//      * @param GameSearch $gameSearch
+//      */
+//     public function removeGameSearch(GameSearch $gameSearch)
+//     {
+//         $this->gameSearches->removeElement($gameSearch);
+//     }
+
+//     /**
+//      * Get game searches
+//      *
+//      * @return \Doctrine\Common\Collections\Collection 
+//      */
+//     public function getGameSearches()
+//     {
+//         return $this->gameSearches;
+//     }
 }

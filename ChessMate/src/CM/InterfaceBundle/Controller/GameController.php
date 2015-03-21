@@ -12,7 +12,97 @@ use CM\InterfaceBundle\Entity\Game;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class GameController extends Controller
-{    
+{
+	/**
+	 * Find/Create new game
+	 * 
+	 * @param Request $request
+	 * @return \Symfony\Component\HttpFoundation\JsonResponse
+	 */
+    public function newGameAction(Request $request)
+    {
+    	$user = $this->getUser();
+	    $em = $this->getDoctrine()->getManager();
+    	//get game variables - null if match any
+	    $duration = $request->request->get('duration');
+	    $skill = $request->request->get('skill');
+    	//find match
+	    $search = $em->getRepository('CMInterfaceBundle:GameSearch')->findGameSearch($user, $duration, $skill);
+    	//create search/game
+	    if ($search) {
+			$search = $search[0];
+	    	$search->setMatched(true);
+	    	$em->flush();
+	    	//set search initiator as white
+	    	$white = $search->getPlayer1();
+	    	//get game length
+	    	$length = $search->getLength();
+	    	if (is_null($length)) {
+		    	if (!is_null($duration)) {
+		    		$length = $duration;
+		    	} else {
+		    		//any length - set default
+		    		$length = 600;
+		    	}	    		
+	    	}
+	    	//create game
+    		$game = $this->get('game_factory')->createNewGame($length, $white, $user);
+	    	$em->persist($game);
+	    	$search->setGame($game);
+			$em->flush();
+    		//add to players' current games
+    		$white->addCurrentGame($game);
+    		$user->addCurrentGame($game);
+	    	//get id
+		    $gameID = $game->getId();
+	    } else {
+	    	//create new search
+    		$search = $this->get('game_search_factory')->createNewSearch($user, $duration, $skill);
+	    	$em->persist($search);
+	    	$em->flush();
+		    //wait for matches
+		    //extend time-limit to 5 mins. - user has option to cancel
+		    set_time_limit(300);
+		    $em->refresh($search);
+		    while (is_null($search->getGame())) {
+		    	//wait 1 second between checks
+		    	sleep(1);
+		    	$em->refresh($search);
+		    }
+		    //get game id
+		    $gameID = $search->getGame()->getId();
+		    //delete search
+		    $em->remove($search);
+	    }
+	    //save changes
+		$em->flush();
+
+    	return new JsonResponse(array('gameURL' => $this->generateUrl('cm_interface_play', array('gameID' => $gameID))));
+    }
+	
+    /**
+     * Start  game
+     * 
+     * @param int $gameID
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function playAction($gameID)
+    {
+	    $user = $this->getUser();	
+    	$em = $this->getDoctrine()->getManager();
+	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+	    //authenticate user/game
+	    $this->checkGameValidity($game, $user);
+
+	    return $this->render('CMInterfaceBundle:Game:index.html.twig', array('game' => $game));
+    }
+
+	/**
+	 * Show embedded board view
+	 * 
+	 * @param int|string $gameID
+	 * @return \Symfony\Component\HttpFoundation\Response
+	 */
 	public function showBoardAction($gameID = null) {
 		if (is_null($gameID)) {  
 			$gameID = 'x';
@@ -33,64 +123,6 @@ class GameController extends Controller
         return $this->render('CMInterfaceBundle:Game:board.html.twig', 
         		array('gameID' => $gameID, 'pieces' => $pieces, 'player' => $colour));	
 	}
-	
-    public function newGameAction(Request $request)
-    {
-    	$user = $this->getUser();
-	    $em = $this->getDoctrine()->getManager();
-    	//get game variables
-    	$opponent = $request->request->get('opponent');
-	    $duration = $request->request->get('duration') * 60; //TODO: mins. or secs.?
-    	if ($opponent == 'any') {
-    		//find any new game
-	    	$game = $em->getRepository('CMInterfaceBundle:Game')->findAnyNewGame($user);
-    	} else {
-	    	$skill = $request->request->get('skill');
-    		//find match
-	    	$game = $em->getRepository('CMInterfaceBundle:Game')->findMatchingNewGame($user, $duration, $skill);
-    	}
-    	//find/create game
-	    if ($game) {
-	    	//echo 'aaaaaaaaaaaa'; exit;
-	    	//join existing game
-			$game = $game[0];
-		    $gameID = $game->getId();
-	    	$player = $game->getPlayers()->indexOf($user);
-	    	if ($player === false) {
-		   		$game->setBlackPlayer($user);
-		   		$game->setInProgress(true);
-	    		$em->flush();
-	    	}
-	    } else {
-	    	//echo 'bbbbbbbbbbbb'; exit;
-	    	//create new game
-    		$game = $this->get('game_factory')->createNewGame($duration, $user);
-	    	$em->persist($game);
-	    	$em->flush();
-		    $gameID = $game->getId();
-		    //wait for other player to join
-		    //extend time-limit to 5 mins. - user has option to cancel
-		    set_time_limit(300);
-		    while ($game->getInProgress() == false) {
-		    	//wait 1 second between checks
-		    	sleep(1);
-		    	$em->refresh($game);
-		    }
-	    }
-
-    	return new JsonResponse(array('gameURL' => $this->generateUrl('cm_interface_play', array('gameID' => $gameID))));
-    }
-	
-    public function playAction($gameID)
-    {
-	    $user = $this->getUser();	
-    	$em = $this->getDoctrine()->getManager();
-	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-	    //authenticate user/game
-	    $this->checkGameValidity($game, $user);
-
-	    return $this->render('CMInterfaceBundle:Game:index.html.twig', array('game' => $game));
-    }
     
     /**
      * Get player's colour

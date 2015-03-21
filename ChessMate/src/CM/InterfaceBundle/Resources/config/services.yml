@@ -1,7 +1,6 @@
 services:
-#    cm_interface.example:
-#        class: CM\InterfaceBundle\Example
-#        arguments: [@service_id, "plain_value", %parameter%]
+    game_search_factory:
+        class: CM\InterfaceBundle\Factories\GameSearchFactory
     game_factory:
         class: CM\InterfaceBundle\Factories\GameFactory
     pawn_validator:

@@ -4,9 +4,6 @@
 namespace CM\InterfaceBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\DBAL\Types\BooleanType;
-use Doctrine\Common\Collections\ArrayCollection;
-//use CM\UserBundle\Entity\User as User;
 
 /**
  * @ORM\Entity

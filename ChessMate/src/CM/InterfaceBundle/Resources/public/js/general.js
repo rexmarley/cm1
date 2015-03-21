@@ -90,9 +90,9 @@ $(document).ready( function() {
             if (matchSearch) {
                 var skill = form.find('input[name="skill"]:checked').val(),
                 	duration = form.find('input[name="duration"]:checked').val();
-                posting = $.post(url, {'opponent': opponent, 'skill': skill, 'duration': duration });    
+                posting = $.post(url, {'skill': skill, 'duration': duration });    
             } else {
-            	posting = $.post(url, {'opponent': 'any' });    
+            	posting = $.post(url, {'skill': null, 'duration': null });    
             }
             posting.done(function(data) {
                 location.href = data['gameURL'];

@@ -15,8 +15,8 @@ class GameFactory
      * Create new game of chess
      *
      * @param int $length the length of game
-     * @param int $whitePlayer player 1
-     * @param int $blackPlayer player 2
+     * @param User $whitePlayer player 1
+     * @param User $blackPlayer player 2
      *
      * @return Game
      */

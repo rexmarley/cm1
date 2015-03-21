@@ -24,33 +24,35 @@ $(document).ready( function() {
 	/**
 	 * Wait for first move
 	 */
-	if ($('.ui-draggable').attr('id').charAt(0) == 'b') {
-		//get game id
-		var game = $('.board').attr('id').split('_');
-    	$.ajax({
-    		type: "POST",
-    	    //async: false,
-    		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/getFirstMove',
-    		data: { 'gameID' : game[1] },
-    		success: function(data) {
-    			//console.log(data['board']);
-    			if (data['valid']) {
-    				//update abstract board
-    				abstractBoard = data['board'];
-    				//get opponent's valid move
-    				from = data['from'];
-    				to = data['to'];
-    				var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
-    				var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
-    				//move piece
-    				var moved = getOccupant(gridFrom);
-    				$(moved).position({
-    		            of: 'div#'+gridTo
-    		        });
-    			}
-    		}
-    	});
-    }
+	if ($('.board').attr('id').charAt(5) != 'x') {
+		if ($('.ui-draggable:first').attr('id').charAt(0) == 'b') {
+			//get game id
+			var game = $('.board').attr('id').split('_');
+	    	$.ajax({
+	    		type: "POST",
+	    	    //async: false,
+	    		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/getFirstMove',
+	    		data: { 'gameID' : game[1] },
+	    		success: function(data) {
+	    			//console.log(data['board']);
+	    			if (data['valid']) {
+	    				//update abstract board
+	    				abstractBoard = data['board'];
+	    				//get opponent's valid move
+	    				from = data['from'];
+	    				to = data['to'];
+	    				var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
+	    				var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
+	    				//move piece
+	    				var moved = getOccupant(gridFrom);
+	    				$(moved).position({
+	    		            of: 'div#'+gridTo
+	    		        });
+	    			}
+	    		}
+	    	});
+	    }
+	}
 	
 	//Temp workaround for hidden overflow hiding draggable
 	$('.square').mouseover(function() {
