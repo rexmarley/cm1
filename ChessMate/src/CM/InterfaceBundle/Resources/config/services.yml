@@ -15,4 +15,6 @@ services:
         class: CM\InterfaceBundle\Helpers\Validation\QueenValidator
     king_validator:
         class: CM\InterfaceBundle\Helpers\Validation\KingValidator
+    html_helper:
+        class: CM\InterfaceBundle\Helpers\HTMLHelper
 

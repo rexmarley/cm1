@@ -66,10 +66,8 @@ class GameController extends Controller
     {
 	    $user = $this->getUser();	
     	$games = $user->getCurrentGames();
-	    
-    	$pieces = $this->getHTMLPieces();
     	
-        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('pieces' => $pieces, 'games' => $games));
+        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('games' => $games));
     }
     
 	/**
@@ -165,7 +163,9 @@ class GameController extends Controller
 	public function showBoardAction($gameID = null) {
 		if (is_null($gameID)) {  
 			$gameID = 'x';
-			$colour = 'w';
+			$colour = 'x';
+			//get default pieces
+		    $pieces = $this->get('html_helper')->getUnicodePieces();
 		} else {
 		    $user = $this->getUser();	
 	    	$em = $this->getDoctrine()->getManager();
@@ -174,9 +174,9 @@ class GameController extends Controller
 		    $this->checkGameValidity($game, $user);
 		    //get player colour
 	    	$colour = $this->getPlayerColour($game, $user);
+	    	//get game pieces
+    		$pieces = $this->get('html_helper')->getUnicodePieces($game->getBoard()->getBoard());
 		}
-    	//get game pieces
-	    $pieces = $this->getHTMLPieces($colour);
 
         return $this->render('CMInterfaceBundle:Game:board.html.twig', 
         		array('gameID' => $gameID, 'pieces' => $pieces, 'player' => $colour));	
@@ -238,82 +238,5 @@ class GameController extends Controller
     public function toggleChatAction()
     {
     	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
-    }
-    
-    private function getHTMLPieces($for = 'w') {
-    	//TODO: move to helper/service & switch white/black depending on player
-    	if ($for == 'w') {
-	    	$pieces = array(
-	    			array('id' => 'b_rook_1', 'img' => '&#9820;'),
-	    			array('id' => 'b_knight_1', 'img' => '&#9822;'),
-	    			array('id' => 'b_bishop_1', 'img' => '&#9821;'),
-	    			array('id' => 'b_queen', 'img' => '&#9819;'),
-	    			array('id' => 'b_king', 'img' => '&#9818;'),
-	    			array('id' => 'b_bishop_2', 'img' => '&#9821;'),
-	    			array('id' => 'b_knight_2', 'img' => '&#9822;'),
-	    			array('id' => 'b_rook_2', 'img' => '&#9820;'),
-	    			array('id' => 'b_pawn_1', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_2', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_3', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_4', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_5', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_6', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_7', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_8', 'img' => '&#9823;'),
-	    			array('id' => 'w_pawn_1', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_2', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_3', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_4', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_5', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_6', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_7', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_8', 'img' => '&#9817;'),
-	    			array('id' => 'w_rook_1', 'img' => '&#9814;'),
-	    			array('id' => 'w_knight_1', 'img' => '&#9816;'),
-	    			array('id' => 'w_bishop_1', 'img' => '&#9815;'),
-	    			array('id' => 'w_queen', 'img' => '&#9813;'),
-	    			array('id' => 'w_king', 'img' => '&#9812;'),
-	    			array('id' => 'w_bishop_2', 'img' => '&#9815;'),
-	    			array('id' => 'w_knight_2', 'img' => '&#9816;'),
-	    			array('id' => 'w_rook_2', 'img' => '&#9814;')
-	    	);
-    	} else {
-	    	$pieces = array(
-	    			array('id' => 'w_rook_1', 'img' => '&#9814;'),
-	    			array('id' => 'w_knight_1', 'img' => '&#9816;'),
-	    			array('id' => 'w_bishop_1', 'img' => '&#9815;'),
-	    			array('id' => 'w_king', 'img' => '&#9812;'),
-	    			array('id' => 'w_queen', 'img' => '&#9813;'),
-	    			array('id' => 'w_bishop_2', 'img' => '&#9815;'),
-	    			array('id' => 'w_knight_2', 'img' => '&#9816;'),
-	    			array('id' => 'w_rook_2', 'img' => '&#9814;'),
-	    			array('id' => 'w_pawn_1', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_2', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_3', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_4', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_5', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_6', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_7', 'img' => '&#9817;'),
-	    			array('id' => 'w_pawn_8', 'img' => '&#9817;'),
-	    			array('id' => 'b_pawn_1', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_2', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_3', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_4', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_5', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_6', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_7', 'img' => '&#9823;'),
-	    			array('id' => 'b_pawn_8', 'img' => '&#9823;'),
-	    			array('id' => 'b_rook_1', 'img' => '&#9820;'),
-	    			array('id' => 'b_knight_1', 'img' => '&#9822;'),
-	    			array('id' => 'b_bishop_1', 'img' => '&#9821;'),
-	    			array('id' => 'b_king', 'img' => '&#9818;'),
-	    			array('id' => 'b_queen', 'img' => '&#9819;'),
-	    			array('id' => 'b_bishop_2', 'img' => '&#9821;'),
-	    			array('id' => 'b_knight_2', 'img' => '&#9822;'),
-	    			array('id' => 'b_rook_2', 'img' => '&#9820;')
-	    	);    		
-    	}
-    	
-    	return $pieces;
     }
 }

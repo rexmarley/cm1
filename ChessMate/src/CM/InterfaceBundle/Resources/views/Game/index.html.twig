@@ -62,4 +62,14 @@
     <script type="text/javascript" src="{{ asset('bundles/cminterface/js/board.js') }}"></script>
     <script type="text/javascript" src="{{ asset('bundles/cminterface/js/boardHelper.js') }}"></script>
     <script type="text/javascript" src="{{ asset('bundles/cminterface/js/general.js') }}"></script>
+	{% if game is defined %}
+	    {# OVERWRITE abstractBoard, unmoved etc. #}
+	    <script>
+	    	$(document).ready(function(){
+		    	abstractBoard = {{ game.board.board |json_encode|raw }};
+		    	unmoved = {{ game.board.unmoved |json_encode|raw}};
+		    	//TODO: castled?, En passant(DEF?) etc.
+	    	});
+	    </script>
+	{% endif %}
 {% endblock %}

@@ -24,23 +24,20 @@ $(document).ready( function() {
 	/**
 	 * Wait for first move
 	 */
-	if ($('.board').attr('id').charAt(7) != 'x') {
+	if ($('.board').attr('id').charAt(5) == 'b') {
 		//get game id
 		var game = $('.board').attr('id').split('_');
-		if (game[1] == 'b') {
-	    	$.ajax({
-	    		type: "POST",
-	    		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/getFirstMove',
-	    		data: { 'gameID' : game[2] },
-	    		success: function(data) {
-	    			//console.log(data['board']);
-	    			if (data['valid']) {
-	    				performMoveByOpponent(data['board'], data['from'], data['to']);
-	    			}
-	    		}
-	    	});
-	    }
-	}
+    	$.ajax({
+    		type: "POST",
+    		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/getFirstMove',
+    		data: { 'gameID' : game[2] },
+    		success: function(data) {
+    			if (data['valid']) {
+    				performMoveByOpponent(data['board'], data['from'], data['to']);
+    			}
+    		}
+    	});
+    }
 	
 	//workaround for hidden overflow hiding draggable
 	$('.square').mouseover(function() {
@@ -60,10 +57,7 @@ $(document).ready( function() {
 		var colour = piece[1];
 		var type = piece[2];
 		//get new id
-		var num = 3;
-		if (type == 'queen') {
-			num--;
-		}
+		var num = 1;
 		newPiece = colour+'_'+type;
 		//check for conflict
 		var conflict = $('#'+newPiece+'_'+num);
