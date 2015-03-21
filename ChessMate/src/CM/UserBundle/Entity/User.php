@@ -30,13 +30,6 @@ class User extends BaseUser
      */
     protected $currentGames;
     
-//     /**
-//      * Game searches
-//      *
-//      * @ORM\ManyToOne(targetEntity="CM\InterfaceBundle\Entity\GameSearch", inversedBy="player1", cascade={"persist", "remove"})
-//      */
-//     private $gameSearches;
-    
     /**
      * Is the user register or a guest
      * 
@@ -63,7 +56,6 @@ class User extends BaseUser
     {
         parent::__construct();
         $this->currentGames = new ArrayCollection();
-        //$this->gameSearches = new ArrayCollection();
         $this->rating = 1500;
     }
     

@@ -9,7 +9,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\Controller,
 use CM\InterfaceBundle\Entity\Game;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
-class AjaxController extends Controller
+class MoveController extends Controller
 {   
 	/**
 	 * Moves are validated client-side

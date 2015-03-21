@@ -24,11 +24,11 @@ cm_toggle_chat:
     
 cm_validate_move:
     path:     /checkMove
-    defaults: { _controller: "CMInterfaceBundle:Ajax:validateMove" }
+    defaults: { _controller: "CMInterfaceBundle:Move:validateMove" }
     
 cm_get_first_move:
     path:     /getFirstMove
-    defaults: { _controller: "CMInterfaceBundle:Ajax:getFirstMove" }
+    defaults: { _controller: "CMInterfaceBundle:Move:getFirstMove" }
     
 cm_js_testBoard:
     path:     /tests
