@@ -12,18 +12,6 @@ $(document).ready( function() {
             }
         }
 	});
-	
-	//temp
-//	$('#temp').on('click', function(e) {
-//		e.preventDefault();
-//		//move piece
-//		var moved = getOccupant('f_7');
-//		$(moved).position({
-//            of: 'div#f_4'
-//        });
-//		//center piece
-//		$('div#f_4').append(moved.css('position','static'));
-//	});
 
 	/**
 	 * Make squares droppable
@@ -47,20 +35,7 @@ $(document).ready( function() {
 	    		success: function(data) {
 	    			//console.log(data['board']);
 	    			if (data['valid']) {
-	    				//update abstract board
-	    				abstractBoard = data['board'];
-	    				//get opponent's valid move
-	    				from = data['from'];
-	    				to = data['to'];
-	    				var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
-	    				var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
-	    				//move piece
-	    				var moved = getOccupant(gridFrom);
-	    				$(moved).position({
-	    		            of: 'div#'+gridTo
-	    		        });
-	    				//center piece
-	    				$('div#'+gridTo).append(moved.css('position','static'));
+	    				performMoveByOpponent(data['board'], data['from'], data['to']);
 	    			}
 	    		}
 	    	});
@@ -173,9 +148,9 @@ $(document).ready( function() {
 	    			castled = false;
 	    		}
 	    		//check for takeable piece
-    			checkAndTakePiece(to);
+    			checkAndTakePiece(to, 'Won');
     		} else {
-				takePiece(getGridRefFromAbstractIndices(from[0],to[1]));
+				takePiece(getGridRefFromAbstractIndices(from[0],to[1]), 'Won');
 			}
 			//check for pawn reaching opposing end
 			if (piece['type'] == 'pawn' && (piece['colour'] == 'w' && to[0] == 7) || (piece['colour'] == 'b' && to[0] == 0)) {
@@ -221,23 +196,33 @@ $(document).ready( function() {
     				//abstractBoard = data['board'];
     				//could just cancel game for now
     			} else {
-    				//update abstract board
-    				abstractBoard = data['board'];
-    				//get opponent's valid move
-    				from = data['from'];
-    				to = data['to'];
-    				var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
-    				var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
-    				//move piece
-    				var moved = getOccupant(gridFrom);
-    				moved.position({
-    		            of: 'div#'+gridTo
-    		        });
-    				//center piece
-    				$('div#'+gridTo).append(moved.css('position','static'));
+    				performMoveByOpponent(data['board'], data['from'], data['to']);
     			}
     		}
     	});
+	}
+	
+	/**
+	 * Perform opponent's move
+	 * @param board the updated abstractBoard
+	 * @param from grid-ref.
+	 * @param to grid-ref
+	 */
+	function performMoveByOpponent(board, from, to) {
+		//update abstract board
+		abstractBoard = board;
+		//get opponent's valid move
+		var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
+		var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
+		//check for takeable piece
+		checkAndTakePiece(to, 'Won');
+		//make move
+		var moved = getOccupant(gridFrom);
+		moved.position({
+            of: 'div#'+gridTo
+        });
+		//center piece
+		$('div#'+gridTo).append(moved.css('position','static'));	
 	}
 	
 	/**
@@ -269,23 +254,23 @@ $(document).ready( function() {
 	 * Check for takeable piece and remove if found
 	 * Given square must already be checked for own piece
 	 */
-	function checkAndTakePiece(square) {
+	function checkAndTakePiece(square, wonOrLost) {
 		if (!vacant(square[0],square[1])) {
-			takePiece(getGridRefFromAbstractIndices(square[0],square[1]));
+			takePiece(getGridRefFromAbstractIndices(square[0],square[1]), wonOrLost);
 		}
 	}
 	
 	/**
 	 * Remove piece, from given square, and move to side 
 	 */
-	function takePiece(toSquare) {
+	function takePiece(toSquare, wonOrLost) {
 		//get taken piece
 		var taken = getOccupant(toSquare);
 		//move off board
-    	if ($('div#piecesWon div.piece').length == 0) {
-    		$('div#piecesWon div.row:first div.col-md-2:first').append(taken);
+    	if ($('div#pieces'+wonOrLost+' div.piece').length == 0) {
+    		$('div#pieces'+wonOrLost+' div.row:first div.col-md-2:first').append(taken);
     	} else {
-    		var lastOccupied = $('div#piecesWon div.piece:last').parent();
+    		var lastOccupied = $('div#pieces'+wonOrLost+' div.piece:last').parent();
     		lastOccupied.next('div.col-md-2').append(taken);
     	}
     	//prevent further movement
