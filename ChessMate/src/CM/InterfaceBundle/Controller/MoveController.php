@@ -65,6 +65,7 @@ class MoveController extends Controller
     		$em->flush();
     		//wait for opponents move - 5 mins. max
     		$game = $this->waitForTurn($game, $player, $em);
+			$em->refresh($game);
 		    //get updated board
     		$board = $game->getBoard();
 		    //return opponent's valid move    	
@@ -87,12 +88,12 @@ class MoveController extends Controller
     	$gameID = $request->request->get('gameID');
     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
     	$user = $this->getUser();
-    	//make sure valid user for game & turn
 	    $player = $game->getPlayers()->indexOf($user);
+	    //get opponent's move
     	$game = $this->waitForTurn($game, $player, $em);
 		//get updated board
     	$board = $game->getBoard();
-		//return opponent's valid move    	
+		//return opponent's valid move
 	    return new JsonResponse(
 	    	array('valid' => true,
 	    			'board' => $board->getBoard(), 

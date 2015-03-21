@@ -52,7 +52,7 @@ function getGridRefFromAbstractIndices(y, x) {
 	//get alpha x
 	x = letterAt[x];
 	//translate to grid ref
-	return x+'_'+(y + 1);
+	return x+'_'+(parseInt(y, '10') + 1);
 }
 
 /**

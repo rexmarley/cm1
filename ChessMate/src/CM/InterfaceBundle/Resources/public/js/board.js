@@ -11,7 +11,19 @@ $(document).ready( function() {
                 return true;
             }
         }
-	});	
+	});
+	
+	//temp
+//	$('#temp').on('click', function(e) {
+//		e.preventDefault();
+//		//move piece
+//		var moved = getOccupant('f_7');
+//		$(moved).position({
+//            of: 'div#f_4'
+//        });
+//		//center piece
+//		$('div#f_4').append(moved.css('position','static'));
+//	});
 
 	/**
 	 * Make squares droppable
@@ -47,13 +59,15 @@ $(document).ready( function() {
 	    				$(moved).position({
 	    		            of: 'div#'+gridTo
 	    		        });
+	    				//center piece
+	    				$('div#'+gridTo).append(moved.css('position','static'));
 	    			}
 	    		}
 	    	});
 	    }
 	}
 	
-	//Temp workaround for hidden overflow hiding draggable
+	//workaround for hidden overflow hiding draggable
 	$('.square').mouseover(function() {
 		$(this).removeClass('clipped');
 	});
@@ -219,6 +233,8 @@ $(document).ready( function() {
     				moved.position({
     		            of: 'div#'+gridTo
     		        });
+    				//center piece
+    				$('div#'+gridTo).append(moved.css('position','static'));
     			}
     		}
     	});
