@@ -65,9 +65,9 @@ class MoveController extends Controller
     		$em->flush();
     		//wait for opponents move - 5 mins. max
     		$game = $this->waitForTurn($game, $player, $em);
-			$em->refresh($game);
 		    //get updated board
     		$board = $game->getBoard();
+			$em->refresh($board);
 		    //return opponent's valid move    	
 	    	return new JsonResponse(
 	    		array('valid' => true, 
