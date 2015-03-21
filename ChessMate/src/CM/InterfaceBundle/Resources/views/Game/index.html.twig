@@ -1,5 +1,12 @@
 {% extends '::base.html.twig' %}
 
+{% block stylesheets %}
+    {{ parent() }}
+	{% stylesheets '../vendor/components/jqueryui/themes/smoothness/jquery-ui.min.css' filter='cssrewrite'  %} 
+        <link href="{{ asset_url }}" rel="stylesheet" type="text/css" />
+	{% endstylesheets %}
+{% endblock %}
+        
 {% block body %}
 	<div class="row">
 	    <div class="errors col-md-6">
@@ -10,6 +17,13 @@
 		{% set offset = "" %}
 	{% else %}
 		{% set gameID = null %}
+		{% if games is not empty %}
+			<div class="row">
+			    <div class="col-md-6 col-md-offset-3">
+	    			<a id="showCurrentGames" class="btn btn-large btn-danger">You have current games!</a>
+				</div>
+			</div>
+		{% endif %}
 		{% set offset = "col-md-offset-3" %}
 		<div class="row">
 		    <div class="col-md-6 col-md-offset-3">
@@ -35,4 +49,17 @@
 			{% endif %}
 		</div>
 	</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    {% javascripts '%kernel.root_dir%/../vendor/jquery/jquery/jquery.min.js' %}
+        <script type="text/javascript" src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+    {% javascripts '%kernel.root_dir%/../vendor/components/jqueryui/ui/minified/jquery-ui.min.js' %}
+        <script type="text/javascript" src="{{ asset_url }}"></script>
+    {% endjavascripts %}
+    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/board.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/boardHelper.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/general.js') }}"></script>
 {% endblock %}

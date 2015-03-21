@@ -9,9 +9,6 @@
 	        {% stylesheets '%kernel.root_dir%/../vendor/twitter/bootstrap/less/bootstrap.less' %} 
         		<link href="{{ asset_url }}" rel="stylesheet" type="text/css" />
 	        {% endstylesheets %}
-	        {% stylesheets '../vendor/components/jqueryui/themes/smoothness/jquery-ui.min.css' filter='cssrewrite'  %} 
-        		<link href="{{ asset_url }}" rel="stylesheet" type="text/css" />
-	        {% endstylesheets %}
         {% endblock %}
         <link rel="icon" type="image/x-icon" href="{{ asset('bundles/cminterface/images/favicon.ico') }}" />
     </head>
@@ -57,15 +54,6 @@
         {% block body %}{% endblock %}
 	    </div>
         {% block javascripts %}
-		    {% javascripts '%kernel.root_dir%/../vendor/jquery/jquery/jquery.min.js' %}
-		        <script type="text/javascript" src="{{ asset_url }}"></script>
-		    {% endjavascripts %}
-		    {% javascripts '%kernel.root_dir%/../vendor/components/jqueryui/ui/minified/jquery-ui.min.js' %}
-		        <script type="text/javascript" src="{{ asset_url }}"></script>
-		    {% endjavascripts %}
-		    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/board.js') }}"></script>
-		    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/boardHelper.js') }}"></script>
-    		<script type="text/javascript" src="{{ asset('bundles/cminterface/js/general.js') }}"></script>
         {% endblock %}
     </body>
 </html>

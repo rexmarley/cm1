@@ -24,15 +24,14 @@ $(document).ready( function() {
 	/**
 	 * Wait for first move
 	 */
-	if ($('.board').attr('id').charAt(5) != 'x') {
-		if ($('.ui-draggable:first').attr('id').charAt(0) == 'b') {
-			//get game id
-			var game = $('.board').attr('id').split('_');
+	if ($('.board').attr('id').charAt(7) != 'x') {
+		//get game id
+		var game = $('.board').attr('id').split('_');
+		if (game[1] == 'b') {
 	    	$.ajax({
 	    		type: "POST",
-	    	    //async: false,
 	    		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/getFirstMove',
-	    		data: { 'gameID' : game[1] },
+	    		data: { 'gameID' : game[2] },
 	    		success: function(data) {
 	    			//console.log(data['board']);
 	    			if (data['valid']) {
@@ -100,7 +99,7 @@ $(document).ready( function() {
 		//close piece-chooser
 		$('#choosePiece_'+colour).dialog("close");
 		//ajax move if real game
-		if ($('.board').attr('id').charAt(5) != 'x') {
+		if ($('.board').attr('id').charAt(7) != 'x') {
 	    	//ajax move & validate server-side
 	    	//should only fail due to cheating --> display message and manually revert board
 			//(TODO disable board on success?)
@@ -115,7 +114,13 @@ $(document).ready( function() {
 	 */
 	function validateMove(event, ui) {
 		//get moved piece
-		var piece = getPieceDetails(ui.draggable.attr('id'));		
+		var piece = getPieceDetails(ui.draggable.attr('id'));	
+		//check piece is player's (if actual game)
+		if ($('.board').attr('id').charAt(7) != 'x' && piece['colour'] != $('.board').attr('id').charAt(5)) {
+    		//invalidate move
+    		ui.draggable.addClass('invalid');
+			return false;			
+		}
 		//get abstract indices for from/to squares
 		var from = getAbstractedSquareIndex(ui.draggable.parent().attr('id'));
 		var to = getAbstractedSquareIndex(this.id);
@@ -163,7 +168,7 @@ $(document).ready( function() {
 				//ajax move on piece selection
 				gFrom = from;
 				openPieceChooser(piece['colour']);
-			} else if ($('.board').attr('id').charAt(5) != 'x') {
+			} else if ($('.board').attr('id').charAt(7) != 'x') {
 	        	//ajax move & validate server-side
 	        	//should only fail due to cheating --> display message and manually revert board
 				//(TODO disable board on success?)
@@ -190,7 +195,7 @@ $(document).ready( function() {
     		type: "POST",
     	    //async: false,
     		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/checkMove',
-    		data: { 'gameID' : game[1],'from' : from, 'to' : to , 'type' : type, 'colour' : colour, 'newPiece' : newPiece },
+    		data: { 'gameID' : game[2],'from' : from, 'to' : to , 'type' : type, 'colour' : colour, 'newPiece' : newPiece },
     		success: function(data) {
     			//console.log(data['board']);
     			if (!data['valid']) {

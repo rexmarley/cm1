@@ -47,7 +47,7 @@ $(document).ready( function() {
 		 modal: true,
 	});
 	
-	$('#newGameOptions').dialog({
+	$('.closeable').dialog({
 		 open: function(event, ui) {
 			 $(".ui-dialog-titlebar-close").show();
 		 },
@@ -55,6 +55,10 @@ $(document).ready( function() {
 	
 	$('a#startGame').on('click', function() {
 		$('#newGameOptions').dialog("open");
+	});
+	
+	$('a#showCurrentGames').on('click', function() {
+		$('#currentGamesDialog').dialog("open");
 	});
 	
 	//ajax var for aborts

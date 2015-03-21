@@ -12,7 +12,66 @@ use CM\InterfaceBundle\Entity\Game;
 use Symfony\Component\HttpFoundation\JsonResponse;
 
 class GameController extends Controller
-{
+{    
+    /**
+     * Login as inactive guest account
+     * Create's a new account if none are available
+     * 
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
+    public function guestAction()
+    {
+    	//check user is not already logged in
+    	if (!$this->getUser()) {
+	     	//get inactive guest account
+	     	$userManager = $this->get('fos_user.user_manager');
+			$em = $this->getDoctrine()->getManager();
+			$user = $em->getRepository('CMUserBundle:User')->findInactiveGuest();
+			if (!$user) {
+				//create new guest accounts as needed
+				$id = $em->createQuery('SELECT MAX(u.id) FROM CMUserBundle:User u')->getSingleScalarResult() + 1;
+				$name = "Guest0".$id;
+				$user = $userManager->createUser();
+				$user->setUsername($name);		
+				$user->setEmail($name);
+				$user->setPassword("");
+				$user->setRegistered(false);
+				$user->setLastActiveTime(new \DateTime());
+			} else {
+				$user = $user[0];
+				$name = $user->getUsername();
+				$user->setLastActiveTime(new \DateTime());
+			}
+			//give guest average rating
+			//$user->setRating(1000);
+			$user->setRating(1410);
+			$userManager->updateUser($user);
+			//set login token
+			$token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
+			$this->get("security.context")->setToken($token);		
+			// fire login
+			$event = new InteractiveLoginEvent($this->get("request"), $token);
+			$this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
+    	}
+    	
+    	return $this->redirect($this->generateUrl('cm_interface_start', array()));
+    }
+	
+    /**
+     * Index action
+     * 
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function startAction()
+    {
+	    $user = $this->getUser();	
+    	$games = $user->getCurrentGames();
+	    
+    	$pieces = $this->getHTMLPieces();
+    	
+        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('pieces' => $pieces, 'games' => $games));
+    }
+    
 	/**
 	 * Find/Create new game
 	 * 
@@ -115,7 +174,6 @@ class GameController extends Controller
 		    $this->checkGameValidity($game, $user);
 		    //get player colour
 	    	$colour = $this->getPlayerColour($game, $user);
-			//get white/black specific board
 		}
     	//get game pieces
 	    $pieces = $this->getHTMLPieces($colour);
@@ -180,13 +238,6 @@ class GameController extends Controller
     public function toggleChatAction()
     {
     	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
-    }
-	
-    public function startAction()
-    {
-    	$pieces = $this->getHTMLPieces();
-    	
-        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('pieces' => $pieces));
     }
     
     private function getHTMLPieces($for = 'w') {
@@ -264,43 +315,5 @@ class GameController extends Controller
     	}
     	
     	return $pieces;
-    }
-     
-    public function guestAction()
-    {
-    	//check user is not already logged in
-    	if (!$this->getUser()) {
-	     	//get inactive guest account
-	     	$userManager = $this->get('fos_user.user_manager');
-			$em = $this->getDoctrine()->getManager();
-			$user = $em->getRepository('CMUserBundle:User')->findInactiveGuest();
-			if (!$user) {
-				//create new guest accounts as needed
-				$id = $em->createQuery('SELECT MAX(u.id) FROM CMUserBundle:User u')->getSingleScalarResult() + 1;
-				$name = "Guest0".$id;
-				$user = $userManager->createUser();
-				$user->setUsername($name);		
-				$user->setEmail($name);
-				$user->setPassword("");
-				$user->setRegistered(false);
-				$user->setLastActiveTime(new \DateTime());
-			} else {
-				$user = $user[0];
-				$name = $user->getUsername();
-				$user->setLastActiveTime(new \DateTime());
-			}
-			//give guest average rating
-			//$user->setRating(1000);
-			$user->setRating(1410);
-			$userManager->updateUser($user);
-			//set login token
-			$token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
-			$this->get("security.context")->setToken($token);		
-			// fire login
-			$event = new InteractiveLoginEvent($this->get("request"), $token);
-			$this->get("event_dispatcher")->dispatch("security.interactive_login", $event);
-    	}
-    	
-    	return $this->redirect($this->generateUrl('cm_interface_start', array()));
     }
 }

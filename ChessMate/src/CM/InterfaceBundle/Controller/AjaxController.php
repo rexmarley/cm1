@@ -40,6 +40,10 @@ class AjaxController extends Controller
     			'pType' => $request->request->get('type'),
     			'newPiece' => $request->request->get('newPiece')
     	);
+    	//make sure right colour moved
+    	if ($move['pColour'] == 'w' and $player == 1 || $move['pColour'] == 'b' and $player == 0) {
+    		throw new AccessDeniedException('That is not your piece!');    		
+    	}
     	//get piece validator 
     	$validator = $this->get($move['pType'].'_validator');
     	//validate move
@@ -61,12 +65,6 @@ class AjaxController extends Controller
     		$em->flush();
     		//wait for opponents move - 5 mins. max
     		$game = $this->waitForTurn($game, $player, $em);
-// 		    set_time_limit(300);
-// 		    while ($game->getActivePlayerIndex() != $player) {
-// 		    	//wait 1 second between checks
-// 		    	sleep(1);
-// 		    	$em->refresh($game);
-// 		    }
 		    //get updated board
     		$board = $game->getBoard();
 		    //return opponent's valid move    	

@@ -14,7 +14,7 @@
 	{% set rightCol = 'a' %}
 	{% set alt = 1 %}
 {% endif %}
-<div id ="game_{{ gameID }}" class="board">
+<div id ="game_{{ player }}_{{ gameID }}" class="board">
 	{% for i in topRow..bottomRow  %}
 		{% for j in leftCol..rightCol  %}
 			{% if (i+alt) is divisibleby(2) %}
@@ -32,7 +32,7 @@
 			{% endif %}		
 			<div id="{{j}}_{{i}}" class="square {{ squareColour }} ui-droppable clipped">
 				{% if i < 3 or i > 6 %}
-					<div id="{{ pieces[p].id }}" class="piece {{ drag }}">{{ pieces[p].img | raw }}</div>
+					<div id="{{ pieces[p].id }}" class="piece ui-draggable">{{ pieces[p].img | raw }}</div>
 					{% set p = p + 1 %}
 				{% elseif i == 3 %}
 					{% set drag = 'ui-draggable' %}

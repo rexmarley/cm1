@@ -81,6 +81,15 @@ a#startGame {
 	padding:3%;
 }
 
+a#showCurrentGames {
+	width:100%;
+	padding:3%;
+	font-size: 2em;
+}
+.red {
+	color: #ff0000;	
+}
+
 div#newGameOptions {
 	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
 	font-size: 1.2em;
