@@ -3,13 +3,19 @@
 	{% set bottomRow = 8 %}
 	{% set leftCol = 'h' %}
 	{% set rightCol = 'a' %}
+	{# resolve white/black perspective #}
 	{% set alt = 1 %}
+	{% set alt2 = 8 %}
+	{% set alt3 = 1 %}
 {% else %}
 	{% set topRow = 8 %}
 	{% set bottomRow = 1 %}
 	{% set leftCol = 'a' %}
 	{% set rightCol = 'h' %}
+	{# resolve white/black perspective #}
 	{% set alt = 0 %}
+	{% set alt2 = 1 %}
+	{% set alt3 = -1 %}
 {% endif %}
 <div id ="game_{{ player }}_{{ gameID }}" class="board">
 	{% for i in topRow..bottomRow  %}
@@ -28,8 +34,9 @@
 				{% endif %}	
 			{% endif %}		
 			<div id="{{j}}_{{i}}" class="square {{ squareColour }} ui-droppable clipped">
-				{% if pieces[i-1][loop.index-1] %}
-					<div id="{{ pieces[i-1][loop.index-1].id }}" class="piece ui-draggable">{{ pieces[i-1][loop.index-1].img | raw }}</div>
+				{% set col = (alt2-loop.index)*alt3 %}
+				{% if pieces[i-1][col] %}
+					<div id="{{ pieces[i-1][col].id }}" class="piece ui-draggable">{{ pieces[i-1][col].img | raw }}</div>
 				{% endif %}
 			</div>
 		{% endfor %}

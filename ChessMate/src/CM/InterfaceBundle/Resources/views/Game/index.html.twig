@@ -59,17 +59,18 @@
     {% javascripts '%kernel.root_dir%/../vendor/components/jqueryui/ui/minified/jquery-ui.min.js' %}
         <script type="text/javascript" src="{{ asset_url }}"></script>
     {% endjavascripts %}
-    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/board.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/boardHelper.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/general.js') }}"></script>
 	{% if game is defined %}
-	    {# OVERWRITE abstractBoard, unmoved etc. #}
 	    <script>
 	    	$(document).ready(function(){
+		    	//set game state
+		    	activePlayer = {{game.activePlayerIndex }};
 		    	abstractBoard = {{ game.board.board |json_encode|raw }};
 		    	unmoved = {{ game.board.unmoved |json_encode|raw}};
-		    	//TODO: castled?, En passant(DEF?) etc.
+		    	//TODO: castled?, En passant etc.
 	    	});
 	    </script>
 	{% endif %}
+    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/board.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/boardHelper.js') }}"></script>
+    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/general.js') }}"></script>
 {% endblock %}

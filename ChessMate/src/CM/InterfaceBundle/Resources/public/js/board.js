@@ -22,21 +22,24 @@ $(document).ready( function() {
     });
 	
 	/**
-	 * Wait for first move
+	 * Wait for first move (also used for reloads)
 	 */
-	if ($('.board').attr('id').charAt(5) == 'b') {
-		//get game id
-		var game = $('.board').attr('id').split('_');
-    	$.ajax({
-    		type: "POST",
-    		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/getFirstMove',
-    		data: { 'gameID' : game[2] },
-    		success: function(data) {
-    			if (data['valid']) {
-    				performMoveByOpponent(data['board'], data['from'], data['to']);
-    			}
-    		}
-    	});
+	if (typeof activePlayer !== 'undefined') {
+		if ((activePlayer === 0 && $('.board').attr('id').charAt(5) == 'b')
+				|| (activePlayer === 1 && $('.board').attr('id').charAt(5) == 'w')) {
+			//get game id
+			var game = $('.board').attr('id').split('_');
+	    	$.ajax({
+	    		type: "POST",
+	    		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/getFirstMove',
+	    		data: { 'gameID' : game[2] },
+	    		success: function(data) {
+	    			if (data['valid']) {
+	    				performMoveByOpponent(data['board'], data['from'], data['to']);
+	    			}
+	    		}
+	    	});
+	    }
     }
 	
 	//workaround for hidden overflow hiding draggable
@@ -209,7 +212,7 @@ $(document).ready( function() {
 		var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
 		var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
 		//check for takeable piece
-		checkAndTakePiece(to, 'Won');
+		checkAndTakePiece(to, 'Lost');
 		//make move
 		var moved = getOccupant(gridFrom);
 		moved.position({
