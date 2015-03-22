@@ -1,6 +1,10 @@
+{% set enabled = '' %}
+{% if ((player == 'w' and not game.p2Chatty) or (player == 'b' and not game.p1Chatty)) %}
+	{% set enabled = opponent.username ~ ' does not feel like chatting.' %}
+{% endif %}
 <div id="chatBox" class="row">
 	<div class="col-md-12">
 		<h2>Chat with opponent:</h2>
-		<textarea>blah blah blah</textarea>
+		<textarea>{{ enabled }}</textarea>
 	</div>
 </div>	

@@ -51,12 +51,20 @@ class User extends BaseUser
      * @ORM\Column(name="last_active_time", type="datetime")
      */
     protected $lastActiveTime;
+    
+    /**
+     * Is chat enabled (default true, but maintains last value if user changes)
+     * 
+     * @ORM\Column(type="boolean")
+     */
+    protected $chatty;
 
     public function __construct()
     {
         parent::__construct();
         $this->currentGames = new ArrayCollection();
         $this->rating = 1500;
+        $this->chatty = true;
     }
     
     /**
@@ -164,37 +172,21 @@ class User extends BaseUser
     {
         return $this->currentGames;
     }
-
-//     /**
-//      * Add game search
-//      *
-//      * @param GameSearch $gameSearch
-//      * @return User
-//      */
-//     public function addGameSearch(GameSearch $gameSearch)
-//     {
-//         $this->gameSearches->add($gameSearch);
-
-//         return $this;
-//     }
-
-//     /**
-//      * Remove game search
-//      *
-//      * @param GameSearch $gameSearch
-//      */
-//     public function removeGameSearch(GameSearch $gameSearch)
-//     {
-//         $this->gameSearches->removeElement($gameSearch);
-//     }
-
-//     /**
-//      * Get game searches
-//      *
-//      * @return \Doctrine\Common\Collections\Collection 
-//      */
-//     public function getGameSearches()
-//     {
-//         return $this->gameSearches;
-//     }
+    
+    /**
+     * Enable/Disable chat
+     * @param Bool $chatty
+     */
+    public function setChatty($chatty) {
+    	$this->chatty = $chatty;
+    }
+    
+    /**
+     * Check if user has chat enabled
+     *
+     * @return Bool
+     */
+    public function getChatty() {
+    	return $this->chatty;
+    }
 }

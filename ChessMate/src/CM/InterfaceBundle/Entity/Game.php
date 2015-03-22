@@ -48,9 +48,19 @@ class Game
     private $length;
     
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="boolean") //TODO: still used??
      */
     private $inProgress;
+    
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $p1Chatty;
+    
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $p2Chatty;
     
     private $whiteTimeLeft;
     private $blackTimeLeft;
@@ -275,5 +285,51 @@ class Game
     public function getPlayers()
     {
         return $this->players;
+    }
+
+    /**
+     * Enable/disable chat for player 1
+     *
+     * @param boolean $chatty
+     * @return Game
+     */
+    public function setP1Chatty($chatty)
+    {
+        $this->p1Chatty = $chatty;
+
+        return $this;
+    }
+
+    /**
+     * Check if player 1 has chat enabled
+     *
+     * @return boolean 
+     */
+    public function getP1Chatty()
+    {
+        return $this->p1Chatty;
+    }
+
+    /**
+     * Enable/disable chat for player 2
+     *
+     * @param boolean $chatty
+     * @return Game
+     */
+    public function setP2Chatty($chatty)
+    {
+        $this->p2Chatty = $chatty;
+
+        return $this;
+    }
+
+    /**
+     * Check if player 2 has chat enabled
+     *
+     * @return boolean 
+     */
+    public function getP2Chatty()
+    {
+        return $this->p2Chatty;
     }
 }

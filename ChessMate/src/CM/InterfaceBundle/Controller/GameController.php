@@ -67,7 +67,7 @@ class GameController extends Controller
 	    $user = $this->getUser();	
     	$games = $user->getCurrentGames();
     	
-        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('games' => $games));
+        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('games' => $games, 'player' => 'x'));
     }
     
 	/**
@@ -150,8 +150,18 @@ class GameController extends Controller
 	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
 	    //authenticate user/game
 	    $this->checkGameValidity($game, $user);
+	    //get player colour
+    	$colour = $this->getPlayerColour($game, $user);
+    	//get opponent
+    	if ($colour == 'w') {
+    		$op = 1;
+    	} else {
+    		$op = 0;    		
+    	}
+    	$opponent = $game->getPlayers()->get($op);
 
-	    return $this->render('CMInterfaceBundle:Game:index.html.twig', array('game' => $game));
+	    return $this->render('CMInterfaceBundle:Game:index.html.twig', 
+	    		array('game' => $game, 'player' => $colour, 'opponent' => $opponent));
     }
 
 	/**
@@ -235,7 +245,7 @@ class GameController extends Controller
     	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
     }
 	
-    public function toggleChatAction()
+    public function toggleChatAction($player)
     {
     	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
     }

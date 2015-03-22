@@ -28,8 +28,10 @@ class GameFactory
         
         $game->setLength($length);
         $game->addPlayer($whitePlayer);
+        $game->setP1Chatty($whitePlayer->getChatty());
         if (!is_null($blackPlayer)) {
         	$game->addPlayer($blackPlayer);
+       		$game->setP2Chatty($blackPlayer->getChatty());
         	$game->setInProgress(true);
         }
 
