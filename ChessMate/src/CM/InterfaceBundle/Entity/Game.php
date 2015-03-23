@@ -48,9 +48,11 @@ class Game
     private $length;
     
     /**
-     * @ORM\Column(type="boolean") //TODO: still used??
+     * Has the game got both players
+     * 
+     * @ORM\Column(type="boolean")
      */
-    private $inProgress;
+    private $joined;
     
     /**
      * @ORM\Column(type="boolean")
@@ -72,7 +74,7 @@ class Game
     {
         $this->players = new \Doctrine\Common\Collections\ArrayCollection();
         $this->board = $board;
-        $this->inProgress = false;
+        $this->joined = false;
     	//set white as active
     	$this->setActivePlayerIndex(0);
     }
@@ -111,26 +113,26 @@ class Game
     }
 
     /**
-     * Set game in progress
+     * Set game as joined
      *
-     * @param boolean $inProgress
+     * @param boolean $joined
      * @return Game
      */
-    public function setInProgress($inProgress)
+    public function setJoined($joined)
     {
-        $this->inProgress = $inProgress;
+        $this->joined = $joined;
 
         return $this;
     }
 
     /**
-     * Check if game is in progress
+     * Check if game has both players
      *
      * @return boolean 
      */
-    public function getInProgress()
+    public function getJoined()
     {
-        return $this->inProgress;
+        return $this->joined;
     }
 
     /**

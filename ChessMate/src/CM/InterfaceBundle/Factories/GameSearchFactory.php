@@ -38,7 +38,7 @@ class GameSearchFactory
     		$maxRank = 3000;		
 		}
         $search = new GameSearch($duration, $minRank, $maxRank);
-        $search->setPlayer1($player);
+        $search->setSearcher($player);
 
         return $search;
     }

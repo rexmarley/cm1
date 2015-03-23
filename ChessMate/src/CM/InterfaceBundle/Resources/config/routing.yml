@@ -6,9 +6,17 @@ cm_interface_play:
     path:     /play/{gameID}
     defaults: { _controller: "CMInterfaceBundle:Game:play" }
     
-cm_new_game:
+cm_new_search:
     path:     /newGame
-    defaults: { _controller: "CMInterfaceBundle:Game:newGame" }
+    defaults: { _controller: "CMInterfaceBundle:Game:newSearch" }
+    
+cm_match_search:
+    path:     /matchSearch/{searchID}
+    defaults: { _controller: "CMInterfaceBundle:Game:matchSearch" }
+    
+cm_cancel_search:
+    path:     /cancelSearch/{searchID}
+    defaults: { _controller: "CMInterfaceBundle:Game:cancelSearch", searchID = 0 }
     
 cm_offer_draw:
     path:     /draw

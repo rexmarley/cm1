@@ -1,5 +1,5 @@
 <div id="newGameOptions" class="ui-dialog closeable">
-	<form id="newGameForm" action="{{ path('cm_new_game', {})}}" method="POST">
+	<form id="newSearchForm" action="{{ path('cm_new_search', {})}}" method="POST">
 		<center><h1><u>Start Game</u></h1></center>
 		<h2>Opponent:</h2>
 		<input type="radio" name="opponent" value=1 checked>&nbsp;<label>Human</label>
@@ -32,7 +32,7 @@
 	<h2>Finding game<span id="loadingDots"></span></h2>
 	<br>
 	<center>
-		<a id="cancelSearch" class="btn btn-large btn-danger">Cancel</a>
+		<a id="cancelSearch" href="{{ path('cm_cancel_search', {}) }}" class="btn btn-large btn-danger">Cancel</a>
 		<a id="relaxSearch" class="btn btn-large btn-warning">Relax search</a>
 		<a id="playComputer" class="btn btn-large btn-primary">Play computer</a>
 	</center>

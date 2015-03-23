@@ -20,7 +20,7 @@ class GameFactory
      *
      * @return Game
      */
-    public function createNewGame($length, User $whitePlayer, User $blackPlayer = null)
+    public function createNewGame($length, User $whitePlayer, User $blackPlayer)
     {
     	//create board
     	$board = new Board();    	
@@ -29,11 +29,11 @@ class GameFactory
         $game->setLength($length);
         $game->addPlayer($whitePlayer);
         $game->setP1Chatty($whitePlayer->getChatty());
-        if (!is_null($blackPlayer)) {
-        	$game->addPlayer($blackPlayer);
-       		$game->setP2Chatty($blackPlayer->getChatty());
-        	$game->setInProgress(true);
-        }
+        $game->addPlayer($blackPlayer);
+       	$game->setP2Chatty($blackPlayer->getChatty());
+        //$game->setInProgress(true);
+        //NOW
+        //$game->setJoined(true);
 
         return $game;
     }

@@ -93,7 +93,7 @@ $(document).ready( function() {
 		}
 	});
 	//global var for swapping pawn
-	gFrom = [];
+	var gFrom = [];
 
 	/**
 	 * Validate chess move

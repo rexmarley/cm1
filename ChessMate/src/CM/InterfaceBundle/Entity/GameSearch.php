@@ -37,16 +37,21 @@ class GameSearch
     private $length;
     
     /**
-     * Search initiator
+     * Searcher
      *
-     * @ORM\OneToOne(targetEntity="CM\UserBundle\Entity\User")
+     * @ORM\ManyToOne(targetEntity="CM\UserBundle\Entity\User")
      */
-    private $player1;
+    private $searcher;
     
     /**
      * @ORM\Column(type="boolean")
      */
     private $matched;
+    
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $cancelled;
 
     /**
      * @ORM\OneToOne(targetEntity="Game")
@@ -63,7 +68,18 @@ class GameSearch
     	$this->minRank = $minRank;
     	$this->maxRank = $maxRank;
     	$this->matched = false;
+    	$this->cancelled = false;
     	$this->game = null;
+    }
+
+    /**
+     * Get id
+     *
+     * @return integer 
+     */
+    public function getId()
+    {
+        return $this->id;
     }
 
     /**
@@ -138,12 +154,12 @@ class GameSearch
     /**
      * Set search initiator
      *
-     * @param User $player1
+     * @param User $searcher
      * @return GameSearch
      */
-    public function setPlayer1(User $player1)
+    public function setSearcher(User $searcher)
     {
-        $this->player1 = $player1;
+        $this->searcher = $searcher;
 
         return $this;
     }
@@ -153,9 +169,9 @@ class GameSearch
      *
      * @return User 
      */
-    public function getPlayer1()
+    public function getSearcher()
     {
-        return $this->player1;
+        return $this->searcher;
     }
 
     /**
@@ -179,6 +195,29 @@ class GameSearch
     public function getMatched()
     {
     	return $this->matched;
+    }
+
+    /**
+     * Set search cancelled
+     *
+     * @param boolean $cancelled
+     * @return GameSearch
+     */
+    public function setCancelled($cancelled)
+    {
+    	$this->cancelled = $cancelled;
+    
+    	return $this;
+    }
+    
+    /**
+     * Check if search is cancelled
+     *
+     * @return boolean
+     */
+    public function getCancelled()
+    {
+    	return $this->cancelled;
     }
 
     /**

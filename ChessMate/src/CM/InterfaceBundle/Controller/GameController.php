@@ -71,70 +71,122 @@ class GameController extends Controller
     }
     
 	/**
-	 * Find/Create new game
+	 * Create search
 	 * 
 	 * @param Request $request
 	 * @return \Symfony\Component\HttpFoundation\JsonResponse
 	 */
-    public function newGameAction(Request $request)
+    public function newSearchAction(Request $request)
     {
     	$user = $this->getUser();
 	    $em = $this->getDoctrine()->getManager();
     	//get game variables - null if match any
 	    $duration = $request->request->get('duration');
 	    $skill = $request->request->get('skill');
-    	//find match
-	    $search = $em->getRepository('CMInterfaceBundle:GameSearch')->findGameSearch($user, $duration, $skill);
-    	//create search/game
-	    if ($search) {
-			$search = $search[0];
-	    	$search->setMatched(true);
-	    	$em->flush();
-	    	//set search initiator as white
-	    	$white = $search->getPlayer1();
-	    	//get game length
-	    	$length = $search->getLength();
-	    	if (is_null($length)) {
-		    	if (!is_null($duration)) {
-		    		$length = $duration;
-		    	} else {
-		    		//any length - set default
-		    		$length = 600;
-		    	}	    		
-	    	}
-	    	//create game
-    		$game = $this->get('game_factory')->createNewGame($length, $white, $user);
-	    	$em->persist($game);
-	    	$search->setGame($game);
-			$em->flush();
-    		//add to players' current games
-    		$white->addCurrentGame($game);
-    		$user->addCurrentGame($game);
-	    	//get id
-		    $gameID = $game->getId();
-	    } else {
-	    	//create new search
-    		$search = $this->get('game_search_factory')->createNewSearch($user, $duration, $skill);
-	    	$em->persist($search);
-	    	$em->flush();
-		    //wait for matches
-		    //extend time-limit to 5 mins. - user has option to cancel
-		    set_time_limit(300);
-		    $em->refresh($search);
-		    while (is_null($search->getGame())) {
-		    	//wait 1 second between checks
-		    	sleep(1);
-		    	$em->refresh($search);
-		    }
-		    //get game id
-		    $gameID = $search->getGame()->getId();
-		    //delete search
-		    $em->remove($search);
-	    }
+	    //create new search
+    	$search = $this->get('game_search_factory')->createNewSearch($user, $duration, $skill);
+	    $em->persist($search);
 	    //save changes
 		$em->flush();
 
-    	return new JsonResponse(array('gameURL' => $this->generateUrl('cm_interface_play', array('gameID' => $gameID))));
+    	return new JsonResponse(array('searchID' => $search->getId()));
+    }
+    
+	/**
+	 * Find/create new game
+	 * 
+	 * @param int $searchID
+	 * @return \Symfony\Component\HttpFoundation\JsonResponse
+	 */
+    public function matchSearchAction($searchID)
+    {
+	    $em = $this->getDoctrine()->getManager();
+	    $search = $em->getRepository('CMInterfaceBundle:GameSearch')->find($searchID);
+    	$user = $this->getUser();
+    	if ($search->getSearcher() != $user) {
+	    	throw new AccessDeniedException('This is not your search!');    		
+    	}
+     	//if user's search not matched by opponent
+	    if (!$search->getMatched()) {
+	    	//find match
+	     	$length = $search->getLength();
+	     	$minRank = $search->getMinRank();
+	     	$maxRank = $search->getMaxRank();
+	     	$repo = $em->getRepository('CMInterfaceBundle:GameSearch');
+	 	    $match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
+	    	$waited = 0;
+	    	//alow 20 seconds to search per call
+		    while (!$match && !$search->getCancelled() && $waited < 20) {
+		    	sleep(1);
+		    	$em->refresh($search);
+		    	//recheck for match by opponent
+		    	if ($search->getMatched()) {
+		    		//get game id
+		    		$gameID = $search->getGame()->getId();
+	    		    //delete search
+	    		    $em->remove($search);
+	    		    //return link to game
+    				return new JsonResponse(array('matched' => true,
+    												'gameURL' => $this->generateUrl('cm_interface_play', 
+    																					array('gameID' => $gameID))));
+		    	}
+		    	//else look for match
+	 	    	$match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
+		    	$waited++;
+		    }
+		    //ensure search not cancelled
+		    if (!$search->getCancelled()) {
+			    if ($match) {
+			    	$match = $match[0];
+			    	//set opponent's search as matched & add game
+			    	$match->setMatched(true);
+	    	    	$game = $this->get('game_factory')->createNewGame($length, $user, $match->getSearcher());
+	    		    $em->persist($game);
+	    		    $match->setGame($game);
+	    		    //delete own search
+	    		    $em->remove($search);
+			    	//save
+			    	$em->flush();
+	    		    //return link to game
+    				return new JsonResponse(array('matched' => true,
+    												'gameURL' => $this->generateUrl('cm_interface_play', 
+    																					array('gameID' => $game->getID()))));
+			    } else {
+			    	//else timed-out - report back for retry
+			    	return new JsonResponse(array('matched' => false, 'searchID' => $searchID));
+			    }
+	    	}
+	    	//else ajax aborted 
+	    } else {
+	    	//matched by oppponent
+		    //get game id
+		    $gameID = $search->getGame()->getId();
+	    	//delete search
+	    	$em->remove($search);
+	    	//save
+	    	$em->flush();
+	    	//return link to game
+    		return new JsonResponse(array('matched' => true,
+    									'gameURL' => $this->generateUrl('cm_interface_play', array('gameID' => $gameID))));
+	    }
+	    //only reachable if cancelled
+		return new JsonResponse(array('cancelled' => true));
+    }
+    
+    public function cancelSearchAction($searchID) {
+    	if ($searchID != 0) {
+		    $em = $this->getDoctrine()->getManager();
+		    $search = $em->getRepository('CMInterfaceBundle:GameSearch')->find($searchID);
+	    	$user = $this->getUser();
+	    	if ($search->getSearcher() != $user) {
+		    	throw new AccessDeniedException('This is not your search!');    		
+	    	}
+	    	//cancel search
+		    $search->setCancelled(true);
+		    $em->flush();    		
+    	}
+	    
+    	return new JsonResponse(array('cancelled' => true));
     }
 	
     /**
