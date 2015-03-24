@@ -102,64 +102,63 @@ class GameController extends Controller
     {
 	    $em = $this->getDoctrine()->getManager();
 	    $search = $em->getRepository('CMInterfaceBundle:GameSearch')->find($searchID);
-    	$user = $this->getUser();
-    	if ($search->getSearcher() != $user) {
-	    	throw new AccessDeniedException('This is not your search!');    		
-    	}
-     	//if user's search not matched by opponent
-	    if (!$search->getMatched()) {
-	    	//find match
-	     	$length = $search->getLength();
-	     	$minRank = $search->getMinRank();
-	     	$maxRank = $search->getMaxRank();
-	     	$repo = $em->getRepository('CMInterfaceBundle:GameSearch');
-	 	    $match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
-	    	$waited = 0;
-	    	//alow 20 seconds to search per call
-		    while (!$match && !$search->getCancelled() && $waited < 20) {
-		    	sleep(1);
-		    	$em->refresh($search);
-		    	//recheck for match by opponent
-		    	if ($search->getMatched()) {
-		    		//get game id
-		    		$gameID = $search->getGame()->getId();
-	    		    //delete search
-	    		    $em->remove($search);
-	    		    //return link to game
-    				return new JsonResponse(array('matched' => true,
-    												'gameURL' => $this->generateUrl('cm_interface_play', 
-    																					array('gameID' => $gameID))));
-		    	}
-		    	//else look for match
-	 	    	$match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
-		    	$waited++;
-		    }
-		    //ensure search not cancelled
-		    if (!$search->getCancelled()) {
-			    if ($match) {
-			    	$match = $match[0];
-			    	//set opponent's search as matched & add game
-			    	$match->setMatched(true);
-	    	    	$game = $this->get('game_factory')->createNewGame($length, $user, $match->getSearcher());
-	    		    $em->persist($game);
-	    		    $match->setGame($game);
-	    		    //delete own search
-	    		    $em->remove($search);
-			    	//save
-			    	$em->flush();
-	    		    //return link to game
-    				return new JsonResponse(array('matched' => true,
-    												'gameURL' => $this->generateUrl('cm_interface_play', 
-    																					array('gameID' => $game->getID()))));
+	    if ($search) {
+	    	$user = $this->getUser();
+	    	if ($search->getSearcher() != $user) {
+		    	throw new AccessDeniedException('This is not your search!');    		
+	    	}
+	     	//if user's search not matched by opponent
+		    if (!$search->getMatched()) {
+		    	//find match
+		     	$length = $search->getLength();
+		     	$minRank = $search->getMinRank();
+		     	$maxRank = $search->getMaxRank();
+		     	$repo = $em->getRepository('CMInterfaceBundle:GameSearch');
+		 	    $match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
+			    if (!$match) {
+			    	sleep(1);
+			    	//recheck
+		 	    	$match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
+			    	$em->refresh($search);
+			    }
+		 	    //if not cancelled
+			    if ($search) {
+			    	//recheck for match
+				    if ($match || $search->getMatched()) {
+					    if ($match) {
+					    	$match = $match[0];
+					    	//set opponent's search as matched & add game
+					    	$match->setMatched(true);
+			    	    	$game = $this->get('game_factory')->createNewGame($length, $user, $match->getSearcher());
+			    		    $em->persist($game);
+			    		    $match->setGame($game);
+				    		$em->flush();
+			    		    //$search->setGame($game);
+					    	//get game id
+					    	$gameID = $game->getId();
+					    } else {
+					    	//search matched by opponent
+					    	//get game id
+					    	$gameID = $search->getGame()->getId();
+					    }
+					    
+		    		    //delete own search
+		    		    $em->remove($search);
+				    	//save
+				    	$em->flush();
+			    	    //return link to game
+		    			return new JsonResponse(array('matched' => true,
+		    											'gameURL' => $this->generateUrl('cm_interface_play', 
+		    																				array('gameID' => $gameID))));
+				    }
+				    //report back for retry
+					return new JsonResponse(array('matched' => false));
 			    } else {
-			    	//else timed-out - report back for retry
-			    	return new JsonResponse(array('matched' => false, 'searchID' => $searchID));
+			    	//else ajax aborted 
+					return new JsonResponse(array('cancelled' => true));
 			    }
 	    	}
-	    	//else ajax aborted 
-	    } else {
-	    	//matched by oppponent
-		    //get game id
+	    	//get game id
 		    $gameID = $search->getGame()->getId();
 	    	//delete search
 	    	$em->remove($search);
@@ -169,7 +168,7 @@ class GameController extends Controller
     		return new JsonResponse(array('matched' => true,
     									'gameURL' => $this->generateUrl('cm_interface_play', array('gameID' => $gameID))));
 	    }
-	    //only reachable if cancelled
+	    //only reachable if ajax aborted
 		return new JsonResponse(array('cancelled' => true));
     }
     
@@ -181,12 +180,15 @@ class GameController extends Controller
 	    	if ($search->getSearcher() != $user) {
 		    	throw new AccessDeniedException('This is not your search!');    		
 	    	}
-	    	//cancel search
-		    $search->setCancelled(true);
-		    $em->flush();    		
+		    //remove search
+ 		    $em->remove($search);
+ 		    $em->flush();
+		    $cancelled = true;		
+    	} else {
+    		$cancelled = false;
     	}
 	    
-    	return new JsonResponse(array('cancelled' => true));
+    	return new JsonResponse(array('cancelled' => $cancelled));
     }
 	
     /**

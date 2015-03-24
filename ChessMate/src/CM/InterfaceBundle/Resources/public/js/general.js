@@ -64,6 +64,12 @@ $(document).ready( function() {
     $("a#findGame").on('click', function() {
         if ($('#newSearchForm').find('input[name="opponent"]:checked').val() == 1) {
         	//human opponent
+            //change dialog
+    		$('#newGameOptions').dialog("close");
+    		$('#findingGameDialog').dialog("open");
+    		//reset relax search
+    		$('a#relaxSearch').show();
+    		$('#findingGameDialog p').html('');
 	    	createSearch(true);
 	    } else {
 	        //computer opponent TODO
@@ -82,12 +88,6 @@ $(document).ready( function() {
         	var search = $.post(url, {'skill': null, 'duration': null });    
         }
         search.done(function(data) {
-            //change dialog
-    		$('#newGameOptions').dialog("close");
-    		//reset relax search
-    		$('a#relaxSearch').show();
-    		$('#findingGameDialog p').html('');
-    		$('#findingGameDialog').dialog("open");
     		var loading = 0;
     		setInterval(function() {
     		    if(loading < 3) {
@@ -117,7 +117,7 @@ $(document).ready( function() {
     		if(data['matched']) {
     			//load game
     			location.href = data['gameURL'];    			
-    		} else if(!data['cancelled'])  {
+    		} else {
     			//retry
     			checkSearchMatched(searchID);
     		}
@@ -125,13 +125,20 @@ $(document).ready( function() {
 	}
 	
 	function cancelSearch() {
-		//if (matchSearch != null) {
-			matchSearch.abort();	
-		//}
-		var url = $('a#cancelSearch').attr('href');
-        var cancel = $.post(url);
-        cancel.done(function(data) {
-        });
+		var i = setInterval(function() {
+			if(matchSearch) {
+				matchSearch.abort();
+				var url = $('a#cancelSearch').attr('href');
+		        var cancel = $.post(url);
+			    matchSearch = null;
+			    //reset url
+			    url = $('a#cancelSearch').attr('href');
+			    split = url.split('/');
+			    var idLength = url[url.length - 1].length + 1;
+				$('a#cancelSearch').attr('href', url.substring(0, url.length - idLength - 1));
+				clearInterval(i);
+		    }
+		}, 1000);
 	}
 	
 	$('a#cancelSearch').on('click', function(e) {
