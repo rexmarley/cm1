@@ -40,7 +40,6 @@ class GameSearchRepository extends EntityRepository
 			    JOIN gs.searcher p
 				WHERE p.id != :playerID
 				AND gs.matched = 0
-				AND gs.cancelled = 0
 				AND :playerRank >= gs.minRank
 				AND :playerRank <= gs.maxRank
 				AND p.rating >= :minRank 

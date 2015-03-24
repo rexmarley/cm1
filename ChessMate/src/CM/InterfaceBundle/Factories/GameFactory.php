@@ -24,16 +24,12 @@ class GameFactory
     {
     	//create board
     	$board = new Board();    	
-        $game = new Game($board);
+        $game = new Game($board, $length);
         
-        $game->setLength($length);
         $game->addPlayer($whitePlayer);
         $game->setP1Chatty($whitePlayer->getChatty());
         $game->addPlayer($blackPlayer);
        	$game->setP2Chatty($blackPlayer->getChatty());
-        //$game->setInProgress(true);
-        //NOW
-        //$game->setJoined(true);
 
         return $game;
     }

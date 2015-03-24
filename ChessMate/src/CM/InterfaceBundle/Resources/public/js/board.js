@@ -21,26 +21,94 @@ $(document).ready( function() {
 		drop: validateMove,
     });
 	
+	//allow player to move
+	var playersTurn = true;
+	
 	/**
-	 * Wait for first move (also used for reloads)
+	 * Join game/check opponent has joined &
+	 * wait for first move (also used for reloads)
 	 */
 	if (typeof activePlayer !== 'undefined') {
-		if ((activePlayer === 0 && $('.board').attr('id').charAt(5) == 'b')
-				|| (activePlayer === 1 && $('.board').attr('id').charAt(5) == 'w')) {
-			//get game id
-			var game = $('.board').attr('id').split('_');
+		//get game id
+		var game = $('.board').attr('id').split('_');
+		var root = 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/';
+		if (!inProgress) {
+			//join game
 	    	$.ajax({
 	    		type: "POST",
-	    		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/getFirstMove',
+	    		async: false,
+	    		url: root + 'join/'+game[2]
+	    	});
+			//check opponent has joined
+	    	$.ajax({
+	    		type: "POST",
+	    		async: false,
+	    		url: root + 'checkJoined/'+game[2],
+	    		success: function(data) {
+	    			if (!data['joined']) {
+	    				//game cancelled
+	    				alert('Game aborted by opponent!');
+	    				//back to start
+	        			location.href = root + 'start';
+	    			}    			
+	    		}
+	    	});
+		}
+    	//wait for first move
+		if ((activePlayer === 0 && $('.board').attr('id').charAt(5) == 'b')
+				|| (activePlayer === 1 && $('.board').attr('id').charAt(5) == 'w')) {
+	    	playersTurn = false;
+	    	$.ajax({
+	    		type: "POST",
+	    		url: root + 'getFirstMove',
 	    		data: { 'gameID' : game[2] },
 	    		success: function(data) {
 	    			if (data['valid']) {
 	    				performMoveByOpponent(data['board'], data['from'], data['to']);
+	    		    	playersTurn = true;
 	    			}
 	    		}
 	    	});
-	    }
+			//start opponent's timer
+	    	$('div#timer1').addClass('red');
+	    	startTimer('div#timer1');
+	    } else {
+			//start own timer
+	    	$('div#timer2').addClass('red');
+	    	startTimer('div#timer2');
+		}
     }
+	
+	function switchTimers() {
+		clearInterval(tInterval);
+		if ($('div#timer1').hasClass('red')) {
+	    	$('div#timer1').removeClass('red');
+	    	$('div#timer2').addClass('red');
+	    	startTimer('div#timer2');			
+		} else {
+	    	$('div#timer2').removeClass('red');
+	    	$('div#timer1').addClass('red');
+	    	startTimer('div#timer1');
+		}
+	}
+	
+	var tInterval = null;
+	function startTimer(timerID) {
+		var timeLeft = $(timerID + ' h1');
+		var time = timeLeft.html().split(':');
+		tInterval = setInterval(function() {
+			if (time[1] == '00') {
+				time[1] = '59';
+				time[0] = time[0] - 1;
+			} else {
+				time[1] = time[1] - 1;
+				if (time[1] < 10) {
+					time[1] = '0' + time[1];
+				}
+			}
+			timeLeft.html(time[0]+':'+time[1]);
+		}, 1000);
+	}
 	
 	//workaround for hidden overflow hiding draggable
 	$('.square').mouseover(function() {
@@ -101,8 +169,9 @@ $(document).ready( function() {
 	function validateMove(event, ui) {
 		//get moved piece
 		var piece = getPieceDetails(ui.draggable.attr('id'));	
-		//check piece is player's (if actual game)
-		if ($('.board').attr('id').charAt(7) != 'x' && piece['colour'] != $('.board').attr('id').charAt(5)) {
+		//check player's turn and piece (if actual game)
+		if (!playersTurn || ($('.board').attr('id').charAt(7) != 'x' 
+			&& piece['colour'] != $('.board').attr('id').charAt(5))) {
     		//invalidate move
     		ui.draggable.addClass('invalid');
 			return false;			
@@ -157,8 +226,7 @@ $(document).ready( function() {
 			} else if ($('.board').attr('id').charAt(7) != 'x') {
 	        	//ajax move & validate server-side
 	        	//should only fail due to cheating --> display message and manually revert board
-				//(TODO disable board on success?)
-	        	ajaxMove(from, to, piece['type'], piece['colour']);				
+	        	ajaxMove(from, to, piece['type'], piece['colour']);
 			}
 			unmoved[from[0]][from[1]] = false;
     		//center piece
@@ -174,9 +242,10 @@ $(document).ready( function() {
 	function ajaxMove(from, to, type, colour) {
     	//ajax move & validate server-side
     	//TODO: change to app.php for live
-		//var valid = false;
 		//get game id
 		var game = $('.board').attr('id').split('_');
+		playersTurn = false;
+		switchTimers();
     	$.ajax({
     		type: "POST",
     	    //async: false,
@@ -194,6 +263,8 @@ $(document).ready( function() {
     				//could just cancel game for now
     			} else {
     				performMoveByOpponent(data['board'], data['from'], data['to']);
+    				playersTurn = true;
+    				switchTimers();
     			}
     		}
     	});

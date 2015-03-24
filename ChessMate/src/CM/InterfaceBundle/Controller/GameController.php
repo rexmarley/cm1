@@ -209,13 +209,76 @@ class GameController extends Controller
     	//get opponent
     	if ($colour == 'w') {
     		$op = 1;
+    		$userTime = $this->getMinutesTimeString($game->getP1Time());
+    		$opTime = $this->getMinutesTimeString($game->getP2Time());
     	} else {
-    		$op = 0;    		
+    		$op = 0;
+    		$userTime = $this->getMinutesTimeString($game->getP2Time());
+    		$opTime = $this->getMinutesTimeString($game->getP1Time());
     	}
     	$opponent = $game->getPlayers()->get($op);
 
 	    return $this->render('CMInterfaceBundle:Game:index.html.twig', 
-	    		array('game' => $game, 'player' => $colour, 'opponent' => $opponent));
+	    		array('game' => $game,
+	    			'player' => $colour, 
+	    			'opponent' => $opponent,
+	    			'userTime' => $userTime,
+	    			'opTime' => $opTime)
+	    		);
+    }
+    
+    private function getMinutesTimeString($seconds) {
+    	$s = $seconds % 60;
+    	$minutes = ($seconds - $s) / 60;
+    	if ($s < 10) {
+    		$s .= '0';
+    	}
+    	
+    	return $minutes.':'.$s;
+    }
+    
+    public function joinGameAction($gameID) {
+	    $user = $this->getUser();	
+    	$em = $this->getDoctrine()->getManager();
+    	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+	    //authenticate user/game
+	    $this->checkGameValidity($game, $user);
+	    //join game
+    	if ($game->getPlayers()->get(0) == $user) {
+    		$game->setP1Joined(true);
+    	} else {
+    		$game->setP2Joined(true);
+    	}
+    	$em->flush();
+	    
+    	return new JsonResponse(array('joined' => true));    	
+    }
+    
+    public function checkJoinedAction($gameID) {
+	    $user = $this->getUser();	
+    	$em = $this->getDoctrine()->getManager();
+    	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+	    //authenticate user/game
+	    $this->checkGameValidity($game, $user);
+	    //wait for oppponent to join
+	    $waited = 0;
+	    $em->refresh($game);
+	    while (!$game->getJoined() && $waited < 5) {
+	    	sleep(1);
+	    	$em->refresh($game);
+	    	$waited++;
+	    }
+	    $joined = $game->getJoined();
+	    if (!$joined) {
+	    	//cancel game
+	    	$em->remove($game);
+	    } else {
+	    	//add to user
+	    	$user->addCurrentGame($game);
+	    }
+	    $em->flush();
+	    
+    	return new JsonResponse(array('joined' => $joined));    	
     }
 
 	/**

@@ -38,13 +38,24 @@
 		</div>
 		<div class="col-md-6 col-sm-12">
 			{% if gameID %}
-				{# if game is defined else render start game options #}
 				<div id="midGame">
+					{{ include('CMInterfaceBundle:Game:timer.html.twig', { 'timer': '1', 'timeLeft': opTime}) }}
 					{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Lost'}) }}
 					{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}
 					{{ include('CMInterfaceBundle:Game:midGameOptions.html.twig', {}) }}
 					<br>
 					{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Won'}) }}
+					{{ include('CMInterfaceBundle:Game:timer.html.twig', { 'timer': '2', 'timeLeft': userTime}) }}
+				</div>
+			{% else %}
+				<div id="piecesWon" class="row piecesWonLost hidden">
+					<div class="col-md-12">
+						<div class="row">
+							{% for i in 1..30  %}
+								<div class="col-md-2 col-sm-2 col-xs-2"></div>
+							{% endfor %}
+						</div>
+					</div>
 				</div>			
 			{% endif %}
 		</div>
@@ -64,6 +75,7 @@
 	    	$(document).ready(function(){
 		    	//set game state
 		    	activePlayer = {{game.activePlayerIndex }};
+		    	inProgress = {{ game.joined }}
 		    	abstractBoard = {{ game.board.board |json_encode|raw }};
 		    	unmoved = {{ game.board.unmoved |json_encode|raw}};
 		    	//TODO: castled?, En passant etc.

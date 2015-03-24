@@ -48,11 +48,18 @@ class Game
     private $length;
     
     /**
-     * Has the game got both players
+     * Has player 1 joined game
      * 
      * @ORM\Column(type="boolean")
      */
-    private $joined;
+    private $p1Joined;
+    
+    /**
+     * Has player 2 joined game
+     * 
+     * @ORM\Column(type="boolean")
+     */
+    private $p2Joined;
     
     /**
      * @ORM\Column(type="boolean")
@@ -64,17 +71,28 @@ class Game
      */
     private $p2Chatty;
     
-    private $whiteTimeLeft;
-    private $blackTimeLeft;
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $p1Time;
+    
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $p2Time;
     
     /**
      * Constructor
      */
-    public function __construct($board)
+    public function __construct($board, $length)
     {
         $this->players = new \Doctrine\Common\Collections\ArrayCollection();
         $this->board = $board;
-        $this->joined = false;
+        $this->p1Joined = false;
+        $this->p2Joined = false;
+        $this->length = $length;
+        $this->p1Time = $length;
+        $this->p2Time = $length;
     	//set white as active
     	$this->setActivePlayerIndex(0);
     }
@@ -113,27 +131,60 @@ class Game
     }
 
     /**
-     * Set game as joined
+     * Set player 1 as joined
      *
      * @param boolean $joined
      * @return Game
      */
-    public function setJoined($joined)
+    public function setP1Joined($joined)
     {
-        $this->joined = $joined;
+        $this->p1Joined = $joined;
 
         return $this;
     }
 
     /**
-     * Check if game has both players
+     * Check if player 1 has joined
+     *
+     * @return boolean 
+     */
+    public function getP1Joined()
+    {
+        return $this->p1Joined;
+    }
+
+    /**
+     * Set player 2 as joined
+     *
+     * @param boolean $joined
+     * @return Game
+     */
+    public function setP2Joined($joined)
+    {
+        $this->p2Joined = $joined;
+
+        return $this;
+    }
+
+    /**
+     * Check if player 2 has joined
+     *
+     * @return boolean 
+     */
+    public function getP2Joined()
+    {
+        return $this->p2Joined;
+    }
+
+    /**
+     * Check if both players have joined
      *
      * @return boolean 
      */
     public function getJoined()
     {
-        return $this->joined;
-    }
+        return $this->p1Joined && $this->p2Joined;
+    }    
 
     /**
      * Set board
@@ -310,6 +361,52 @@ class Game
     public function getP1Chatty()
     {
         return $this->p1Chatty;
+    }
+
+    /**
+     * Set time left for player 1
+     *
+     * @param int $timeLeft
+     * @return Game
+     */
+    public function setP1Time($timeLeft)
+    {
+        $this->p1Time = $timeLeft;
+
+        return $this;
+    }
+
+    /**
+     * Get time left for player 1
+     *
+     * @return int 
+     */
+    public function getP1Time()
+    {
+        return $this->p1Time;
+    }
+
+    /**
+     * Set time left for player 2
+     *
+     * @param int $timeLeft
+     * @return Game
+     */
+    public function setP2Time($timeLeft)
+    {
+        $this->p2Time = $timeLeft;
+
+        return $this;
+    }
+
+    /**
+     * Get time left for player 2
+     *
+     * @return int 
+     */
+    public function getP2Time()
+    {
+        return $this->p2Time;
     }
 
     /**

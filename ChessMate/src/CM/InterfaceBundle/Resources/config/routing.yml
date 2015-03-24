@@ -6,8 +6,16 @@ cm_interface_play:
     path:     /play/{gameID}
     defaults: { _controller: "CMInterfaceBundle:Game:play" }
     
+cm_interface_join:
+    path:     /join/{gameID}
+    defaults: { _controller: "CMInterfaceBundle:Game:joinGame" }
+    
+cm_interface_checkJoined:
+    path:     /checkJoined/{gameID}
+    defaults: { _controller: "CMInterfaceBundle:Game:checkJoined" }
+    
 cm_new_search:
-    path:     /newGame
+    path:     /newSearch
     defaults: { _controller: "CMInterfaceBundle:Game:newSearch" }
     
 cm_match_search:
