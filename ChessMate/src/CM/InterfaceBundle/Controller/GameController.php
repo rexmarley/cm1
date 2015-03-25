@@ -111,6 +111,9 @@ class GameController extends Controller
 	     	//if user's search matched by opponent
 		    if ($search->getMatched()) {
 		    	//get game id
+		    	while (!$search->getGame()) {
+		    		$em->refresh($search);
+		    	}
 		    	$gameID = $search->getGame()->getId();
 		    } else {
 		    	//find match
@@ -158,6 +161,12 @@ class GameController extends Controller
 		return new JsonResponse(array('cancelled' => true));
     }
     
+    /**
+     * Cancel search
+     * @param int $searchID
+     * @throws AccessDeniedException
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
     public function cancelSearchAction($searchID) {
     	if ($searchID != 0) {
 		    $em = $this->getDoctrine()->getManager();
