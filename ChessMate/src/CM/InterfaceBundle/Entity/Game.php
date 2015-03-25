@@ -20,7 +20,7 @@ class Game
     protected $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="Board", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="Board", cascade={"persist"})
      */
     private $board;
     

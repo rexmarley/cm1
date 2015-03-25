@@ -47,7 +47,7 @@ class HTMLHelper
     		$pieces[$row] = array();
     		foreach ($cols as $col => $piece) {
     			if ($piece) {
-    				$pieces[$row][$col] = array('id' => $piece.'_'.$col, 'img' => self::$unicode[$piece]);     				
+    				$pieces[$row][$col] = array('id' => $piece.'_'.$row.$col, 'img' => self::$unicode[$piece]);     				
     			} else {
     				$pieces[$row][$col] = false;
     			}

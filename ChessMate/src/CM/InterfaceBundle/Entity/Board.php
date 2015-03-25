@@ -39,6 +39,13 @@ class Board
      * @ORM\Column(type="array")
      */
     protected $lastMoveTo;
+    
+    /**
+     * Has pawn been swapped
+     * 
+     * @ORM\Column(type="boolean")
+     */
+    private $pawnSwapped;
 
     /**
      * The position of a pawn vulnerable to En passant
@@ -87,6 +94,7 @@ class Board
     	$this->setDefaultBoard();
     	$this->setDefaultUnmoved();
     	$this->enPassantAvailable = null;
+    	$this->pawnSwapped = false;
     }
 
     /**
@@ -253,6 +261,29 @@ class Board
         $this->board[$square[0]][$square[1]] = $piece;
 
         return $this;
+    }
+
+    /**
+     * Flag piece as swapped
+     *
+     * @param boolean $pawnSwapped
+     * @return Game
+     */
+    public function setPawnSwapped($swapped)
+    {
+        $this->pawnSwapped = $swapped;
+
+        return $this;
+    }
+
+    /**
+     * Check if piece has swapped
+     *
+     * @return boolean 
+     */
+    public function getPawnSwapped()
+    {
+        return $this->pawnSwapped;
     }
 
     /**

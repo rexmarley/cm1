@@ -48,7 +48,9 @@ abstract class ValidationHelper
     		$this->game->getBoard()->setPieceAsMoved($move['from'][0], $move['from'][1]); //TODO: check persistence
     		//add/remove En passant
     		$this->game->getBoard()->setEnPassantAvailable($this->enPassant);
-    		return array('valid' => true, 'board' => $this->board); //return $game?
+    		//flag pawn as swapped/reset
+    		$this->game->getBoard()->setPawnSwapped($this->pieceSwapped);
+    		return array('valid' => true, 'board' => $this->board);
     	}
 
     	return array('valid' => false);

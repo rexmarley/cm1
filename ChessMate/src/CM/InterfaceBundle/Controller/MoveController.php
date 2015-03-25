@@ -82,7 +82,8 @@ class MoveController extends Controller
 	    	return new JsonResponse(
 	    		array('valid' => true, 
 	    				'checkMate' => false,
-	    				'enPassant' => $board->getEnPassantAvailable(), 
+	    				'enPassant' => $board->getEnPassantAvailable(),
+	    				'pieceSwapped' => $board->getPawnSwapped(), 
 	    				'board' => $board->getBoard(), 
 	    				'from' => $board->getLastMoveFrom(), 
 	    				'to' => $board->getLastMoveTo())
@@ -109,6 +110,7 @@ class MoveController extends Controller
 	    	array('valid' => true,
     				'checkMate' => false,
     				'enPassant' => $board->getEnPassantAvailable(), 
+	    			'pieceSwapped' => $board->getPawnSwapped(),
 	    			'board' => $board->getBoard(), 
 	    			'from' => $board->getLastMoveFrom(), 
 	    			'to' => $board->getLastMoveTo()

@@ -79,7 +79,6 @@
 		    	abstractBoard = {{ game.board.board |json_encode|raw }};
 		    	unmoved = {{ game.board.unmoved |json_encode|raw}};
 		    	enPassantAvailable = {{ game.board.enPassantAvailable |json_encode|raw}};
-		    	//TODO: castled?, En passant etc.
 	    	});
 	    </script>
 	{% endif %}
