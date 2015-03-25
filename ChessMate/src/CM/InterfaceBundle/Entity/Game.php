@@ -20,7 +20,7 @@ class Game
     protected $id;
 
     /**
-     * @ORM\OneToOne(targetEntity="Board", cascade={"persist"})
+     * @ORM\OneToOne(targetEntity="Board", cascade={"persist", "remove"})
      */
     private $board;
     
@@ -95,8 +95,6 @@ class Game
         $this->board = $board;
         $this->p1Joined = false;
         $this->p2Joined = false;
-//         $this->p1Time = $length;
-//         $this->p2Time = $length;
         $this->playerTimes = array($length, $length);
     	//set white as active
     	$this->setActivePlayerIndex(0);

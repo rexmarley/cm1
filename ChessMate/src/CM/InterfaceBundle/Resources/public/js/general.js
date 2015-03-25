@@ -56,11 +56,37 @@ $(document).ready( function() {
 	$('a#startGame').on('click', function() {
 		$('#newGameOptions').dialog("open");
 	});
-	
+
 	$('a#showCurrentGames').on('click', function() {
 		$('#currentGamesDialog').dialog("open");
 	});
-	
+
+	$('a#cancelSearch').on('click', function(e) {
+		e.preventDefault();
+		cancelSearch();
+		$('#findingGameDialog').dialog("close");
+	});
+
+	$('a#relaxSearch').on('click', function() {
+		cancelSearch();
+		//wait to finish
+		var i = setInterval(function() {
+			if(!matchSearch) {
+				clearInterval(i);
+		    }
+		}, 200);
+		//create new ajax call
+		createSearch(false);
+		$(this).hide();
+		$('#findingGameDialog').append('<center><p style="color:#0000ff;">Search relaxed</p></center>');
+	});
+
+	$('a#playComputer').on('click', function() {
+		//cancel first
+		cancelSearch();
+		$('#findingGameDialog').dialog("close");
+	});
+
     $("a#findGame").on('click', function() {
         if ($('#newSearchForm').find('input[name="opponent"]:checked').val() == 1) {
         	//human opponent
@@ -76,6 +102,9 @@ $(document).ready( function() {
 	    }
     });
 
+	/**
+	 * Create new search
+	 */
     function createSearch(match) {
         //ajax form
         var form = $('#newSearchForm'),
@@ -109,7 +138,10 @@ $(document).ready( function() {
         });
 	}
     
-    matchSearch = null;
+    var matchSearch;
+	/**
+	 * Find/create new game
+	 */
 	function checkSearchMatched(searchID) {
 		var url = 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/matchSearch/'+searchID;
     	matchSearch = $.post(url);
@@ -124,6 +156,9 @@ $(document).ready( function() {
         });
 	}
 	
+	/**
+	 * Cancel search
+	 */
 	function cancelSearch() {
 		var i = setInterval(function() {
 			if(matchSearch) {
@@ -132,32 +167,11 @@ $(document).ready( function() {
 		        var cancel = $.post(url);
 			    matchSearch = null;
 			    //reset url
-			    url = $('a#cancelSearch').attr('href');
-			    split = url.split('/');
-			    var idLength = url[url.length - 1].length + 1;
+			    var split = url.split('/');
+			    var idLength = url[split.length - 1].length + 1;
 				$('a#cancelSearch').attr('href', url.substring(0, url.length - idLength - 1));
 				clearInterval(i);
 		    }
-		}, 1000);
+		}, 200);
 	}
-	
-	$('a#cancelSearch').on('click', function(e) {
-		e.preventDefault();
-		cancelSearch();
-		$('#findingGameDialog').dialog("close");
-	});
-	
-	$('a#relaxSearch').on('click', function() {
-		cancelSearch();
-		//create new ajax call
-		createSearch(false);
-		$(this).hide();
-		$('#findingGameDialog').append('<center><p style="color:#0000ff;">Search relaxed</p></center>');
-	});
-	
-	$('a#playComputer').on('click', function() {
-		//cancel first
-		cancelSearch();
-		$('#findingGameDialog').dialog("close");
-	});
 });

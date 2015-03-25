@@ -28,9 +28,9 @@ class GameSearchRepository extends EntityRepository
 							'minRank' => $minRank,
 							'maxRank' => $maxRank );
 		$lengthTerm = '';
-		if (!is_null($length)) {
+		if ($length) {
 			$queryParams['length'] = $length;
-			$lengthTerm .= ' AND (gs.length = :length OR gs.length IS NULL)';
+			$lengthTerm .= ' AND (gs.length = :length OR gs.length = 0)';
 		}
 		//find game
 		$search = $this->getEntityManager()

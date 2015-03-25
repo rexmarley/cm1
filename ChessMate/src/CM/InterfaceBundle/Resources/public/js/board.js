@@ -66,7 +66,7 @@ $(document).ready( function() {
 	    		data: { 'gameID' : game[2] },
 	    		success: function(data) {
 	    			if (data['valid']) {
-	    				performMoveByOpponent(data['board'], data['from'], data['to']);
+	    				performMoveByOpponent(data['board'], data['from'], data['to'], data['enPassant']);
 	    		    	playersTurn = true;
 	    		    	switchTimers();
 	    			}
@@ -81,6 +81,20 @@ $(document).ready( function() {
 	    	startTimer('div#timer2');
 		}
     }
+	
+	//workaround for hidden overflow hiding draggable
+	$('.square').mouseover(function() {
+		$(this).removeClass('clipped');
+	});
+	$('.square').mouseleave(function() {
+		$(this).addClass('clipped');
+	});
+	
+	//global var for swapping pawn
+	var gFrom = [];
+	$('.choosablePiece').click(function() {
+		swapPawn(this.id);
+	});
 	
 	/**
 	 * Switch timers
@@ -122,59 +136,6 @@ $(document).ready( function() {
 			timeLeft.html(time[0]+':'+time[1]);
 		}, 1000);
 	}
-	
-	//workaround for hidden overflow hiding draggable
-	$('.square').mouseover(function() {
-		$(this).removeClass('clipped');
-	});
-	
-	$('.square').mouseleave(function() {
-		$(this).addClass('clipped');
-	});
-
-	/**
-	 * Swap pawn on selection
-	 */
-	$('.choosablePiece').click(function() {
-		//get selected piece
-		var piece = this.id.split('_');
-		var colour = piece[1];
-		var type = piece[2];
-		//get new id
-		var num = 1;
-		newPiece = colour+'_'+type;
-		//check for conflict
-		var conflict = $('#'+newPiece+'_'+num);
-		while (conflict.length) {
-			num++;
-			conflict = $('#'+newPiece+'_'+num);
-		}
-		//get pawn position
-		var endRow = 7;
-		if (colour == 'b') {
-			endRow = 0;
-		}
-		var pawnCol = $.inArray(colour+'_pawn', abstractBoard[endRow]);
-		//update abstract board
-		abstractBoard[endRow][pawnCol] = newPiece;
-		//update real board
-		var pawn = getOccupant(getGridRefFromAbstractIndices(endRow, pawnCol));
-		//change piece
-		pawn.html($(this).html());
-		//set new id
-		pawn.attr('id', newPiece+'_'+num);
-		//close piece-chooser
-		$('#choosePiece_'+colour).dialog("close");
-		//ajax move if real game
-		if ($('.board').attr('id').charAt(7) != 'x') {
-	    	//ajax move & validate server-side
-	    	//should only fail due to cheating --> display message and manually revert board
-			//(TODO disable board on success?)
-			ajaxMove(gFrom, [endRow, pawnCol], 'pawn', colour);
-		}
-	});
-	//global var for swapping pawn
-	var gFrom = [];
 
 	/**
 	 * Validate chess move
@@ -216,18 +177,13 @@ $(document).ready( function() {
 	            		ui.draggable.addClass('invalid');
 	            		return false;
 	        		}
+					//check for takeable piece
+					checkAndTakePiece(to, 'Won');
 	    		} else {
 	    			//check already checked
-					//move castle
-	    			if (to[1] == 2) {
-						$('#d_'+(to[0]+1)).append($('#'+piece['colour']+'_rook_1'));
-	    			} else {
-						$('#f_'+(to[0]+1)).append($('#'+piece['colour']+'_rook_2'));
-	    			}
-	    			castled = false;
+					moveCastle(to, piece['colour']);
+					castled = false; //TODO: rethink, delete?
 	    		}
-	    		//check for takeable piece
-    			checkAndTakePiece(to, 'Won');
     		} else {
 				takePiece(getGridRefFromAbstractIndices(from[0],to[1]), 'Won');
 			}
@@ -252,6 +208,29 @@ $(document).ready( function() {
     	return valid;
 	}
 	
+	/**
+	 * Move castle in accordance with castling.
+	 * Validity must be pre-checked
+	 * @param to [y,x]
+	 * @param colour the piece's colour
+	 */
+	function moveCastle(to, colour) {
+		to[0] = parseInt(to[0], '10')
+		if (to[1] == 2) {
+			$('#d_'+(to[0]+1)).append($('#'+colour+'_rook_0'));
+		} else {
+			$('#f_'+(to[0]+1)).append($('#'+colour+'_rook_7'));
+		}
+	}
+	
+	/**
+	 * Ajax move for server side validation
+	 * & wait for opponent's move
+	 * @param from [y,x]
+	 * @param to [y,x]
+	 * @param type the moved piece type
+	 * @param colour the moved piece colour
+	 */
 	function ajaxMove(from, to, type, colour) {
     	//ajax move & validate server-side
     	//TODO: change to app.php for live
@@ -261,11 +240,9 @@ $(document).ready( function() {
 		switchTimers();
     	$.ajax({
     		type: "POST",
-    	    //async: false,
     		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/checkMove',
     		data: { 'gameID' : game[2],'from' : from, 'to' : to , 'type' : type, 'colour' : colour, 'newPiece' : newPiece },
     		success: function(data) {
-    			//console.log(data['board']);
     			if (!data['valid']) {
     				$('div.errors').html('<h2>Nice try but why cheat at chess? You\'re docked a minute!</h2>');
     			    // show for 5 seconds
@@ -275,7 +252,7 @@ $(document).ready( function() {
     				//abstractBoard = data['board'];
     				//could just cancel game for now
     			} else {
-    				performMoveByOpponent(data['board'], data['from'], data['to']);
+    				performMoveByOpponent(data['board'], data['from'], data['to'], data['enPassant']);
     				playersTurn = true;
     				switchTimers();
     			}
@@ -288,22 +265,44 @@ $(document).ready( function() {
 	 * @param board the updated abstractBoard
 	 * @param from grid-ref.
 	 * @param to grid-ref
+	 * @param enPassant indices of vulnerable piece (null if none)
 	 */
-	function performMoveByOpponent(board, from, to) {
-		//update abstract board
-		abstractBoard = board;
+	function performMoveByOpponent(board, from, to, enPassant) {
 		//get opponent's valid move
 		var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
 		var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
-		//check for takeable piece
-		checkAndTakePiece(to, 'Lost');
-		//make move
+		//get moved piece
 		var moved = getOccupant(gridFrom);
+		var movedDetails = getPieceDetails(moved.attr('id'));
+		//check for castling
+		if (movedDetails['type'] == 'king' && Math.abs(to[1] - from[1]) == 2) {
+			//only valid if castled
+			moveCastle(to, movedDetails['colour']);
+		} else if (movedDetails['type'] == 'pawn' && to[1] != from[1] && vacant(to[0], to[1])) {
+			//only valid if En passant - TODO: mark En passant as available
+			takePiece(getGridRefFromAbstractIndices(from[0],to[1]), 'Lost');
+		} else {
+			//check for takeable piece
+			checkAndTakePiece(to, 'Lost');
+		}
+		//make move
 		moved.position({
             of: 'div#'+gridTo
         });
 		//center piece
-		$('div#'+gridTo).append(moved.css('position','static'));	
+		$('div#'+gridTo).append(moved.css('position','static'));
+		//update abstract board
+		abstractBoard = board;
+		//update En passant
+		enPassantAvailable = enPassant;
+	}
+	
+	/**
+	 * Get piece type/colour from id
+	 */
+	function getPieceDetails(pieceID) {
+		var piece = pieceID.split('_');
+		return {'colour':piece[0], 'type':piece[1]};
 	}
 	
 	/**
@@ -314,11 +313,46 @@ $(document).ready( function() {
 	}
 	
 	/**
-	 * Get piece type/colour from id
+	 * Swap pawn on selection
 	 */
-	function getPieceDetails(pieceID) {
+	function swapPawn(pieceID) {
+		console.log(pieceID);
+		//get selected piece
 		var piece = pieceID.split('_');
-		return {'colour':piece[0], 'type':piece[1]};
+		var colour = piece[1];
+		var type = piece[2];
+		//get new id
+		var num = 1;
+		newPiece = colour+'_'+type; //TODO: check
+		//check for conflict
+		var conflict = $('#'+newPiece+'_'+num);
+		while (conflict.length) {
+			num++;
+			conflict = $('#'+newPiece+'_'+num);
+		}
+		//get pawn position
+		var endRow = 7;
+		if (colour == 'b') {
+			endRow = 0;
+		}
+		var pawnCol = $.inArray(colour+'_pawn', abstractBoard[endRow]);
+		//update abstract board
+		abstractBoard[endRow][pawnCol] = newPiece;
+		//update real board
+		var pawn = getOccupant(getGridRefFromAbstractIndices(endRow, pawnCol));
+		//change piece
+		pawn.html($(this).html());
+		//set new id
+		pawn.attr('id', newPiece+'_'+num);
+		//close piece-chooser
+		$('#choosePiece_'+colour).dialog("close");
+		//ajax move if real game
+		if ($('.board').attr('id').charAt(7) != 'x') {
+	    	//ajax move & validate server-side
+	    	//should only fail due to cheating --> display message and manually revert board
+			//(TODO disable board on success?)
+			ajaxMove(gFrom, [endRow, pawnCol], 'pawn', colour);
+		}
 	}
 	
 	/**

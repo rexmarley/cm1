@@ -115,42 +115,85 @@ class GameController extends Controller
 		     	$maxRank = $search->getMaxRank();
 		     	$repo = $em->getRepository('CMInterfaceBundle:GameSearch');
 		 	    $match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
-			    if (!$match) {
-			    	sleep(1);
-			    	//recheck
-		 	    	$match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
-			    	$em->refresh($search);
-			    }
+// 			    if (!$match) {
+// 			    	//sleep(1);
+// 			    	//recheck
+// 		 	    	$match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
+// 			    	$em->refresh($search);
+// 			    }
 		 	    //if not cancelled
 			    if ($search) {
 			    	//recheck for match
 				    if ($match || $search->getMatched()) {
-					    if ($match) {
+					    if ($search->getMatched()) {
+					    	//search matched by opponent
+					    	//get game id
+					    	$gameID = $search->getGame()->getId();				    	
+					    } else if($match) {
 					    	$match = $match[0];
-					    	//set opponent's search as matched & add game
+					    	//set opponent's search as matched
 					    	$match->setMatched(true);
+					    	//if length is not specified - use opponents settings
+					    	//if neither is specified - default 10 mins. each
+					    	if (!$length) {
+					    		$length = $match->getLength();
+						    	if (!$length) {
+						    		$length = 600;
+						    	}
+					    	}
 			    	    	$game = $this->get('game_factory')->createNewGame($length, $user, $match->getSearcher());
 			    		    $em->persist($game);
 			    		    $match->setGame($game);
 				    		$em->flush();
-			    		    //$search->setGame($game);
 					    	//get game id
-					    	$gameID = $game->getId();
-					    } else {
-					    	//search matched by opponent
-					    	//get game id
-					    	$gameID = $search->getGame()->getId();
+					    	$gameID = $game->getId();				    	
 					    }
-					    
 		    		    //delete own search
 		    		    $em->remove($search);
-				    	//save
 				    	$em->flush();
 			    	    //return link to game
 		    			return new JsonResponse(array('matched' => true,
 		    											'gameURL' => $this->generateUrl('cm_interface_play', 
 		    																				array('gameID' => $gameID))));
 				    }
+// 				    if ($match || $search->getMatched()) {
+// 					    if ($match) {
+// 					    	$match = $match[0];
+// 					    	//set opponent's search as matched
+// 					    	$match->setMatched(true);
+// 					    	//create game
+// 					    	$game = $search->getGame();
+// 					    	if (!$game) {
+// 						    	//if length is not specified - use opponents settings
+// 						    	//if neither is specified - default 10 mins. each
+// 						    	if (!$length) {
+// 						    		$length = $match->getLength();
+// 							    	if (!$length) {
+// 							    		$length = 600;
+// 							    	}
+// 						    	}
+// 				    	    	$game = $this->get('game_factory')->createNewGame($length, $user, $match->getSearcher());
+// 				    		    $em->persist($game);
+// 				    		    $match->setGame($game);
+// 					    	}
+// 				    		$em->flush();
+// 					    	//get game id
+// 					    	$gameID = $game->getId();
+// 					    } else {
+// 					    	//search matched by opponent
+// 					    	//get game id
+// 					    	$gameID = $search->getGame()->getId();
+// 					    }
+					    
+// 		    		    //delete own search
+// 		    		    $em->remove($search);
+// 				    	//save
+// 				    	$em->flush();
+// 			    	    //return link to game
+// 		    			return new JsonResponse(array('matched' => true,
+// 		    											'gameURL' => $this->generateUrl('cm_interface_play', 
+// 		    																				array('gameID' => $gameID))));
+// 				    }
 				    //report back for retry
 					return new JsonResponse(array('matched' => false));
 			    } else {

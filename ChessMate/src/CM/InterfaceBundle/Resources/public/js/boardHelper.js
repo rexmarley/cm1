@@ -171,8 +171,6 @@ function validateKing(colour, from, to) {
 				}
 	        	//update abstract board
 	    		updateAbstractBoard([from[0], rookFromCol], [to[0], rookToCol]);
-	    		//set rook as moved - not actually necessary
-				//unmoved[from[0]][rookFromCol] = false;
 				//flag castled - prevent recheck of inCheck()
 				castled = true;
 				return true;

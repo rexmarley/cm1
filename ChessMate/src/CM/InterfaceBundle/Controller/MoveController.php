@@ -81,7 +81,8 @@ class MoveController extends Controller
 		    //return opponent's valid move    	
 	    	return new JsonResponse(
 	    		array('valid' => true, 
-	    				'checkMate' => false, 
+	    				'checkMate' => false,
+	    				'enPassant' => $board->getEnPassantAvailable(), 
 	    				'board' => $board->getBoard(), 
 	    				'from' => $board->getLastMoveFrom(), 
 	    				'to' => $board->getLastMoveTo())
@@ -106,6 +107,8 @@ class MoveController extends Controller
 		//return opponent's valid move
 	    return new JsonResponse(
 	    	array('valid' => true,
+    				'checkMate' => false,
+    				'enPassant' => $board->getEnPassantAvailable(), 
 	    			'board' => $board->getBoard(), 
 	    			'from' => $board->getLastMoveFrom(), 
 	    			'to' => $board->getLastMoveTo()
