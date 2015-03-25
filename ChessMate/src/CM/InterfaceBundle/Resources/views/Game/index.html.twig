@@ -75,7 +75,7 @@
 	    	$(document).ready(function(){
 		    	//set game state
 		    	activePlayer = {{game.activePlayerIndex }};
-		    	inProgress = {{ game.joined }}
+		    	inProgress = {{ game.joined |json_encode|raw }};
 		    	abstractBoard = {{ game.board.board |json_encode|raw }};
 		    	unmoved = {{ game.board.unmoved |json_encode|raw}};
 		    	//TODO: castled?, En passant etc.

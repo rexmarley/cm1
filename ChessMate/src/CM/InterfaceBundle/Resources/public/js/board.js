@@ -23,6 +23,8 @@ $(document).ready( function() {
 	
 	//allow player to move
 	var playersTurn = true;
+	//turn interval
+	var tInterval;
 	
 	/**
 	 * Join game/check opponent has joined &
@@ -66,6 +68,7 @@ $(document).ready( function() {
 	    			if (data['valid']) {
 	    				performMoveByOpponent(data['board'], data['from'], data['to']);
 	    		    	playersTurn = true;
+	    		    	switchTimers();
 	    			}
 	    		}
 	    	});
@@ -79,6 +82,9 @@ $(document).ready( function() {
 		}
     }
 	
+	/**
+	 * Switch timers
+	 */
 	function switchTimers() {
 		clearInterval(tInterval);
 		if ($('div#timer1').hasClass('red')) {
@@ -92,14 +98,21 @@ $(document).ready( function() {
 		}
 	}
 	
-	var tInterval = null;
+	/**
+	 * Start timer with given id
+	 */
 	function startTimer(timerID) {
 		var timeLeft = $(timerID + ' h1');
 		var time = timeLeft.html().split(':');
 		tInterval = setInterval(function() {
 			if (time[1] == '00') {
-				time[1] = '59';
-				time[0] = time[0] - 1;
+				if (time[0] == '0') {
+					//end game
+					clearInterval(tInterval);
+				} else {
+					time[1] = '59';
+					time[0] = time[0] - 1;					
+				}
 			} else {
 				time[1] = time[1] - 1;
 				if (time[1] < 10) {

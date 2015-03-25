@@ -32,6 +32,16 @@ class MoveController extends Controller
     	} else if ($game->getActivePlayerIndex() != $player) {
     		throw new AccessDeniedException('It is not your turn!');
     	}
+    	//check player has time left
+    	$moveTime = time() - $game->getLastMoveTime();
+    	$timeLeft = $game->getPlayerTime($player) - $moveTime;
+    	if ($timeLeft < $moveTime) {
+    		throw new AccessDeniedException('You are out of time!');    		
+    	}
+    	//update player's time
+    	$game->setLastMoveTime(time());
+    	$game->setPlayerTime($player, $timeLeft - $moveTime);
+    	
     	//get move details
     	$move = array(
     			'from' => $request->request->get('from'),

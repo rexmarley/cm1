@@ -206,15 +206,18 @@ class GameController extends Controller
 	    $this->checkGameValidity($game, $user);
 	    //get player colour
     	$colour = $this->getPlayerColour($game, $user);
+    	//get time left
+    	$p1Time = $game->getPlayerTime(0);
+    	$p2Time = $game->getPlayerTime(1);
     	//get opponent
     	if ($colour == 'w') {
     		$op = 1;
-    		$userTime = $this->getMinutesTimeString($game->getP1Time());
-    		$opTime = $this->getMinutesTimeString($game->getP2Time());
+    		$userTime = $this->getMinutesTimeString($p1Time);
+    		$opTime = $this->getMinutesTimeString($p2Time);
     	} else {
     		$op = 0;
-    		$userTime = $this->getMinutesTimeString($game->getP2Time());
-    		$opTime = $this->getMinutesTimeString($game->getP1Time());
+    		$userTime = $this->getMinutesTimeString($p2Time);
+    		$opTime = $this->getMinutesTimeString($p1Time);
     	}
     	$opponent = $game->getPlayers()->get($op);
 
@@ -263,7 +266,7 @@ class GameController extends Controller
 	    //wait for oppponent to join
 	    $waited = 0;
 	    $em->refresh($game);
-	    while (!$game->getJoined() && $waited < 5) {
+	    while (!$game->getJoined() && $waited < 10) {
 	    	sleep(1);
 	    	$em->refresh($game);
 	    	$waited++;
@@ -275,6 +278,8 @@ class GameController extends Controller
 	    } else {
 	    	//add to user
 	    	$user->addCurrentGame($game);
+	    	//set time
+	    	$game->setLastMoveTime(time());
 	    }
 	    $em->flush();
 	    

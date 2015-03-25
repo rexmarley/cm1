@@ -43,11 +43,6 @@ class Game
     private $activePlayerIndex;
     
     /**
-     * @ORM\Column(type="integer")
-     */
-    private $length;
-    
-    /**
      * Has player 1 joined game
      * 
      * @ORM\Column(type="boolean")
@@ -72,14 +67,24 @@ class Game
     private $p2Chatty;
     
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="bigint", nullable=true)
      */
-    private $p1Time;
+    private $lastMoveTime;
+    
+//     /**
+//      * @ORM\Column(type="integer")
+//      */
+//     private $p1Time;
+    
+//     /**
+//      * @ORM\Column(type="integer")
+//      */
+//     private $p2Time;
     
     /**
-     * @ORM\Column(type="integer")
+     * @ORM\Column(type="array")
      */
-    private $p2Time;
+    private $playerTimes;
     
     /**
      * Constructor
@@ -90,9 +95,9 @@ class Game
         $this->board = $board;
         $this->p1Joined = false;
         $this->p2Joined = false;
-        $this->length = $length;
-        $this->p1Time = $length;
-        $this->p2Time = $length;
+//         $this->p1Time = $length;
+//         $this->p2Time = $length;
+        $this->playerTimes = array($length, $length);
     	//set white as active
     	$this->setActivePlayerIndex(0);
     }
@@ -105,29 +110,6 @@ class Game
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Set length
-     *
-     * @param integer $length
-     * @return Game
-     */
-    public function setLength($length)
-    {
-        $this->length = $length;
-
-        return $this;
-    }
-
-    /**
-     * Get length
-     *
-     * @return integer 
-     */
-    public function getLength()
-    {
-        return $this->length;
     }
 
     /**
@@ -183,7 +165,7 @@ class Game
      */
     public function getJoined()
     {
-        return $this->p1Joined && $this->p2Joined;
+        return ($this->p1Joined && $this->p2Joined);
     }    
 
     /**
@@ -364,50 +346,97 @@ class Game
     }
 
     /**
-     * Set time left for player 1
+     * Set last move time
      *
-     * @param int $timeLeft
+     * @param integer $time
      * @return Game
      */
-    public function setP1Time($timeLeft)
+    public function setLastMoveTime($time)
     {
-        $this->p1Time = $timeLeft;
+        $this->lastMoveTime = $time;
 
         return $this;
     }
 
     /**
-     * Get time left for player 1
+     * Get last move time
      *
-     * @return int 
+     * @return integer 
      */
-    public function getP1Time()
+    public function getLastMoveTime()
     {
-        return $this->p1Time;
+        return $this->lastMoveTime;
     }
 
     /**
-     * Set time left for player 2
+     * Set time left for player
      *
-     * @param int $timeLeft
+     * @param int $player index
+     * @param int $timeLeft seconds
      * @return Game
      */
-    public function setP2Time($timeLeft)
+    public function setPlayerTime($player, $timeLeft)
     {
-        $this->p2Time = $timeLeft;
+        $this->playerTimes[$player] = $timeLeft;
 
         return $this;
     }
 
     /**
-     * Get time left for player 2
+     * Get time left for player
      *
      * @return int 
      */
-    public function getP2Time()
+    public function getPlayerTime($player)
     {
-        return $this->p2Time;
+        return $this->playerTimes[$player];
     }
+
+//     /**
+//      * Set time left for player 1
+//      *
+//      * @param int $timeLeft
+//      * @return Game
+//      */
+//     public function setP1Time($timeLeft)
+//     {
+//         $this->p1Time = $timeLeft;
+
+//         return $this;
+//     }
+
+//     /**
+//      * Get time left for player 1
+//      *
+//      * @return int 
+//      */
+//     public function getP1Time()
+//     {
+//         return $this->p1Time;
+//     }
+
+//     /**
+//      * Set time left for player 2
+//      *
+//      * @param int $timeLeft
+//      * @return Game
+//      */
+//     public function setP2Time($timeLeft)
+//     {
+//         $this->p2Time = $timeLeft;
+
+//         return $this;
+//     }
+
+//     /**
+//      * Get time left for player 2
+//      *
+//      * @return int 
+//      */
+//     public function getP2Time()
+//     {
+//         return $this->p2Time;
+//     }
 
     /**
      * Enable/disable chat for player 2
