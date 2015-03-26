@@ -5,17 +5,17 @@ $(document).ready( function() {
 	 */
 	$("input:radio[name='opponent']").on('change', function() {
 		  if (this.value == 1) {
-			  $('#skill1').html('Best Match');
-			  $('#skill2').html('Lesser');
-			  $('#skill3').html('Greater');
+			  $("label[for='skill1']").html('Best Match');
+			  $("label[for='skill2']").html('Lesser');
+			  $("label[for='skill3']").html('Greater');
 			  //hide options for guest players
 			  if (!$('#skillLevel').hasClass('visible')) {
 				  $('#skillLevel').addClass('hidden');
 			  }
 		  } else {
-			  $('#skill1').html('Easy');
-			  $('#skill2').html('Moderate');
-			  $('#skill3').html('Difficult');
+			  $("label[for='skill1']").html('Easy');
+			  $("label[for='skill2']").html('Moderate');
+			  $("label[for='skill3']").html('Difficult');
 			  //show options for computer opponent
 			  if ($('#skillLevel').hasClass('hidden')) {
 				  $('#skillLevel').removeClass('hidden');
@@ -128,9 +128,7 @@ $(document).ready( function() {
     		    }
     		}, 600);
     		//get search id
-    		searchID = data['searchID'];
-    		//get search id
-    		searchID = data['searchID'];
+    		var searchID = data['searchID'];
     		//add to cancel
     		$('a#cancelSearch').attr('href', $('a#cancelSearch').attr('href') + '/' + searchID);
     		//wait for search to be matched

@@ -23,8 +23,10 @@ $(document).ready( function() {
 	
 	//allow player to move
 	var playersTurn = true;
-	//turn interval
+	//timer interval
 	var tInterval;
+	
+	var root = 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/';
 	
 	/**
 	 * Join game/check opponent has joined &
@@ -33,45 +35,22 @@ $(document).ready( function() {
 	if (typeof activePlayer !== 'undefined') {
 		//get game id
 		var game = $('.board').attr('id').split('_');
-		var root = 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/';
 		if (!inProgress) {
-			//join game
-	    	$.ajax({
-	    		type: "POST",
-	    		async: false,
-	    		url: root + 'join/'+game[2]
-	    	});
-			//check opponent has joined
-	    	$.ajax({
-	    		type: "POST",
-	    		async: false,
-	    		url: root + 'checkJoined/'+game[2],
-	    		success: function(data) {
-	    			if (!data['joined']) {
-	    				//game cancelled
-	    				alert('Game aborted by opponent!');
-	    				//back to start
-	        			location.href = root + 'start';
-	    			}    			
-	    		}
-	    	});
+			//join game/check joined
+			joinGame(game[2]);
 		}
-    	//wait for first move
+    	//if not players turn
 		if ((activePlayer === 0 && $('.board').attr('id').charAt(5) == 'b')
 				|| (activePlayer === 1 && $('.board').attr('id').charAt(5) == 'w')) {
+	    	//wait for opponent's move
 	    	playersTurn = false;
-	    	$.ajax({
-	    		type: "POST",
-	    		url: root + 'getFirstMove',
-	    		data: { 'gameID' : game[2] },
-	    		success: function(data) {
-	    			if (data['valid']) {
-	    				performMoveByOpponent(data['board'], data['from'], data['to'], data['enPassant'], data['pieceSwapped']);
-	    		    	playersTurn = true;
-	    		    	switchTimers();
-	    			}
+	    	var gm = setInterval(function() {
+	    		//ensure game is joined
+	    		if (inProgress) {
+	    			getMove(game[2]);
+	    			clearInterval(gm);
 	    		}
-	    	});
+	    	}, 1000);
 			//start opponent's timer
 	    	$('div#timer1').addClass('red');
 	    	startTimer('div#timer1');
@@ -95,6 +74,60 @@ $(document).ready( function() {
 	$('.choosablePiece').click(function() {
 		swapPawn(this.id);
 	});
+	
+	/**
+	 * Join Game/check oppponent has joined
+	 */
+	function joinGame(gameID) {
+    	$.ajax({
+    		type: "POST",
+    		url: root + 'join/'+gameID,
+			success: function() {
+				checkOpponentJoined(gameID);
+			}
+    	});		
+	}
+	
+	/**
+	 * Check oppponent has joined game
+	 */
+	function checkOpponentJoined(gameID) {
+		//check opponent has joined
+    	$.ajax({
+    		type: "POST",
+    		url: root + 'checkJoined/'+gameID,
+    		success: function(data) {
+    			if (!data['joined']) {
+    				//game cancelled
+    				alert('Game aborted by opponent!');
+    				//back to start
+        			location.href = root + 'start';
+    			} else {
+    				inProgress = true;
+    			} 			
+    		}
+    	});		
+	}
+	
+	/**
+	 * Get opponent's move
+	 */
+	function getMove(gameID) {
+    	$.ajax({
+    		type: "POST",
+    		url: root + 'getMove',
+    		data: { 'gameID' : gameID },
+    		success: function(data) {
+    			if (data['moved']) {
+    				performMoveByOpponent(data['board'], data['from'], data['to'], data['enPassant'], data['pieceSwapped']);
+    		    	playersTurn = true;
+    		    	switchTimers();
+    			} else {
+    				getMove(gameID);
+    			}
+    		}
+    	});		
+	}
 	
 	/**
 	 * Switch timers
@@ -142,7 +175,7 @@ $(document).ready( function() {
 	 */
 	function validateMove(event, ui) {
 		//get moved piece
-		var piece = getPieceDetails(ui.draggable.attr('id'));	
+		var piece = getPieceDetails(ui.draggable.attr('id'));
 		//check player's turn and piece (if actual game)
 		if (!playersTurn || ($('.board').attr('id').charAt(7) != 'x' 
 			&& piece['colour'] != $('.board').attr('id').charAt(5))) {
@@ -188,7 +221,7 @@ $(document).ready( function() {
 				takePiece(getGridRefFromAbstractIndices(from[0],to[1]), 'Won');
 			}
 			//check for pawn reaching opposing end
-			if (piece['type'] == 'pawn' && (piece['colour'] == 'w' && to[0] == 7) || (piece['colour'] == 'b' && to[0] == 0)) {
+			if (piece['type'] == 'pawn' && ((piece['colour'] == 'w' && to[0] == 7) || (piece['colour'] == 'b' && to[0] == 0))) {
 				//ajax move on piece selection
 				gFrom = from;
 				openPieceChooser(piece['colour']);
@@ -243,7 +276,10 @@ $(document).ready( function() {
     		url: 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/checkMove',
     		data: { 'gameID' : game[2],'from' : from, 'to' : to , 'type' : type, 'colour' : colour, 'newPiece' : newPiece },
     		success: function(data) {
-    			if (!data['valid']) {
+    			if (data['valid']) {
+    				//poll for opponent's move
+    				getMove(data['gameID']);
+    			} else {
     				$('div.errors').html('<h2>Nice try but why cheat at chess? You\'re docked a minute!</h2>');
     			    // show for 5 seconds
     			    setTimeout(function() { $('div.errors h2').fadeOut(2000); }, 5000);
@@ -251,10 +287,6 @@ $(document).ready( function() {
     			    //revert board
     				//abstractBoard = data['board'];
     				//could just cancel game for now
-    			} else {
-    				performMoveByOpponent(data['board'], data['from'], data['to'], data['enPassant'], data['pieceSwapped']);
-    				playersTurn = true;
-    				switchTimers();
     			}
     		}
     	});

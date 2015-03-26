@@ -72,14 +72,12 @@
     {% endjavascripts %}
 	{% if game is defined %}
 	    <script>
-	    	$(document).ready(function(){
-		    	//set game state
-		    	activePlayer = {{game.activePlayerIndex }};
-		    	inProgress = {{ game.joined |json_encode|raw }};
-		    	abstractBoard = {{ game.board.board |json_encode|raw }};
-		    	unmoved = {{ game.board.unmoved |json_encode|raw}};
-		    	enPassantAvailable = {{ game.board.enPassantAvailable |json_encode|raw}};
-	    	});
+	    	//set game state
+	    	var activePlayer = {{game.activePlayerIndex }};
+	    	var inProgress = {{ game.joined |json_encode|raw }};
+	    	var abstractBoard = {{ game.board.board |json_encode|raw }};
+	    	var unmoved = {{ game.board.unmoved |json_encode|raw}};
+	    	var enPassantAvailable = {{ game.board.enPassantAvailable |json_encode|raw}};
 	    </script>
 	{% endif %}
     <script type="text/javascript" src="{{ asset('bundles/cminterface/js/board.js') }}"></script>

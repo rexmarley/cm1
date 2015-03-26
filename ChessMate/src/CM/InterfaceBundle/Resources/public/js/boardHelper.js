@@ -3,29 +3,32 @@ var posOf = {'a': 1,'b': 2,'c': 3,'d': 4,'e': 5,'f': 6,'g': 7,'h': 8};
 var letterAt = ['a','b','c','d','e','f','g','h'];
 
 //allow abstract validation
-var abstractBoard = [
-	                ['w_rook','w_knight','w_bishop','w_queen','w_king','w_bishop','w_knight','w_rook'],
-	                ['w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn'],
-	                [false, false, false, false, false, false, false, false],
-	                [false, false, false, false, false, false, false, false],
-	                [false, false, false, false, false, false, false, false],
-	                [false, false, false, false, false, false, false, false],
-		            ['b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn'],
-	                ['b_rook','b_knight','b_bishop','b_queen','b_king','b_bishop','b_knight','b_rook']
-                ];
-//include redundant middle board to avoid resolving indices
-var unmoved = [
-			[true, true, true, true, true, true, true, true],
-			[true, true, true, true, true, true, true, true],
-			[false, false, false, false, false, false, false, false],
-			[false, false, false, false, false, false, false, false],
-			[false, false, false, false, false, false, false, false],
-			[false, false, false, false, false, false, false, false],
-			[true, true, true, true, true, true, true, true],
-			[true, true, true, true, true, true, true, true]
-        ];
-
-var enPassantAvailable = false;
+if (typeof activePlayer === 'undefined') {
+	//create default board state (for non-games i.e. practice on start screen)
+	var abstractBoard = [
+		                ['w_rook','w_knight','w_bishop','w_queen','w_king','w_bishop','w_knight','w_rook'],
+		                ['w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn'],
+		                [false, false, false, false, false, false, false, false],
+		                [false, false, false, false, false, false, false, false],
+		                [false, false, false, false, false, false, false, false],
+		                [false, false, false, false, false, false, false, false],
+			            ['b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn'],
+		                ['b_rook','b_knight','b_bishop','b_queen','b_king','b_bishop','b_knight','b_rook']
+	                ];
+	//include redundant middle board to avoid resolving indices
+	var unmoved = [
+				[true, true, true, true, true, true, true, true],
+				[true, true, true, true, true, true, true, true],
+				[false, false, false, false, false, false, false, false],
+				[false, false, false, false, false, false, false, false],
+				[false, false, false, false, false, false, false, false],
+				[false, false, false, false, false, false, false, false],
+				[true, true, true, true, true, true, true, true],
+				[true, true, true, true, true, true, true, true]
+	        ];
+	var enPassantAvailable = false;
+}
+//variables for non-games
 var enPassantPerformed = false;
 var castled = false;
 var newPiece = false;
