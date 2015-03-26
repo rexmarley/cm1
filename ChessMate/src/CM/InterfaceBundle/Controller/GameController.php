@@ -234,7 +234,12 @@ class GameController extends Controller
     	
     	return $minutes.':'.$s;
     }
-    
+
+    /**
+     * Join game
+     * @param int $gameID
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
     public function joinGameAction($gameID) {
 	    $user = $this->getUser();	
     	$em = $this->getDoctrine()->getManager();
@@ -252,6 +257,11 @@ class GameController extends Controller
     	return new JsonResponse(array('joined' => true));    	
     }
     
+    /**
+     * Check opponent has joined the game
+     * @param int $gameID
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
     public function checkJoinedAction($gameID) {
 	    $user = $this->getUser();	
     	$em = $this->getDoctrine()->getManager();
@@ -344,6 +354,11 @@ class GameController extends Controller
 	    }    	
     }
 	
+    /**
+     * Resign game
+     * @param int $gameID
+     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     */
     public function resignAction($gameID)
     {
 	    $user = $this->getUser();	
@@ -357,12 +372,23 @@ class GameController extends Controller
     	return $this->redirect($this->generateUrl('cm_interface_start', array()));	
     }
 	
-    public function offerDrawAction()
+    /**
+     * Offer draw
+     * @param int $gameID
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function offerDrawAction($gameID)
     {
     	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
     }
 	
-    public function toggleChatAction($player)
+    /**
+     * Toggle chat
+     * @param int $gameID
+     * @param int $player
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function toggleChatAction($gameID, $player)
     {
     	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
     }
