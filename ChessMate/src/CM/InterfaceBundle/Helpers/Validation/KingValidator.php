@@ -12,7 +12,7 @@ class KingValidator extends ValidationHelper
 {
 	/**
 	 * Validate king movement
-	 * @param array  $move
+	 * @param array $move
 	 */
 	protected function validatePiece($move) {
     	$from = $move['from'];
@@ -59,34 +59,4 @@ class KingValidator extends ValidationHelper
 		}
 		return false;
 	}
-	
-	/**
-	 * Mark a piece as vulnerable to En passant
-	 */
-	private function checkApplyEnPassant($move, $to, $colour) {
-		if ($move == 2) {
-			//get opponent's colour
-			$colour = $this->getOpponentColour($colour);
-			//look left/right - TODO: out of bounds?
-			if ($this->board[$to[0]][$to[1]-1] == $colour.'_pawn' || $this->board[$to[0]][$to[1]+1] == $colour.'_pawn') {
-				$this->game->getBoard()->setEnPassantAvailable($to);
-			}
-		}
-	}
-		
-// 	/**
-// 	 * Check En passant has been performed
-// 	 * @param moved the moved piece's start square
-// 	 */
-// 	private function checkEnPassantPerformed($moved) {
-// 		if ($this->enPassantPerformed) {
-// 			$this->enPassantPerformed = false;
-// 			return true;
-// 		}
-// 		//check En passant time-out
-// 		if ($this->enPassantAvailable != $moved) {
-// 			$this->enPassantAvailable = false;
-// 		}
-// 		return false;		
-// 	}
 }

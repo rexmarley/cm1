@@ -28,10 +28,9 @@ if (typeof activePlayer === 'undefined') {
 	        ];
 	var enPassantAvailable = false;
 }
-//variables for non-games
-var enPassantPerformed = false;
+//efficiency variables
 var castled = false;
-var newPiece = false;
+var enPassantPerformed = false;
 	
 /**
  * Resolve grid reference to array indices
@@ -345,6 +344,16 @@ function inCheckByPawn(colour, kingSquare) {
 		return true;
 	}
 	return false;
+}
+
+//TODO: validate moves and check on receiving opponent's move only call server-side validation when dispute
+
+
+/**
+ * Check mate is validated on
+ */
+function gameIsOver() {
+	
 }
 
 /**

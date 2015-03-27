@@ -30,15 +30,20 @@ class Board
      */
     protected $unmoved;
 
-    /**
-     * @ORM\Column(type="array")
-     */
-    protected $lastMoveFrom;
+//     /**
+//      * @ORM\Column(type="array")
+//      */
+//     protected $lastMoveFrom;
+
+//     /**
+//      * @ORM\Column(type="array")
+//      */
+//     protected $lastMoveTo;
 
     /**
      * @ORM\Column(type="array")
      */
-    protected $lastMoveTo;
+    protected $lastMove;
     
     /**
      * Has pawn been swapped
@@ -56,8 +61,9 @@ class Board
     public function __construct()
     {
         $this->setDefaults();
-        $this->lastMoveFrom = array();
-        $this->lastMoveTo = array();
+//         $this->lastMoveFrom = array();
+//         $this->lastMoveTo = array();
+        $this->lastMove = array();
         //$this->pieces = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
@@ -69,19 +75,6 @@ class Board
     public function getId()
     {
         return $this->id;
-    }
-
-    /**
-     * Set board
-     *
-     * @param array $board
-     * @return Board
-     */
-    public function setBoard(array $board)
-    {
-        $this->board = $board;
-
-        return $this;
     }
 
     /**
@@ -117,6 +110,19 @@ class Board
     }
 
     /**
+     * Set board
+     *
+     * @param array $board
+     * @return Board
+     */
+    public function setBoard(array $board)
+    {
+        $this->board = $board;
+
+        return $this;
+    }
+
+    /**
      * Get board
      *
      * @return array 
@@ -126,52 +132,76 @@ class Board
         return $this->board;
     }
 
+//     /**
+//      * Set last move 'from' index
+//      *
+//      * @param array $from[y,x]
+//      * 
+//      * @return Board
+//      */
+//     public function setLastMoveFrom(array $from)
+//     {
+//         $this->lastMoveFrom = $from;
+
+//         return $this;
+//     }
+
+//     /**
+//      * Get last move 'from' index
+//      *
+//      * @return array 
+//      */
+//     public function getLastMoveFrom()
+//     {
+//         return $this->lastMoveFrom;
+//     }
+
+//     /**
+//      * Set last move 'to' index
+//      *
+//      * @param array $to[y,x]
+//      * 
+//      * @return Board
+//      */
+//     public function setLastMoveTo(array $to)
+//     {
+//         $this->lastMoveTo = $to;
+
+//         return $this;
+//     }
+
+//     /**
+//      * Get last move 'to' index
+//      *
+//      * @return array 
+//      */
+//     public function getLastMoveTo()
+//     {
+//         return $this->lastMoveTo;
+//     }
+
     /**
-     * Set last move 'from' index
+     * Set last move, for validation
      *
-     * @param array $from[y,x]
+     * @param array $move[from[y,x], to[y,x], newBoard, enPassantAvailable, newPiece]
      * 
      * @return Board
      */
-    public function setLastMoveFrom(array $from)
+    public function setLastMove(array $move)
     {
-        $this->lastMoveFrom = $from;
+        $this->lastMove = $move;
 
         return $this;
     }
 
     /**
-     * Get last move 'from' index
+     * Get last move, for validation
      *
      * @return array 
      */
-    public function getLastMoveFrom()
+    public function getLastMove()
     {
-        return $this->lastMoveFrom;
-    }
-
-    /**
-     * Set last move 'to' index
-     *
-     * @param array $to[y,x]
-     * 
-     * @return Board
-     */
-    public function setLastMoveTo(array $to)
-    {
-        $this->lastMoveTo = $to;
-
-        return $this;
-    }
-
-    /**
-     * Get last move 'to' index
-     *
-     * @return array 
-     */
-    public function getLastMoveTo()
-    {
-        return $this->lastMoveTo;
+        return $this->lastMove;
     }
 
     /**

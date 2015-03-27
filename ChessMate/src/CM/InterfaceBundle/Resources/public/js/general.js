@@ -1,4 +1,7 @@
 $(document).ready( function() {
+
+	//TODO: change to app.php for live
+	var root = 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/';
 	
 	/**
 	 * Change skill labels on selection of human/computer opponent
@@ -28,6 +31,7 @@ $(document).ready( function() {
 	 */
 	$('.ui-dialog').dialog({
 		 autoOpen: false,
+		 closeOnEscape: false,
 		 open: function(event, ui) {
 			 $(".ui-dialog-titlebar-close").hide();
 		 },
@@ -141,7 +145,7 @@ $(document).ready( function() {
 	 * Find/create new game
 	 */
 	function checkSearchMatched(searchID) {
-		var url = 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/matchSearch/'+searchID;
+		var url = root+'matchSearch/'+searchID;
     	matchSearch = $.post(url);
 		matchSearch.done(function(data) {
     		if(data['matched']) {

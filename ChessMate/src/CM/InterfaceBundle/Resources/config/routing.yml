@@ -2,18 +2,6 @@ cm_interface_start:
     path:     /start
     defaults: { _controller: "CMInterfaceBundle:Game:start" }
     
-cm_interface_play:
-    path:     /play/{gameID}
-    defaults: { _controller: "CMInterfaceBundle:Game:play" }
-    
-cm_interface_join:
-    path:     /join/{gameID}
-    defaults: { _controller: "CMInterfaceBundle:Game:joinGame" }
-    
-cm_interface_checkJoined:
-    path:     /checkJoined/{gameID}
-    defaults: { _controller: "CMInterfaceBundle:Game:checkJoined" }
-    
 cm_new_search:
     path:     /newSearch
     defaults: { _controller: "CMInterfaceBundle:Game:newSearch" }
@@ -26,6 +14,38 @@ cm_cancel_search:
     path:     /cancelSearch/{searchID}
     defaults: { _controller: "CMInterfaceBundle:Game:cancelSearch", searchID = 0 }
     
+cm_interface_play:
+    path:     /play/{gameID}
+    defaults: { _controller: "CMInterfaceBundle:Game:play" }
+    
+cm_interface_join:
+    path:     /join/{gameID}
+    defaults: { _controller: "CMInterfaceBundle:Game:joinGame" }
+    
+cm_interface_checkJoined:
+    path:     /checkJoined/{gameID}
+    defaults: { _controller: "CMInterfaceBundle:Game:checkJoined" }
+    
+cm_send_move:
+    path:     /sendMove
+    defaults: { _controller: "CMInterfaceBundle:Move:sendMove" }
+    
+cm_get_move:
+    path:     /getMove
+    defaults: { _controller: "CMInterfaceBundle:Move:getMove" }
+    
+cm_validate_move:
+    path:     /checkMove
+    defaults: { _controller: "CMInterfaceBundle:Move:validateMove" }
+    
+cm_save_move:
+    path:     /saveMove/{gameID}
+    defaults: { _controller: "CMInterfaceBundle:Move:saveMove" }
+    
+cm_find_cheat:
+    path:     /findCheat/{gameID}
+    defaults: { _controller: "CMInterfaceBundle:Move:findCheat" }
+    
 cm_offer_draw:
     path:     /draw
     defaults: { _controller: "CMInterfaceBundle:Game:offerDraw" }
@@ -37,14 +57,6 @@ cm_resign_game:
 cm_toggle_chat:
     path:     /toggleChat/{player}
     defaults: { _controller: "CMInterfaceBundle:Game:toggleChat" }
-    
-cm_validate_move:
-    path:     /checkMove
-    defaults: { _controller: "CMInterfaceBundle:Move:validateMove" }
-    
-cm_get_move:
-    path:     /getMove
-    defaults: { _controller: "CMInterfaceBundle:Move:getMove" }
     
 cm_js_testBoard:
     path:     /tests
