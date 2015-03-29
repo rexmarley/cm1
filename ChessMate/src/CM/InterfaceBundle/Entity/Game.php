@@ -1,5 +1,4 @@
 <?php
-// src/CM/InterfaceBundle/Entity/Game.php
 
 namespace CM\InterfaceBundle\Entity;
 
@@ -70,21 +69,37 @@ class Game
      * @ORM\Column(type="bigint", nullable=true)
      */
     private $lastMoveTime;
+
+    /**
+     * @ORM\Column(type="array")
+     */
+    protected $lastMove;
     
-//     /**
-//      * @ORM\Column(type="integer")
-//      */
-//     private $p1Time;
-    
-//     /**
-//      * @ORM\Column(type="integer")
-//      */
-//     private $p2Time;
+    /**
+     * @ORM\Column(type="boolean")
+     */
+    private $lastMoveValidated;
     
     /**
      * @ORM\Column(type="array")
      */
     private $playerTimes;
+
+    /**
+     * Cheater's index; null if none
+     * 0 = white
+     * 1 = black
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $cheaterIndex;
+
+    /**
+     * Victor's index; null if none
+     * 0 = white
+     * 1 = black
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $victorIndex;
     
     /**
      * Constructor
@@ -98,6 +113,8 @@ class Game
         $this->playerTimes = array($length, $length);
     	//set white as active
     	$this->setActivePlayerIndex(0);
+        $this->lastMove = array();
+        $this->lastMoveValidated = true;
     }
 
     /**
@@ -260,6 +277,17 @@ class Game
     {
         return $this->activePlayerIndex;
     }
+    
+
+    /**
+     * Get inactive player index
+     *
+     * @return \CM\UserBundle\Entity\User 
+     */
+    public function getInactivePlayerIndex()
+    {
+        return $this->activePlayerIndex - ($this->activePlayerIndex * 2) + 1;        
+    }
 
     /**
      * Switch active player
@@ -268,11 +296,7 @@ class Game
      */
     public function switchActivePlayer()
     {
-        if ($this->activePlayerIndex == 0) {
-        	$this->activePlayerIndex = 1;
-        } else {
-        	$this->activePlayerIndex = 0;
-        }
+        $this->activePlayerIndex = $this->activePlayerIndex - ($this->activePlayerIndex * 2) + 1;
 
         return $this;
     }    
@@ -390,52 +414,6 @@ class Game
         return $this->playerTimes[$player];
     }
 
-//     /**
-//      * Set time left for player 1
-//      *
-//      * @param int $timeLeft
-//      * @return Game
-//      */
-//     public function setP1Time($timeLeft)
-//     {
-//         $this->p1Time = $timeLeft;
-
-//         return $this;
-//     }
-
-//     /**
-//      * Get time left for player 1
-//      *
-//      * @return int 
-//      */
-//     public function getP1Time()
-//     {
-//         return $this->p1Time;
-//     }
-
-//     /**
-//      * Set time left for player 2
-//      *
-//      * @param int $timeLeft
-//      * @return Game
-//      */
-//     public function setP2Time($timeLeft)
-//     {
-//         $this->p2Time = $timeLeft;
-
-//         return $this;
-//     }
-
-//     /**
-//      * Get time left for player 2
-//      *
-//      * @return int 
-//      */
-//     public function getP2Time()
-//     {
-//         return $this->p2Time;
-//     }
-
     /**
      * Enable/disable chat for player 2
      *
@@ -457,5 +435,102 @@ class Game
     public function getP2Chatty()
     {
         return $this->p2Chatty;
+    }
+
+    /**
+     * Set last move, for validation
+     *
+     * @param array $move[from[y,x], to[y,x], newBoard, enPassantAvailable, newPiece]
+     * 
+     * @return Game
+     */
+    public function setLastMove(array $move)
+    {
+        $this->lastMove = $move;
+
+        return $this;
+    }
+
+    /**
+     * Get last move, for validation
+     *
+     * @return array 
+     */
+    public function getLastMove()
+    {
+        return $this->lastMove;
+    }
+
+    /**
+     * Set last move is validated
+     *
+     * @param boolean $validated
+     * @return Game
+     */
+    public function setLastMoveValidated($validated)
+    {
+       $this->lastMoveValidated = $validated;
+
+        return $this;
+    }
+
+    /**
+     * Check if last move is validated
+     *
+     * @return boolean 
+     */
+    public function getLastMoveValidated()
+    {
+        return $this->lastMoveValidated;
+    }
+
+    /**
+     * Set cheater's index, if move not valid
+     * @param int index
+     * 
+     * @return Game
+     */
+    public function setCheaterIndex($index)
+    {
+        if ($index == 0 || $index == 1) {
+        	$this->cheaterIndex = $index;
+        }
+
+        return $this;
+    }
+    
+    /**
+     * Get cheater's index
+     *
+     * @return \CM\UserBundle\Entity\User 
+     */
+    public function getCheaterIndex()
+    {
+        return $this->cheaterIndex;
+    }
+
+    /**
+     * Set victor's index, if game over
+     * @param int index
+     * 
+     * @return Game
+     */
+    public function setVictorIndex($index)
+    {
+        if ($index == 0 || $index == 1) {
+        	$this->victorIndex = $index;
+        }
+
+        return $this;
+    }
+    
+    /**
+     * Get victor's index
+     *
+     * @return \CM\UserBundle\Entity\User 
+     */
+    public function getVictorIndex()
+    {
+        return $this->victorIndex;
     }
 }

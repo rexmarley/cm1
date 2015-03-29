@@ -10,69 +10,7 @@ use CM\InterfaceBundle\Entity\Game;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 
 class MoveController extends Controller
-{   
-// 	/**
-// 	 * Moves are validated client-side
-// 	 * If valid, move is validated server-side, to prevent tampering
-// 	 * 
-// 	 * @param Request $request
-// 	 * @return \Symfony\Component\HttpFoundation\JsonResponse
-// 	 */ 
-//     public function validateMoveAction(Request $request)
-//     {
-//     	//find game
-//     	$em = $this->getDoctrine()->getManager();
-//     	$gameID = $request->request->get('gameID');
-//     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-//     	$user = $this->getUser();
-//     	//make sure valid user for game & turn
-// 	    $player = $game->getPlayers()->indexOf($user);
-//     	if ($player === false) {
-// 	    	throw new AccessDeniedException('You are not part of this game!');
-//     	} else if ($game->getActivePlayerIndex() != $player) {
-//     		throw new AccessDeniedException('It is not your turn!');
-//     	}
-//     	//check player has time left
-//     	$moveTime = time() - $game->getLastMoveTime();
-//     	$timeLeft = $game->getPlayerTime($player) - $moveTime;
-//     	if ($timeLeft < $moveTime) {
-//     		throw new AccessDeniedException('You are out of time!');    		
-//     	}    	
-//     	//get move details
-//     	$move = array(
-//     			'from' => $request->request->get('from'),
-//     			'to' => $request->request->get('to'),
-//     			'pColour' => $request->request->get('colour'),
-//     			'pType' => $request->request->get('type'),
-//     			'newPiece' => $request->request->get('newPiece')
-//     	);
-//     	//make sure right colour moved
-//     	if ($move['pColour'] == 'w' and $player == 1 || $move['pColour'] == 'b' and $player == 0) {
-//     		throw new AccessDeniedException('That is not your piece!');    		
-//     	}
-//     	//get piece validator 
-//     	$validator = $this->get($move['pType'].'_validator');
-//     	//validate move
-//     	$valid = $validator->validateMove($move, $game);
-//     	if ($valid['valid']) {
-//     		//update game state
-//     		$board = $game->getBoard(); 
-//     		$board->setBoard($valid['board']);
-//     		//set last move for retrieval by opponent
-//     		$board->setLastMoveFrom($move['from']);
-//     		$board->setLastMoveTo($move['to']);
-//     		$game->setBoard($board);
-// 			$game->switchActivePlayer();
-// 	    	//update player's time
-// 	    	$game->setLastMoveTime(time());
-// 	    	$game->setPlayerTime($player, $timeLeft - $moveTime);
-// 	    	//save
-//     		$em->flush();
-//     	}
-// 	    //return valid/invalid 	
-//     	return new JsonResponse(array('valid' => $valid['valid'], 'gameID' => $gameID));
-//     }
-    
+{    
 	/**
 	 * Set last move for retrieval/validation by opponent
 	 * If validity is not confirmed by opponent, server-side validation is conducted in subsequent call
@@ -82,57 +20,77 @@ class MoveController extends Controller
 	 */ 
     public function sendMoveAction(Request $request)
     {
+    	$content = json_decode($request->getContent());
     	//find game
     	$em = $this->getDoctrine()->getManager();
-    	$gameID = $request->request->get('gameID');
-    	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+    	$game = $em->getRepository('CMInterfaceBundle:Game')->find($content->gameID);
     	$user = $this->getUser();
     	//make sure valid user for game & turn
 	    $player = $game->getPlayers()->indexOf($user);
+	    //check for attempted hacks that don't affect gameplay
     	if ($player === false) {
 	    	throw new AccessDeniedException('You are not part of this game!');
     	} else if ($game->getActivePlayerIndex() != $player) {
-    		throw new AccessDeniedException('It is not your turn!');
+	    	throw new AccessDeniedException('It is not your turn!');
+    	} else if (!$game->getLastMoveValidated()) {
+    		//attempt to make move without validating previous
+	    	throw new AccessDeniedException('Stop messing about!');
     	}
     	//check player has time left
     	$moveTime = time() - $game->getLastMoveTime();
     	$timeLeft = $game->getPlayerTime($player) - $moveTime;
     	if ($timeLeft < $moveTime) {
-    		throw new AccessDeniedException('You are out of time!');    		
-    	}    	
+    		//throw new AccessDeniedException('You are out of time!');
+	    	$game->setVictorIndex($game->getInactivePlayerIndex());    		
+    	}
+    	$game->setLastMoveTime(time());
     	//get move details
     	$move = array(
-    			'from' => $request->request->get('from'),
-    			'to' => $request->request->get('to'),
-    			'newBoard' => $request->request->get('board'),
-    			'enPassant' => $request->request->get('enPassant'),
-    			'newPiece' => $request->request->get('newPiece')
+    			'from' => $content->from,
+    			'to' => $content->to,
+    			'newBoard' => $content->board,
+    			'enPassant' => $content->enPassant,
+    			'newPiece' => $content->newPiece
     	);
-	    //set move for validation by opponent
-	    $game->getBoard()->setLastMove($move); //TODO: store in Game?
+	    //save move for validation by opponent
+	    $game->setLastMove($move);
+		//mark move as unvalidated
+		$game->setLastMoveValidated(false);
+    	//switch active player
 		$game->switchActivePlayer();
 	    $em->flush();
-	    
+
     	return new JsonResponse(array('sent' => true));
     }
     
     /**
-     * Get opponent's move for validation
+     * Get opponent's move; validity is checked on receipt
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    function getMoveAction(Request $request) {
+    public function getMoveAction(Request $request) {
     	//find game
     	$em = $this->getDoctrine()->getManager();
     	$gameID = $request->request->get('gameID');
     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
     	$user = $this->getUser();
 	    $player = $game->getPlayers()->indexOf($user);
-	    //check if move made
-	    if ($game->getActivePlayerIndex() == $player) {
+	    if ($game->getLastMoveValidated()) {
+	    	$cheat = $game->getCheaterIndex();
+	    	if (!is_null($cheat)) {
+	    		//player/opponent cheated - report back
+	    		if ($cheat == $player) {
+	    			$message = 'Game Aborted: Why cheat at chess?';
+	    		} else {
+	    			$message = 'Game Aborted: Opponent has cheated!';	    			
+	    		}
+	   	 		return new JsonResponse(array('moved' => true, 'cheat' => $message));	    		
+	    	}
+	    //check if move made	    	
+	    } else if ($game->getActivePlayerIndex() == $player) {
 	    	//get opponent's move
-	    	$move = $game->getBoard()->getLastMove();
-			//return opponent's valid move
+	    	$move = $game->getLastMove();	    	
+			//return opponent's unvalidated move
 		    return new JsonResponse(
 		    	array('moved' => true,
 	    				'checkMate' => false, // ?client-side/request check? 
@@ -142,62 +100,48 @@ class MoveController extends Controller
 	    				'enPassant' => $move['enPassant'],
 	    				'newBoard' => $move['newBoard']
 		    	));	    	
+	    } else if (time() - $game->getLastMoveTime() > 30) {
+	    	//move not validated by opponent within 30 secs. - assume foul play/game abandoned
+	    	$game->setVictorIndex($player);
 	    }
 	    return new JsonResponse(array('moved' => false));	
     }
-    
-//     /**
-//      * Get opponent's move
-//      * @param Request $request
-//      * @return \Symfony\Component\HttpFoundation\JsonResponse
-//      */
-//     function getMoveAction(Request $request) {
-//     	//find game
-//     	$em = $this->getDoctrine()->getManager();
-//     	$gameID = $request->request->get('gameID');
-//     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-//     	$user = $this->getUser();
-// 	    $player = $game->getPlayers()->indexOf($user);
-// 	    //check if move made
-// 	    if ($game->getActivePlayerIndex() == $player) {
-// 	    	//get opponent's move
-// 	    	$board = $game->getBoard();
-// 			//return opponent's valid move
-// 		    return new JsonResponse(
-// 		    	array('moved' => true,
-// 	    				'checkMate' => false,
-// 	    				'enPassant' => $board->getEnPassantAvailable(), 
-// 		    			'pieceSwapped' => $board->getPawnSwapped(),
-// 		    			'board' => $board->getBoard(), 
-// 		    			'from' => $board->getLastMoveFrom(), 
-// 		    			'to' => $board->getLastMoveTo()
-// 		    	));	    	
-// 	    }
-// 	    return new JsonResponse(array('moved' => false));	
-//     }
     
     /**
      * Save move if validated by opponent
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    function saveMoveAction($gameID) {
+    public function saveMoveAction($gameID) {
     	$user = $this->getUser();
     	//find game
     	$em = $this->getDoctrine()->getManager();
     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
     	//make sure valid user for game
-    	//& only allow save of opponents move
+    	//& only allow save of opponent's move
 	    $player = $game->getPlayers()->indexOf($user);
     	if ($player === false) {
 	    	throw new AccessDeniedException('You are not part of this game!');
     	} else if ($game->getActivePlayerIndex() != $player) {
     		throw new AccessDeniedException('You may not save your own move!');
     	}
+    	//get opponent's validated move
+    	$move = $game->getLastMove();
+		//mark move as validated
+		$game->setLastMoveValidated(true);
     	//save move
-    	//get opponent's valid move
-    	$move = $game->getBoard()->getLastMove();
-    	$move['validated'] = true; //not used?
+    	$this->saveMove($game, $move, $em);
+    	
+	    return new JsonResponse(array('saved' => true));
+    }
+    
+    /**
+     * Save move
+     * @param Game $game
+     * @param array $move
+     * @param unknown $em
+     */
+    private function saveMove(Game $game, array $move, $em) {
     	//update game state
     	$board = $game->getBoard();
     	$board->setBoard($move['newBoard']);
@@ -205,64 +149,84 @@ class MoveController extends Controller
     	//mark piece as moved
     	$board->setPieceAsMoved($move['from'][0], $move['from'][1]);
     	$game->setBoard($board);
-    	
-	    return new JsonResponse(array('saved' => true));
+    	$em->flush();    	
     }
+    
 	/**
 	 * Moves are validated client-side
-	 * If valid consensus differs between players, the cheat is exposed
+	 * If consensus on validity differs between players, the cheat is exposed
 	 * 
 	 * @return \Symfony\Component\HttpFoundation\JsonResponse
 	 */ 
     public function findCheatAction($gameID)
     {
+    	$user = $this->getUser();
     	//find game
     	$em = $this->getDoctrine()->getManager();
     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-    	$user = $this->getUser();
-    	//make sure valid user for game - probably not needed
+    	//get user
 	    $player = $game->getPlayers()->indexOf($user);
+    	//get player that made move
+    	$mover = $game->getInactivePlayerIndex();
+    	//get player that questioned validity
+    	$shaker = $game->getActivePlayerIndex();
+	    //check for attempted hacks that don't affect gameplay
     	if ($player === false) {
 	    	throw new AccessDeniedException('You are not part of this game!');
+    	} else if ($game->getLastMoveValidated()) {
+	    	throw new AccessDeniedException('Move already validated!');
+    	} else if ($player == $mover) {
+	    	throw new AccessDeniedException('Stop messing about');
     	}
-    	$board = $game->getBoard(); 
+    	$cheatMessage = 'Game Aborted: ';
     	//get attempted move
-    	$attempted = $board->getLastMove();
+    	$attempted = $game->getLastMove();
+    	$board = $game->getBoard(); 
     	$absBoard = $board->getBoard();
     	$from = $attempted['from'];
     	$to = $attempted['to'];
-    	$piece = explode("_", $absBoard[$from][$to]);
-    	//get move details
-    	$move = array(
-    			'from' => $from,
-    			'to' => $to,
-    			'pColour' => $piece[0],
-    			'pType' => $piece[1],
-    			'newPiece' => $attempted['newPiece']
-    	);
-    	//make sure right colour moved
-    	if ($move['pColour'] == 'w' and $player == 0 || $move['pColour'] == 'b' and $player == 1) {
-    		throw new AccessDeniedException('Not opponent\'s piece!');    		
+    	//check piece exists at from square
+    	$piece = $absBoard[$from[0]][$from[1]];
+    	if (!$piece) {
+    		//cheat = inactive player i.e. player that made move
+    		$game->setCheaterIndex($mover);
+    		$cheatMessage .= 'Opponent has cheated!';
+    	} else {
+	    	$piece = explode("_", $piece);
+	    	//get move details
+	    	$move = array(
+	    			'from' => $from,
+	    			'to' => $to,
+	    			'pColour' => $piece[0],
+	    			'pType' => $piece[1],
+	    			'newPiece' => $attempted['newPiece']
+	    	);
+	    	//make sure right colour moved
+	    	if ($move['pColour'] == 'w' and $mover == 1 || $move['pColour'] == 'b' and $mover == 0) {
+    			$game->setCheaterIndex($mover);
+    			$cheatMessage .= 'Opponent has cheated!';
+	    	} else {
+		    	//get piece validator 
+		    	$validator = $this->get($move['pType'].'_validator');
+		    	//validate move
+		    	$valid = $validator->validateMove($move, $game);
+		    	if ($valid['valid']) {
+		    		//cheater = active player i.e. player that questioned validity
+	    			$game->setCheaterIndex($shaker);
+    				$cheatMessage .= 'Why cheat at chess?';
+	    			//save validated move
+	    			$this->saveMove($game, $attempted, $em);
+		    	} else {
+	    			//cheat = inactive player i.e. player that made move
+	    			$game->setCheaterIndex($mover);
+    				$cheatMessage .= 'Opponent has cheated!';
+		    	}
+	    	}
     	}
-    	//get piece validator 
-    	$validator = $this->get($move['pType'].'_validator');
-    	//validate move
-    	$valid = $validator->validateMove($move, $game);
-    	if ($valid['valid']) {
-    		//update game state
-    		$board->setBoard($valid['board']);
-    		//set last move for retrieval by opponent
-    		$board->setLastMoveFrom($move['from']);
-    		$board->setLastMoveTo($move['to']);
-    		$game->setBoard($board);
-			$game->switchActivePlayer();
-	    	//update player's time
-	    	$game->setLastMoveTime(time());
-	    	$game->setPlayerTime($player, $timeLeft - $moveTime);
-	    	//save
-    		$em->flush();
-    	}
-	    //return valid/invalid 	
-    	return new JsonResponse(array('valid' => $valid['valid'], 'gameID' => $gameID));
+		//mark move as validated
+		$game->setLastMoveValidated(true);
+    	$em->flush();
+	    //return cheater 	
+   	 	return new JsonResponse(array('cheat' => $cheatMessage));
     }
 }

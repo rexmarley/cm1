@@ -1,7 +1,7 @@
+//TODO: change to app.php for live
+var root = 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/';
+	
 $(document).ready( function() {
-
-	//TODO: change to app.php for live
-	var root = 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/';
 	
 	/**
 	 * Change skill labels on selection of human/computer opponent

@@ -34,10 +34,6 @@ cm_get_move:
     path:     /getMove
     defaults: { _controller: "CMInterfaceBundle:Move:getMove" }
     
-cm_validate_move:
-    path:     /checkMove
-    defaults: { _controller: "CMInterfaceBundle:Move:validateMove" }
-    
 cm_save_move:
     path:     /saveMove/{gameID}
     defaults: { _controller: "CMInterfaceBundle:Move:saveMove" }

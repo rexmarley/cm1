@@ -1,5 +1,5 @@
 <?php
-// src/CM/InterfaceBundle/Entity/Board.php
+
 namespace CM\InterfaceBundle\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
@@ -10,7 +10,6 @@ use Doctrine\Common\Collections\ArrayCollection;
  * @ORM\Entity
  * @ORM\Table(name="board")
  */
- // @ORM\Entity(repositoryClass="CM\UserBundle\Repository\UserRepository")
 class Board
 {
     /**
@@ -29,21 +28,6 @@ class Board
      * @ORM\Column(type="array")
      */
     protected $unmoved;
-
-//     /**
-//      * @ORM\Column(type="array")
-//      */
-//     protected $lastMoveFrom;
-
-//     /**
-//      * @ORM\Column(type="array")
-//      */
-//     protected $lastMoveTo;
-
-    /**
-     * @ORM\Column(type="array")
-     */
-    protected $lastMove;
     
     /**
      * Has pawn been swapped
@@ -61,10 +45,6 @@ class Board
     public function __construct()
     {
         $this->setDefaults();
-//         $this->lastMoveFrom = array();
-//         $this->lastMoveTo = array();
-        $this->lastMove = array();
-        //$this->pieces = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
@@ -130,78 +110,6 @@ class Board
     public function getBoard()
     {
         return $this->board;
-    }
-
-//     /**
-//      * Set last move 'from' index
-//      *
-//      * @param array $from[y,x]
-//      * 
-//      * @return Board
-//      */
-//     public function setLastMoveFrom(array $from)
-//     {
-//         $this->lastMoveFrom = $from;
-
-//         return $this;
-//     }
-
-//     /**
-//      * Get last move 'from' index
-//      *
-//      * @return array 
-//      */
-//     public function getLastMoveFrom()
-//     {
-//         return $this->lastMoveFrom;
-//     }
-
-//     /**
-//      * Set last move 'to' index
-//      *
-//      * @param array $to[y,x]
-//      * 
-//      * @return Board
-//      */
-//     public function setLastMoveTo(array $to)
-//     {
-//         $this->lastMoveTo = $to;
-
-//         return $this;
-//     }
-
-//     /**
-//      * Get last move 'to' index
-//      *
-//      * @return array 
-//      */
-//     public function getLastMoveTo()
-//     {
-//         return $this->lastMoveTo;
-//     }
-
-    /**
-     * Set last move, for validation
-     *
-     * @param array $move[from[y,x], to[y,x], newBoard, enPassantAvailable, newPiece]
-     * 
-     * @return Board
-     */
-    public function setLastMove(array $move)
-    {
-        $this->lastMove = $move;
-
-        return $this;
-    }
-
-    /**
-     * Get last move, for validation
-     *
-     * @return array 
-     */
-    public function getLastMove()
-    {
-        return $this->lastMove;
     }
 
     /**

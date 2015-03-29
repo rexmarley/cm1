@@ -78,9 +78,6 @@
 	    	var abstractBoard = {{ game.board.board |json_encode|raw }};
 	    	var unmoved = {{ game.board.unmoved |json_encode|raw}};
 	    	var enPassantAvailable = {{ game.board.enPassantAvailable |json_encode|raw}};
-// 	    	var enPassantPerformed = false;
-// 	    	var castled = false;
-// 	    	var newPiece = false;
 	    </script>
 	{% endif %}
     <script type="text/javascript" src="{{ asset('bundles/cminterface/js/board.js') }}"></script>
