@@ -11,7 +11,7 @@ table {
 	width:100%;
 }
 
-@media screen and (max-width: 1023px) {
+@media screen and (max-width: 1200px) {
     body {
     	font-size: 14px !important;
     }
@@ -24,6 +24,17 @@ table {
 	div#newGameOptions {
 		font-size: 1em !important;
 	}
+
+	div.board {
+		width: 56em !important;
+		height: 48em !important;
+		margin-left: -30% !important;
+	}
+	
+	div.square {
+	    height: 6em !important;
+	    width: 7em !important;
+	}
 }
 
 @media screen and (min-width: 800px) {
@@ -32,7 +43,24 @@ table {
 	}
 }
 
-@media screen and (max-width: 767px) {
+@media screen and (max-width: 900px) {
+	div#userOptions {
+		margin-top: 5%;
+	}
+
+	div.board {
+		width: 54.4em !important;
+		height: 44em !important;
+		margin-left: auto !important;
+	}
+	
+	div.square {
+	    height: 5.5em !important;
+	    width: 6.8em !important;
+	}
+}
+
+@media screen and (max-width: 800px) {
     body {
     	font-size: 10px !important;
     }
@@ -42,14 +70,79 @@ table {
 	div#newGameOptions {
 		font-size: 1.2em !important;
 	}
+
+	div.board {
+		width: 73.6em !important;
+		height: 73.6em !important;
+		margin-left: auto !important;
+	}
+	
+	div.square {
+	    height: 9.2em !important;
+	    width: 9.2em !important;
+	}
 }
 
-@media all and (max-width: 480px) {
+@media screen and (max-width: 700px) {
+    body {
+    	font-size: 10px !important;
+    }
+	h1, h2 {
+		font-size:1.8em !important;
+	}
+	div#newGameOptions {
+		font-size: 1.2em !important;
+	}
+
+	div.board {
+		width: 56em !important;
+		height: 56em !important;
+		margin-left: auto !important;
+	}
+	
+	div.square {
+	    height: 7em !important;
+	    width: 7em !important;
+	}
+}
+
+@media all and (max-width: 500px) {
     body {
     	font-size: 7px !important;
     }
 	div#newGameOptions {
 		font-size: 1.4em !important;
+	}
+
+	div.board {
+		width: 64em !important;
+		height: 48em !important;
+		margin-left: auto !important;
+	}
+	
+	div.square {
+	    height: 6em !important;
+	    width: 8em !important;
+	}
+}
+
+@media all and (max-width: 360px) {
+    body {
+    	font-size: 7px !important;
+    }
+	div#newGameOptions {
+		font-size: 1.4em !important;
+	}
+
+	div.board {
+		width: 41em !important;
+		height: 41em !important;
+		margin-left: auto !important;
+	}
+	
+	div.square {
+	    height: 5.5em !important;
+	    width: 5.1em !important;
 	}
 }
 
@@ -113,9 +206,8 @@ div#newGameOptions a {
 }
 
 div.board {
-	width: 100%;
-	height: 0;
-	//padding-bottom:100%;
+	width: 675px;
+	height: 675px;
 	outline: 1px solid #bdb7b7;
 	margin: 3px;
 	cursor: pointer;
@@ -123,9 +215,8 @@ div.board {
 
 div.square {  
 	float: left;
-    height: 0;
-    padding-bottom: 12.5%;
-    width: 12.5%;
+    height: 84.35px;
+    width: 84.35px;
 }
 .clipped {
     overflow: hidden;	
