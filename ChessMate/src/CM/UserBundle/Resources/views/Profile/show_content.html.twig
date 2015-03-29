@@ -1,0 +1,31 @@
+{% trans_default_domain 'FOSUserBundle' %}
+
+<div class="container">
+	<div id="showProfile" class="fos_user_user_show login profile">
+		<div class="row">
+		    <div class="col-md-12">
+		    	<center><h2><u>Profile</u></span></h2>
+			</div>
+		</div>
+		<div class="row">
+		    <div class="col-md-2 col-xs-2">
+				<label>{{ 'profile.show.username'|trans }}: </label>
+			</div>
+		    <div class="col-md-4">
+				<input type="text" value="{{ user.username }}" disabled/>
+			</div>
+		    <div class="col-md-2 col-xs-2">
+				<label>{{ 'profile.show.email'|trans }}:</label> 
+			</div>
+		    <div class="col-md-4">
+				<input type="text" value="{{ user.email }}" disabled/>
+			</div>
+		</div>
+		<br>
+		<div class="row">
+		    <div class="col-md-12">
+	        	<center><a class="btn btn-lg btn-success" href="{{ path('cm_interface_start', {}) }}">Home</a></center>
+			</div>
+		</div>
+	</div>
+</div>

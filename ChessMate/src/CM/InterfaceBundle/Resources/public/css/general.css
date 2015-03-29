@@ -169,7 +169,8 @@ div.piecesWonLost span {
 }
 
 div#chatBox {
-	min-height: 10em;	
+	min-height: 10em;
+	background: #ffffff;
 }
 
 div#chatBox textarea {
@@ -233,13 +234,13 @@ div#register input[type=text], div#register input[type=email], div#register inpu
 	width:90%;
 }
 
-div#register label, div#login label {
+div#register label, div#login label, div.profile {
 	width:100%;
 	text-align:right;
 }
 
-div#register input[type=text], div#register input[type=email], div#register input[type=password] {
-	width:90%;
+div.profile input[type=text], div.profile input[type=email], div.profile input[type=password] {
+	width:100%;
 }
 
 div#register input[type=submit] {

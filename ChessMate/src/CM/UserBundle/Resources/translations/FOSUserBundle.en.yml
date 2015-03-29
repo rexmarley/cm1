@@ -25,15 +25,16 @@ profile:
         username: Username
         email: Email
     edit:
+        current_password: Password
         submit: Update
     flash:
-        updated: The profile has been updated
+        updated: Your profile has been updated
 
 # Password change
 change_password:
     submit: Change password
     flash:
-        success: The password has been changed
+        success: Your password has been changed
 
 # Registration
 registration:
