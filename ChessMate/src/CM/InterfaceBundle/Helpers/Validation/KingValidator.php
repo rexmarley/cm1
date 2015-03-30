@@ -20,7 +20,7 @@ class KingValidator extends ValidationHelper
     	$colour = $move['pColour'];
 		if (abs($to[1] - $from[1]) <= 1 && abs($to[0] - $from[0]) <= 1) {
 			return true;
-		} else if (!$this->game->getBoard()->getPieceIsMoved($from[0], $from[1]) && $to[0] == $from[0] && !$this->inCheck($colour)) {
+		} else if (!$this->game->getBoard()->getPieceIsMoved($from[0], $from[1]) && $to[0] == $from[0] && !$this->inCheck($colour, $move['from'])) {
 			//handle castling
 			if ($to[1] == 2 || $to[1] == 6) {
 				$rookFromCol = 0;
@@ -43,7 +43,7 @@ class KingValidator extends ValidationHelper
 						// if in check at intermittent points, return false
 						$nextSpace = [$from[0], $i];
 			    		$this->updateAbstractBoard($from, $nextSpace);
-			    		if ($this->inCheck($colour)) {
+			    		if ($this->inCheck($colour, $move['from'])) {
 							//put king back in place
 				    		$this->updateAbstractBoard($nextSpace, $from);
 			    			return false;

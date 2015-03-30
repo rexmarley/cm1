@@ -131,8 +131,16 @@ class MoveController extends Controller
 		$game->setLastMoveValidated(true);
     	//save move
     	$this->saveMove($game, $move, $em);
+    	//Temp: check for game over
+    	if ($player === 0) {
+    		$colour = 'w';
+    	} else {
+    		$colour = 'b';
+    	}
+		$gameOverHelper = $this->get('game_fin_helper');
+		$gameOver = $gameOverHelper->checkGameOver($game, $colour);
     	
-	    return new JsonResponse(array('saved' => true));
+	    return new JsonResponse(array('saved' => true, 'gameOver' => $gameOver));
     }
     
     /**

@@ -3,8 +3,6 @@
 namespace CM\InterfaceBundle\Helpers\Validation;
 
 use CM\InterfaceBundle\Entity\Game;
-use CM\UserBundle\Entity\User;
-use CM\InterfaceBundle\Entity\Board;
 
 /**
  * Move validator
@@ -15,6 +13,7 @@ abstract class ValidationHelper
     protected $board;
     protected $enPassant = null;
     protected $pieceSwapped = false;
+    protected $checkThreat = null;
 	
 	/**
 	 * Validate chess move
@@ -29,10 +28,11 @@ abstract class ValidationHelper
     	$this->setGlobals($game);
     	//check piece type/colour matches origin
     	//and target square is not occupied by own piece
-    	if (($this->board[$move['from'][0]][$move['from'][1]] != $move['pColour'].'_'.$move['pType'])
-    		|| ($this->board[$move['to'][0]][$move['to'][1]] && $this->board[$move['to'][0]][$move['to'][1]][0] == $move['pColour']) ) {
+    	$colour = $move['pColour'];
+    	if (($this->board[$move['from'][0]][$move['from'][1]] != $colour.'_'.$move['pType'])
+    		|| ($this->board[$move['to'][0]][$move['to'][1]] && $this->board[$move['to'][0]][$move['to'][1]][0] == $colour) ) {
     		return array('valid' => false);
-    	}    	
+    	}
     	//validate piece
     	$valid = $this->validatePiece($move);
     	if($valid) {
@@ -40,8 +40,10 @@ abstract class ValidationHelper
     		if (!$this->pieceSwapped) {
     			$this->updateAbstractBoard($move['from'], $move['to']);
     		}
+			//get opponent colour
+			$opColour = $this->getOpponentColour($colour);
     		//if in check, invalidate move
-    		if ($this->inCheck($move['pColour'])) {
+    		if ($this->inCheck($opColour, $this->getKingSquare($colour))) {
     			return array('valid' => false);
     		}
     		//mark piece as moved
@@ -69,46 +71,50 @@ abstract class ValidationHelper
     	$this->board = $game->getBoard()->getBoard();
     	//$this->unmoved = $game->getBoard()->getUnmoved();    	
     }
-
-	/**
-	 * Check if king is in check
-	 */
-	protected function inCheck($colour) {
+    
+    /**
+     * Get array indices for given colour king's square
+     * @param char $colour w/b
+     * @return array [y,x]
+     */
+    protected function getKingSquare($colour) {    	
 		$king = $colour.'_king';
-		//get opponent colour
-		$colour = $this->getOpponentColour($colour);
 		//get king's position
-		$kingSquare = 0;
 		for ($row = 0; $row < 8; $row++) {
 			$col = array_search($king, $this->board[$row]);
 			if ($col !== false) {
-				$kingSquare = [$row, $col];
-				break;
+				return array($row, $col);
 			}
-		}
+		}    	
+    }
+
+	/**
+	 * Check if king is in check
+	 * @param char $opColour The threatening player
+	 * @param array $kingSquare The threatened square
+	 */
+	protected function inCheck($opColour, $kingSquare) {
 		//check in check
-		if ($this->inCheckByPawn($colour, $kingSquare)) {
-			return true;
-		} else if ($this->inCheckByKnight($colour, $kingSquare)) {
-			return true;
-		} else if ($this->inCheckOnXAxis($colour, $kingSquare)) {
-			return true;
-		} else if ($this->inCheckOnYAxis($colour, $kingSquare)) {
-			return true;
-		} else if ($this->inCheckOnDiagonal($colour, $kingSquare)) {
-			return true;
+		if ($this->inCheckByPawn($opColour, $kingSquare) 
+			|| $this->inCheckByKnight($opColour, $kingSquare)
+			|| $this->inCheckOnXAxis($opColour, $kingSquare)
+			|| $this->inCheckOnYAxis($opColour, $kingSquare)
+			|| $this->inCheckOnDiagonal($opColour, $kingSquare)) {
+			return true;			
 		}
-		
+
 		return false;
 	}
 
 	/**
 	 * Check if in check on diagonal
 	 */
-	protected function inCheckOnDiagonal($colour, $kingSquare) {
+	protected function inCheckOnDiagonal($opColour, $kingSquare) {
 		$row = $kingSquare[0];
 		$col = $kingSquare[1];
 		$blocks = [false,false,false,false];
+		$bishop = $opColour.'_bishop';
+		$queen = $opColour.'_queen';
 		for ($i = 1; $i < 8; $i++) {
 			$threats = [
 				$this->getPieceAt($row+$i, $col-$i), 
@@ -117,11 +123,20 @@ abstract class ValidationHelper
 				$this->getPieceAt($row-$i, $col+$i)
 					
 			];
-			if ((!$blocks[0] && ($threats[0] == $colour.'_bishop' || $threats[0] == $colour.'_queen'))
-				|| (!$blocks[1] && ($threats[1] == $colour.'_bishop' || $threats[1] == $colour.'_queen'))
-				|| (!$blocks[2] && ($threats[2] == $colour.'_bishop' || $threats[2] == $colour.'_queen'))
-				|| (!$blocks[3] && ($threats[3] == $colour.'_bishop' || $threats[3] == $colour.'_queen'))
-				) {
+			if (!$blocks[0] && ($threats[0] == $bishop || $threats[0] == $queen)) {
+				$this->checkThreat = array($row+$i, $col-$i);
+				return true;
+			} 
+			if (!$blocks[1] && ($threats[1] == $bishop || $threats[1] == $queen)) {
+				$this->checkThreat = array($row+$i, $col+$i);
+				return true;
+			}
+			if (!$blocks[2] && ($threats[2] == $bishop || $threats[2] == $queen)) {
+				$this->checkThreat = array($row-$i, $col-$i);
+				return true;
+			}
+			if (!$blocks[3] && ($threats[3] == $bishop || $threats[3] == $queen)) {
+				$this->checkThreat = array($row-$i, $col+$i);
 				return true;
 			}
 			//get blocking pieces
@@ -137,13 +152,25 @@ abstract class ValidationHelper
 	/**
 	 * Check if in check on x-axis
 	 */
-	protected function inCheckOnXAxis($colour, $kingSquare) {
+	protected function inCheckOnXAxis($opColour, $kingSquare) {
 		$row = $kingSquare[0];
-		for ($col = 0; $col < 8; $col++) {
-			if ($this->board[$row][$col] == $colour.'_rook' || $this->board[$row][$col] == $colour.'_queen') {
-				if (($col + 1) == $kingSquare[1] || ($col - 1) == $kingSquare[1] || !$this->xAxisBlocked($kingSquare[1], $col, $row)) {
+		$queen = $opColour.'_queen';
+		$rook = $opColour.'_rook';
+		//radiate out (for checkmates)
+		for ($col = $kingSquare[1]-1; $col >= 0; $col--) {
+			if ($this->board[$row][$col] == $rook || $this->board[$row][$col] == $queen) {
+				if (!$this->xAxisBlocked($kingSquare[1], $col, $row)) {
+					$this->checkThreat = array($row, $col);
 					return true;
-				}
+				}				
+			}
+		}
+		for ($col = $kingSquare[1]+1; $col < 8; $col++) {
+			if ($this->board[$row][$col] == $rook || $this->board[$row][$col] == $queen) {
+				if (!$this->xAxisBlocked($kingSquare[1], $col, $row)) {
+					$this->checkThreat = array($row, $col);
+					return true;
+				}				
 			}
 		}
 		return false;
@@ -152,13 +179,25 @@ abstract class ValidationHelper
 	/**
 	 * Check if in check on y-axis
 	 */
-	protected function inCheckOnYAxis($colour, $kingSquare) {
+	protected function inCheckOnYAxis($opColour, $kingSquare) {
 		$col = $kingSquare[1];
-		for ($row = 0; $row < 8; $row++) {
-			if ($this->board[$row][$col] == $colour.'_rook' || $this->board[$row][$col] == $colour.'_queen') {
-				if (($row + 1) == $kingSquare[0] || ($row - 1) == $kingSquare[0] || !$this->yAxisBlocked($kingSquare[0], $row, $col)) {
+		$queen = $opColour.'_queen';
+		$rook = $opColour.'_rook';
+		//radiate out
+		for ($row = $kingSquare[0]-1; $row >= 0; $row--) {
+			if ($this->board[$row][$col] == $rook || $this->board[$row][$col] == $queen) {
+				if (!$this->yAxisBlocked($kingSquare[0], $row, $col)) {
+					$this->checkThreat = array($row, $col);
 					return true;
-				}
+				}				
+			}
+		}
+		for ($row = $kingSquare[0]+1; $row < 8; $row++) {
+			if ($this->board[$row][$col] == $rook || $this->board[$row][$col] == $queen) {
+				if (!$this->yAxisBlocked($kingSquare[0], $row, $col)) {
+					$this->checkThreat = array($row, $col);
+					return true;
+				}				
 			}
 		}
 		return false;
@@ -167,16 +206,40 @@ abstract class ValidationHelper
 	/**
 	 * Check if king is in check by knight
 	 */
-	protected function inCheckByKnight($colour, $kingSquare) {
-		if ($this->pieceAt($kingSquare[0]+2, $kingSquare[1]-1, $colour.'_knight')
-			|| $this->pieceAt($kingSquare[0]+2, $kingSquare[1]+1, $colour.'_knight')
-			|| $this->pieceAt($kingSquare[0]+1, $kingSquare[1]-2, $colour.'_knight')
-			|| $this->pieceAt($kingSquare[0]+1, $kingSquare[1]+2, $colour.'_knight')
-			|| $this->pieceAt($kingSquare[0]-1, $kingSquare[1]-2, $colour.'_knight')
-			|| $this->pieceAt($kingSquare[0]-1, $kingSquare[1]+2, $colour.'_knight')
-			|| $this->pieceAt($kingSquare[0]-2, $kingSquare[1]-1, $colour.'_knight')
-			|| $this->pieceAt($kingSquare[0]-2, $kingSquare[1]+1, $colour.'_knight')) {
-			return true;
+	protected function inCheckByKnight($opColour, $kingSquare) {
+		$x = $kingSquare[1];
+		$y = $kingSquare[0];
+		if ($this->pieceAt($y+2, $x-1, $opColour.'_knight')) {
+			$this->checkThreat = array($y+2, $x-1);
+			return true;			
+		}
+		if ($this->pieceAt($y+2, $x+1, $opColour.'_knight')) {
+			$this->checkThreat = array($y+2, $x+1);
+			return true;			
+		}
+		if ($this->pieceAt($y+1, $x-2, $opColour.'_knight')) {
+			$this->checkThreat = array($y+1, $x-2);
+			return true;			
+		}
+		if ($this->pieceAt($y+1, $x+2, $opColour.'_knight')) {
+			$this->checkThreat = array($y+1, $x+2);
+			return true;			
+		}
+		if ($this->pieceAt($y-1, $x-2, $opColour.'_knight')) {
+			$this->checkThreat = array($y-1, $x-2);
+			return true;			
+		}
+		if ($this->pieceAt($y-1, $x+2, $opColour.'_knight')) {
+			$this->checkThreat = array($y-1, $x+2);
+			return true;			
+		}
+		if ($this->pieceAt($y-2, $x-1, $opColour.'_knight')) {
+			$this->checkThreat = array($y-2, $x-1);
+			return true;			
+		}
+		if ($this->pieceAt($y-2, $x+1, $opColour.'_knight')) {
+			$this->checkThreat = array($y-2, $x+1);
+			return true;			
 		}
 		return false;
 	}
@@ -184,14 +247,18 @@ abstract class ValidationHelper
 	/**
 	 * Check if king is in check by pawn
 	 */
-	protected function inCheckByPawn($colour, $kingSquare) {
+	protected function inCheckByPawn($opColour, $kingSquare) {
 		$dir = 1;
-		if ($colour == 'w') {
+		if ($opColour == 'w') {
 			$dir = -1;
 		}
-		if ($this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]-1, $colour.'_pawn')
-			|| $this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]+1, $colour.'_pawn')) {
-			return true;
+		if ($this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]-1, $opColour.'_pawn')) {
+			$this->checkThreat = array($kingSquare[0]+$dir, $kingSquare[1]-1);
+			return true;			
+		}
+		if ($this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]+1, $opColour.'_pawn')) {
+			$this->checkThreat = array($kingSquare[0]+$dir, $kingSquare[1]+1);
+			return true;			
 		}
 		return false;
 	}
@@ -243,9 +310,9 @@ abstract class ValidationHelper
 	
 	/**
 	 * Check if x-axis squares are blocked
-	 * @param from	y1
-	 * @param to	y2
-	 * @param row
+	 * @param from	x1
+	 * @param to	x2
+	 * @param row	y
 	 */
 	protected function xAxisBlocked($from, $to, $row) {
 		//get x-axis direction
@@ -263,9 +330,9 @@ abstract class ValidationHelper
 	
 	/**
 	 * Check if y-axis squares are blocked
-	 * @param from	x1
-	 * @param to	x2
-	 * @param column
+	 * @param from		y1
+	 * @param to		y2
+	 * @param column	x
 	 */
 	protected function yAxisBlocked($from, $to, $column) {
 		//get y-axis direction
