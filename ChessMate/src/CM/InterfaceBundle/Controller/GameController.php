@@ -275,7 +275,7 @@ class GameController extends Controller
 	    $waited = 0;
 	    $em->refresh($game);
 	    while (!$game->getJoined() && $waited < 10) {
-	    	sleep(1); //TODO: remove
+	    	sleep(1); //TODO: change
 	    	$em->refresh($game);
 	    	$waited++;
 	    }

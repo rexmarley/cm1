@@ -133,12 +133,12 @@ $(document).ready( function() {
 	    		}
 	    	}, 1000);
 			//start opponent's timer
-	    	$('div#timer1').addClass('red');
-	    	startTimer('div#timer1');
+	    	$('#tLeft1').addClass('red');
+	    	startTimer('#tLeft1');
 	    } else {
 			//start own timer
-	    	$('div#timer2').addClass('red');
-	    	startTimer('div#timer2');
+	    	$('#tLeft2').addClass('red');
+	    	startTimer('#tLeft2');
 		}		
 	}
 	
@@ -147,14 +147,14 @@ $(document).ready( function() {
 	 */
 	function switchTimers() {
 		clearInterval(tInterval);
-		if ($('div#timer1').hasClass('red')) {
-	    	$('div#timer1').removeClass('red');
-	    	$('div#timer2').addClass('red');
-	    	startTimer('div#timer2');			
+		if ($('#tLeft1').hasClass('red')) {
+	    	$('#tLeft1').removeClass('red');
+	    	$('#tLeft2').addClass('red');
+	    	startTimer('#tLeft2');			
 		} else {
-	    	$('div#timer2').removeClass('red');
-	    	$('div#timer1').addClass('red');
-	    	startTimer('div#timer1');
+	    	$('#tLeft2').removeClass('red');
+	    	$('#tLeft1').addClass('red');
+	    	startTimer('#tLeft1');
 		}
 	}
 	
@@ -162,8 +162,8 @@ $(document).ready( function() {
 	 * Start timer with given id
 	 */
 	function startTimer(timerID) {
-		var timeLeft = $(timerID + ' h1');
-		var time = timeLeft.html().split(':');
+		var timeLeft = $(timerID);
+		var time = timeLeft.text().split(':');
 		tInterval = setInterval(function() {
 			if (time[1] == '00') {
 				if (time[0] == '0') {
@@ -179,8 +179,8 @@ $(document).ready( function() {
 					time[1] = '0' + time[1];
 				}
 			}
-			timeLeft.html(time[0]+':'+time[1]);
-		}, 1000);
+			timeLeft.text(time[0]+':'+time[1]);
+		}, 1500); //TODO: stop cheating
 	}
 
 	/**

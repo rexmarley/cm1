@@ -39,13 +39,13 @@
 		<div class="col-md-6 col-sm-12">
 			{% if gameID %}
 				<div id="midGame">
-					{{ include('CMInterfaceBundle:Game:timer.html.twig', { 'timer': '1', 'timeLeft': opTime}) }}
+					{{ include('CMInterfaceBundle:Game:timer.html.twig', { 'timer': '1', 'timeLeft': opTime, 'pName': opponent.username}) }}
 					{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Lost'}) }}
 					{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}
 					{{ include('CMInterfaceBundle:Game:midGameOptions.html.twig', {}) }}
 					<br>
 					{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Won'}) }}
-					{{ include('CMInterfaceBundle:Game:timer.html.twig', { 'timer': '2', 'timeLeft': userTime}) }}
+					{{ include('CMInterfaceBundle:Game:timer.html.twig', { 'timer': '2', 'timeLeft': userTime, 'pName': app.user.username}) }}
 				</div>
 			{% else %}
 				<div id="piecesWon" class="row piecesWonLost hidden">
