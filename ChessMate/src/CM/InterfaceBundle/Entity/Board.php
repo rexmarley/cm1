@@ -42,6 +42,11 @@ class Board
      */
     protected $enPassantAvailable;
 
+    /**
+     * @ORM\Column(type="array")
+     */
+    protected $takenPieces;
+
     public function __construct()
     {
         $this->setDefaults();
@@ -68,6 +73,7 @@ class Board
     	$this->setDefaultUnmoved();
     	$this->enPassantAvailable = null;
     	$this->pawnSwapped = false;
+    	$this->takenPieces = array();
     }
 
     /**
@@ -153,6 +159,42 @@ class Board
     {
         return $this->unmoved;
     }
+
+    /**
+     * Set taken pieces
+     *
+     * @param array $taken
+     * @return Board
+     */
+    public function setTaken(array $taken)
+    {
+        $this->takenPieces = $taken;
+
+        return $this;
+    }
+
+    /**
+     * Get taken pieces
+     *
+     * @return array 
+     */
+    public function getTaken()
+    {
+        return $this->takenPieces;
+    }
+
+    /**
+     * Add taken piece
+     *
+     * @param string $taken
+     * @return Board
+     */
+    public function addTaken($taken)
+    {
+        $this->takenPieces[] = $taken;
+
+        return $this;
+    }
     
     /**
      * Mark piece as moved
@@ -181,6 +223,11 @@ class Board
      */
     public function updateBoard(array $from, array $to)
     {
+    	if ($this->board[$to[0]][$to[1]]) {
+    		//keep track of taken pieces for reloads
+    		$this->taken[] = $this->board[$to[0]][$to[1]];
+    	}
+    	//move piece
         $this->board[$to[0]][$to[1]] = $this->board[$from[0]][$from[1]];
         $this->board[$from[0]][$from[1]] = false;
 

@@ -289,7 +289,7 @@ class GameOverHelper extends ValidationHelper
 			for ($col = $colStart; $col <= $colEnd; $col++) {
 				$occupant = $this->board[$row][$col];
 				if (!$occupant || $occupant[0] != $colour) {
-					$reachables[] = array($row, column);					
+					$reachables[] = array($row, $col);					
 				}
 			}			
 		}

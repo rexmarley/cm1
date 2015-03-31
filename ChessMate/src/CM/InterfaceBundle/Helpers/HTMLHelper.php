@@ -33,7 +33,7 @@ class HTMLHelper
 						    		);
 	
    /**
-    * Get Unicode pieces and HTML selector ids
+    * Get unicode pieces and HTML selector ids
     * 
     * @param array|bool $board
     * @return array
@@ -55,5 +55,25 @@ class HTMLHelper
     	}
 
     	return $pieces;
+    }
+	
+   /**
+    * Get unicode taken pieces and HTML selector ids
+    * 
+    * @param array $taken
+    * @return array
+    */ 
+    public static function getUnicodeTakenPieces($taken) {
+    	$wTaken = array();
+    	$bTaken = array();
+    	foreach ($taken as $k => $piece) {
+    		if ($piece[0] == 'w') {
+    			$wTaken[] = array('id' => $piece.'_t'.$k, 'img' => self::$unicode[$piece]);
+    		} else {
+    			$bTaken[] = array('id' => $piece.'_t'.$k, 'img' => self::$unicode[$piece]);
+    		}
+    	}
+
+    	return array($wTaken, $bTaken);
     }	
 }

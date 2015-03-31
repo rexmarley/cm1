@@ -215,13 +215,16 @@ class GameController extends Controller
     		$opTime = $this->getMinutesTimeString($p1Time);
     	}
     	$opponent = $game->getPlayers()->get($op);
+	    //get taken pieces
+    	$taken = $this->get('html_helper')->getUnicodeTakenPieces($game->getBoard()->getTaken());
 
 	    return $this->render('CMInterfaceBundle:Game:index.html.twig', 
 	    		array('game' => $game,
 	    			'player' => $colour, 
 	    			'opponent' => $opponent,
 	    			'userTime' => $userTime,
-	    			'opTime' => $opTime)
+	    			'opTime' => $opTime,
+	    			'taken' => $taken)
 	    		);
     }
     

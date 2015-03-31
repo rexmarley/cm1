@@ -1,9 +1,26 @@
 <div id="pieces{{ wonLost }}" class="row piecesWonLost">
 	<div class="col-md-12">
 		<span>Pieces {{ wonLost }}:</span>
+		{% if player == 'w' %}
+			{% if wonLost == 'Won' %}
+				{% set p = 1 %}
+			{% else %}
+				{% set p = 0 %}
+			{% endif %}
+		{% else %}
+			{% if wonLost == 'Won' %}
+				{% set p = 0 %}
+			{% else %}
+				{% set p = 1 %}
+			{% endif %}
+		{% endif %}
 		<div class="row">
 			{% for i in 1..15  %}
-				<div class="col-md-2 col-sm-2 col-xs-2"></div>
+				<div class="col-md-2 col-sm-2 col-xs-2">
+					{% if taken[p][i-1] is defined %}
+						<div id="{{ taken[p][i-1].id }}" class="piece">{{ taken[p][i-1].img | raw }}</div>
+					{% endif %}
+				</div>
 			{% endfor %}
 		</div>
 	</div>

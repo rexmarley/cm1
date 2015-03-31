@@ -93,7 +93,7 @@ class MoveController extends Controller
 			//return opponent's unvalidated move
 		    return new JsonResponse(
 		    	array('moved' => true,
-	    				'checkMate' => false, // ?client-side/request check? 
+	    				'checkMate' => false,
 		    			'from' => $move['from'], 
 		    			'to' => $move['to'],
 		    			'swapped' => $move['newPiece'],
@@ -133,10 +133,11 @@ class MoveController extends Controller
     	$this->saveMove($game, $move, $em);
     	//Temp: check for game over
     	if ($player === 0) {
-    		$colour = 'w';
-    	} else {
     		$colour = 'b';
+    	} else {
+    		$colour = 'w';
     	}
+    	$em->refresh($game);
 		$gameOverHelper = $this->get('game_fin_helper');
 		$gameOver = $gameOverHelper->checkGameOver($game, $colour);
     	
@@ -152,6 +153,11 @@ class MoveController extends Controller
     private function saveMove(Game $game, array $move, $em) {
     	//update game state
     	$board = $game->getBoard();
+    	$absBoard = $board->getBoard();
+    	$taken = $absBoard[$move['to'][0]][$move['to'][1]];
+    	if ($taken) {
+    		$board->addTaken($taken);
+    	}
     	$board->setBoard($move['newBoard']);
     	$board->setEnPassantAvailable($move['enPassant']);
     	//mark piece as moved
