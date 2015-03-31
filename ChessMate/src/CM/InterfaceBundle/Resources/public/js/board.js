@@ -21,6 +21,15 @@ $(document).ready( function() {
 		drop: validateMoveOut,
     });
 	
+	//override position of loading dialog
+	$('#joiningGameDialog').dialog({
+		 position: {
+			 my: "center center",
+			 at: "center center",
+			 of: ".container-fluid"
+		 },
+	});
+	
 	//allow player to move
 	var playersTurn = true;
 	//timer interval
@@ -36,7 +45,81 @@ $(document).ready( function() {
 		if (!inProgress) {
 			//join game/check joined
 			joinGame(game[2]);
+		} else {
+			performOnLoadActions();
 		}
+    }
+	
+	//workaround for hidden overflow hiding draggable
+	$('.square').mouseover(function() {
+		$(this).removeClass('clipped');
+	});
+	$('.square').mouseleave(function() {
+		$(this).addClass('clipped');
+	});
+	
+	//global var for swapping pawn
+	var gFrom = [];
+	$('.choosablePiece').click(function() {
+		swapPawn(this.id);
+	});
+	
+	var joining;	
+	/**
+	 * Join Game/check oppponent has joined
+	 */
+	function joinGame(gameID) {
+		//show loading dialog
+		$('#joiningGameDialog').dialog("open");
+		var loading = 0;
+		joining = setInterval(function() {
+		    if(loading < 3) {
+		        $('#joiningGameDialog span').append('.');
+		        loading++;
+		    } else {
+		        $('#joiningGameDialog span').html('');
+		        loading = 0;
+		    }
+		}, 600);
+		
+    	$.ajax({
+    		type: "POST",
+    		url: root + 'join/'+gameID,
+			success: function() {
+				checkOpponentJoined(gameID);
+			}
+    	});		
+	}
+	
+	/**
+	 * Check oppponent has joined game
+	 */
+	function checkOpponentJoined(gameID) {
+		//check opponent has joined
+    	$.ajax({
+    		type: "POST",
+    		url: root + 'checkJoined/'+gameID,
+    		success: function(data) {
+    			//close loading dialog
+    			clearInterval(joining);
+    			$('#joiningGameDialog').dialog("close");
+    			if (!data['joined']) {
+    				//game cancelled
+    				alert('Game aborted by opponent!');
+    				//back to start
+        			location.href = root + 'start';
+    			} else {
+    				performOnLoadActions();
+    				inProgress = true;
+    			} 			
+    		}
+    	});		
+	}
+	
+	/**
+	 * Game initialisation for load/reload
+	 */
+	function performOnLoadActions() {
     	//if not players turn
 		if ((activePlayer === 0 && $('.board').attr('id').charAt(5) == 'b')
 				|| (activePlayer === 1 && $('.board').attr('id').charAt(5) == 'w')) {
@@ -56,55 +139,7 @@ $(document).ready( function() {
 			//start own timer
 	    	$('div#timer2').addClass('red');
 	    	startTimer('div#timer2');
-		}
-    }
-	
-	//workaround for hidden overflow hiding draggable
-	$('.square').mouseover(function() {
-		$(this).removeClass('clipped');
-	});
-	$('.square').mouseleave(function() {
-		$(this).addClass('clipped');
-	});
-	
-	//global var for swapping pawn
-	var gFrom = [];
-	$('.choosablePiece').click(function() {
-		swapPawn(this.id);
-	});
-	
-	/**
-	 * Join Game/check oppponent has joined
-	 */
-	function joinGame(gameID) {
-    	$.ajax({
-    		type: "POST",
-    		url: root + 'join/'+gameID,
-			success: function() {
-				checkOpponentJoined(gameID);
-			}
-    	});		
-	}
-	
-	/**
-	 * Check oppponent has joined game
-	 */
-	function checkOpponentJoined(gameID) {
-		//check opponent has joined
-    	$.ajax({
-    		type: "POST",
-    		url: root + 'checkJoined/'+gameID,
-    		success: function(data) {
-    			if (!data['joined']) {
-    				//game cancelled
-    				alert('Game aborted by opponent!');
-    				//back to start
-        			location.href = root + 'start';
-    			} else {
-    				inProgress = true;
-    			} 			
-    		}
-    	});		
+		}		
 	}
 	
 	/**

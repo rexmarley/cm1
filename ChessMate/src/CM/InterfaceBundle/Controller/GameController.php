@@ -275,14 +275,17 @@ class GameController extends Controller
 	    $waited = 0;
 	    $em->refresh($game);
 	    while (!$game->getJoined() && $waited < 10) {
-	    	sleep(1);
+	    	sleep(1); //TODO: remove
 	    	$em->refresh($game);
 	    	$waited++;
 	    }
 	    $joined = $game->getJoined();
 	    if (!$joined) {
+	    	$em->refresh($game);
 	    	//cancel game
-	    	$em->remove($game);
+	    	if ($game) {
+	    		$em->remove($game);
+	    	}
 	    } else {
 	    	//add to user
 	    	$user->addCurrentGame($game);

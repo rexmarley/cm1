@@ -60,6 +60,11 @@
 			{% endif %}
 		</div>
 	</div>
+	{% if game is defined %}
+		<div id="joiningGameDialog" class="ui-dialog">
+			<h2>Joining game<span id="loadingDots"></span></h2>
+		</div>
+	{% endif %}
 {% endblock %}
 
 {% block javascripts %}
@@ -80,7 +85,7 @@
 	    	var enPassantAvailable = {{ game.board.enPassantAvailable |json_encode|raw}};
 	    </script>
 	{% endif %}
+    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/general.js') }}"></script>
     <script type="text/javascript" src="{{ asset('bundles/cminterface/js/board.js') }}"></script>
     <script type="text/javascript" src="{{ asset('bundles/cminterface/js/boardHelper.js') }}"></script>
-    <script type="text/javascript" src="{{ asset('bundles/cminterface/js/general.js') }}"></script>
 {% endblock %}
