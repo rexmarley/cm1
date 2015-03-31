@@ -71,9 +71,9 @@ class Board
     {
     	$this->setDefaultBoard();
     	$this->setDefaultUnmoved();
+    	$this->setDefaultTaken();
     	$this->enPassantAvailable = null;
     	$this->pawnSwapped = false;
-    	$this->takenPieces = array();
     }
 
     /**
@@ -81,7 +81,7 @@ class Board
      *
      * @return array 
      */
-    public function setDefaultBoard()
+    private function setDefaultBoard()
     {
         $this->board = array(
     		array('w_rook','w_knight','w_bishop','w_queen','w_king','w_bishop','w_knight','w_rook'),
@@ -93,6 +93,13 @@ class Board
     		array('b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn'),
     		array('b_rook','b_knight','b_bishop','b_queen','b_king','b_bishop','b_knight','b_rook')
     	);
+    }
+    
+    private function setDefaultTaken() {
+    	$this->takenPieces = array(
+    			'w_pawn' => 0, 'w_rook' => 0, 'w_knight' => 0, 'w_bishop' => 0, 'w_queen' => 0,
+    			'b_pawn' => 0, 'b_rook' => 0, 'b_knight' => 0, 'b_bishop' => 0, 'b_queen' => 0
+    	);    	
     }
 
     /**
@@ -191,7 +198,7 @@ class Board
      */
     public function addTaken($taken)
     {
-        $this->takenPieces[] = $taken;
+        $this->takenPieces[$taken]++;
 
         return $this;
     }

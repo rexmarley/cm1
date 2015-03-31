@@ -149,12 +149,14 @@ $(document).ready( function() {
 		clearInterval(tInterval);
 		if ($('#tLeft1').hasClass('red')) {
 	    	$('#tLeft1').removeClass('red');
-	    	$('#tLeft2').addClass('red');
-	    	startTimer('#tLeft2');			
+	    	setTimeout(function(){
+		    	startTimer('#tLeft2');	
+	    	}, 1500);		
 		} else {
 	    	$('#tLeft2').removeClass('red');
-	    	$('#tLeft1').addClass('red');
-	    	startTimer('#tLeft1');
+	    	setTimeout(function(){
+		    	startTimer('#tLeft1');
+	    	}, 1500);
 		}
 	}
 	
@@ -163,6 +165,7 @@ $(document).ready( function() {
 	 */
 	function startTimer(timerID) {
 		var timeLeft = $(timerID);
+		timeLeft.addClass('red');
 		var time = timeLeft.text().split(':');
 		tInterval = setInterval(function() {
 			if (time[1] == '00') {
@@ -181,6 +184,16 @@ $(document).ready( function() {
 			}
 			timeLeft.text(time[0]+':'+time[1]);
 		}, 1500); //TODO: stop cheating
+	}
+	
+	/**
+	 * Stop timer with given id
+	 */
+	function stopTimer(timerID) {
+		clearInterval(tInterval);
+		if ($(timerID).hasClass('red')) {
+	    	$(timerID).removeClass('red');	
+		}		
 	}
 
 	/**
@@ -255,7 +268,6 @@ $(document).ready( function() {
 				moved.attr('id', swapped+'_'+num);					
 			}		
 		} else {
-			console.log('b');
 			//validate server-side & find cheat
 			findCheat();
 		}
@@ -346,11 +358,11 @@ $(document).ready( function() {
 		//validate move
     	var valid = validatePieceType(piece['type'], piece['colour'], from, to);
     	if(valid) {
-    		//get target square occupant - in case of revert
-    		var occupant = abstractBoard[to[0]][to[1]];
     		if (checkEnPassantPerformed(to)) {
 				takePiece(getGridRefFromAbstractIndices(from[0],to[1]), takenSide);
     		} else {
+        		//get target square occupant - in case of revert
+        		var occupant = abstractBoard[to[0]][to[1]];
             	//update abstract board
         		updateAbstractBoard(from, to);
 	    		if (castled) {
@@ -365,8 +377,10 @@ $(document).ready( function() {
 	            		//invalidate move
 	            		return false;
 	        		}
-					//check for takeable piece
-					checkAndTakePiece(to, takenSide);
+	    			if (occupant) {
+						//take piece
+						takePiece(getGridRefFromAbstractIndices(to[0],to[1]), takenSide);	    				
+	    			}
 	    		}
 			}
 			unmoved[from[0]][from[1]] = false;
@@ -429,9 +443,8 @@ $(document).ready( function() {
     		}
     	});
 		playersTurn = false;
-		switchTimers();
     	newPiece = false;
-    	//enPassantAvailable = false; ?
+		switchTimers();
 	}
 	
 	/**
@@ -545,18 +558,18 @@ $(document).ready( function() {
 	function takePiece(toSquare, wonOrLost) {
 		//get taken piece
 		var taken = getOccupant(toSquare);
-		//move off board
-    	if ($('div#pieces'+wonOrLost+' div.piece').length == 0) {
-    		$('div#pieces'+wonOrLost+' div.row:first div.col-md-2:first').append(taken);
+		var oldID = taken.attr('id').split('_');
+		var newID = ' div#'+oldID[0]+'_'+oldID[1]+'_t';
+		taken.remove();
+		var newT = $('div#pieces'+wonOrLost+newID);
+    	if (newT.hasClass('hidden')) {
+    		newT.removeClass('hidden');    		
+    	} else if ($(newID+' sub.subscript:first').html().trim() != '') {
+    		//increment count
+    		$(newID+' sub.subscript:first').html(parseInt($(newID+' sub.subscript:first').html(), 10)+1)
     	} else {
-    		var lastOccupied = $('div#pieces'+wonOrLost+' div.piece:last').parent();
-    		lastOccupied.next('div.col-md-2').append(taken);
+    		$(newID+' sub.subscript:first').html(2);
     	}
-    	//prevent further movement
-    	taken.removeClass('ui-draggable');
-    	taken.draggable({ disabled: true });
-    	//prevent transparency
-    	taken.removeClass('ui-state-disabled');
 	}
 	
 	/**

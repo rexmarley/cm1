@@ -100,9 +100,11 @@ class MoveController extends Controller
 	    				'enPassant' => $move['enPassant'],
 	    				'newBoard' => $move['newBoard']
 		    	));	    	
-	    } else if (time() - $game->getLastMoveTime() > 30) {
-	    	//move not validated by opponent within 30 secs. - assume foul play/game abandoned
+	    } else if (time() - $game->getLastMoveTime() > 15) {
+	    	//move not validated by opponent within 15 secs. - assume foul play/game abandoned
 	    	$game->setVictorIndex($player);
+	    	//switch active player
+			$game->switchActivePlayer();
 	    }
 	    return new JsonResponse(array('moved' => false));	
     }

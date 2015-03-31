@@ -26,14 +26,19 @@ table {
 	}
 
 	div.board {
-		width: 56em !important;
-		height: 48em !important;
-		margin-left: -30% !important;
+		width: 41em !important;
+		height: 41em !important;
+		margin-left: auto !important;
+		font-size: 0.85em;
 	}
 	
 	div.square {
-	    height: 6em !important;
-	    width: 7em !important;
+	    height: 5.5em !important;
+	    width: 5.11em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 4em;	
 	}
 }
 
@@ -52,11 +57,16 @@ table {
 		width: 54.4em !important;
 		height: 44em !important;
 		margin-left: auto !important;
+		font-size: 1em;
 	}
 	
 	div.square {
 	    height: 5.5em !important;
 	    width: 6.8em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 5em;	
 	}
 }
 
@@ -72,14 +82,19 @@ table {
 	}
 
 	div.board {
-		width: 73.6em !important;
-		height: 73.6em !important;
+		width: 52em !important;
+		height: 52em !important;
 		margin-left: auto !important;
+		font-size: 1.4em;
 	}
 	
 	div.square {
-	    height: 9.2em !important;
-	    width: 9.2em !important;
+	    height: 6.5em !important;
+	    width: 6.5em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 5em;	
 	}
 }
 
@@ -98,11 +113,16 @@ table {
 		width: 56em !important;
 		height: 56em !important;
 		margin-left: auto !important;
+		font-size: 1em;
 	}
 	
 	div.square {
 	    height: 7em !important;
 	    width: 7em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 5em;	
 	}
 }
 
@@ -118,11 +138,16 @@ table {
 		width: 64em !important;
 		height: 48em !important;
 		margin-left: auto !important;
+		font-size: 1em;
 	}
 	
 	div.square {
 	    height: 6em !important;
 	    width: 8em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 5em;	
 	}
 }
 
@@ -138,11 +163,16 @@ table {
 		width: 41em !important;
 		height: 41em !important;
 		margin-left: auto !important;
+		font-size: 1em;
 	}
 	
 	div.square {
 	    height: 5.5em !important;
 	    width: 5.1em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 5em;	
 	}
 }
 
@@ -172,12 +202,14 @@ div.ui-dialog {
 a#startGame {
 	width:100%;
 	padding:3%;
+	margin-left:0%;
 }
 
 a#showCurrentGames {
 	width:100%;
 	padding:3%;
 	font-size: 2em;
+	margin-left:0%;
 }
 .red {
 	color: #ff0000;	
@@ -237,8 +269,26 @@ div.piece {
 
 div.piecesWonLost {
 	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
-	min-height: 10em;
+	min-height: 13em;
 	outline: 1px solid #bdb7b7;
+	font-size: 0.8em;
+}
+
+div.piecesWonLost div.piece {
+	min-width:19%;
+	display:inline-block;
+}
+
+div#separator {
+	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
+	width:100%;
+	padding:2px;
+	margin-bottom: 8px;
+}
+
+sub.subscript {
+	font-size:0.4em;
+	margin-left:-10px;
 }
 
 div.timer {
@@ -252,11 +302,6 @@ div#midGame {
 div#midGameOptions {
 	padding:2%; 
 	margin-left:3%;
-}
-
-div.piecesWonLost span {
-	font-size: 1.1em;
-	font-weight:bold;
 }
 
 div#chatBox {

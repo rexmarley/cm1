@@ -66,11 +66,11 @@ class HTMLHelper
     public static function getUnicodeTakenPieces($taken) {
     	$wTaken = array();
     	$bTaken = array();
-    	foreach ($taken as $k => $piece) {
+    	foreach ($taken as $piece => $count) {
     		if ($piece[0] == 'w') {
-    			$wTaken[] = array('id' => $piece.'_t'.$k, 'img' => self::$unicode[$piece]);
+    			$wTaken[] = array('id' => $piece.'_t', 'img' => self::$unicode[$piece], 'count' => $count);
     		} else {
-    			$bTaken[] = array('id' => $piece.'_t'.$k, 'img' => self::$unicode[$piece]);
+    			$bTaken[] = array('id' => $piece.'_t', 'img' => self::$unicode[$piece], 'count' => $count);
     		}
     	}
 

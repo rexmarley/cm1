@@ -1,6 +1,6 @@
 <div id="pieces{{ wonLost }}" class="row piecesWonLost">
 	<div class="col-md-12">
-		<span>Pieces {{ wonLost }}:</span>
+		<h4>Pieces {{ wonLost }}:</h4>
 		{% if player == 'w' %}
 			{% if wonLost == 'Won' %}
 				{% set p = 1 %}
@@ -14,14 +14,22 @@
 				{% set p = 1 %}
 			{% endif %}
 		{% endif %}
-		<div class="row">
-			{% for i in 1..15  %}
-				<div class="col-md-2 col-sm-2 col-xs-2">
-					{% if taken[p][i-1] is defined %}
-						<div id="{{ taken[p][i-1].id }}" class="piece">{{ taken[p][i-1].img | raw }}</div>
-					{% endif %}
-				</div>
-			{% endfor %}
-		</div>
+		{% for i in 0..4  %}
+			{% if taken[p][i].count > 0 %}
+				{% set hidden = '' %}
+			{% else %}
+				{% set hidden = 'hidden' %}
+			{% endif %}
+			<div id="{{ taken[p][i].id }}" class="piece {{ hidden }}">
+				<p>
+					{{ taken[p][i].img | raw }}
+					<sub class="subscript">
+						{% if taken[p][i].count > 1 %}
+							{{ taken[p][i].count }}
+						{% endif %}
+					</sub>
+				</p>
+			</div>
+		{% endfor %}
 	</div>
 </div>
