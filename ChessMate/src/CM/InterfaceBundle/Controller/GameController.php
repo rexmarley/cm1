@@ -418,6 +418,11 @@ class GameController extends Controller
     	$em->flush();
     }
     
+    /**
+     * General listener
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
     public function listenAction(Request $request) {
     	$content = json_decode($request->getContent());
 	    $user = $this->getUser();
