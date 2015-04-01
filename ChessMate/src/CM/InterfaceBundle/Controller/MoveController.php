@@ -56,8 +56,6 @@ class MoveController extends Controller
 	    $game->setLastMove($move);
 		//mark move as unvalidated
 		$game->setLastMoveValidated(false);
-    	//switch active player
-		$game->switchActivePlayer();
 	    $em->flush();
 
     	return new JsonResponse(array('sent' => true));
@@ -87,7 +85,7 @@ class MoveController extends Controller
 	   	 		return new JsonResponse(array('moved' => true, 'cheat' => $message));	    		
 	    	}
 	    //check if move made	    	
-	    } else if ($game->getActivePlayerIndex() == $player) {
+	    } else if ($game->getActivePlayerIndex() != $player && !$game->getLastMoveValidated()) {
 	    	//get opponent's move
 	    	$move = $game->getLastMove();	    	
 			//return opponent's unvalidated move
@@ -119,6 +117,8 @@ class MoveController extends Controller
     	//find game
     	$em = $this->getDoctrine()->getManager();
     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+    	//switch active player
+		$game->switchActivePlayer();
     	//make sure valid user for game
     	//& only allow save of opponent's move
 	    $player = $game->getPlayers()->indexOf($user);

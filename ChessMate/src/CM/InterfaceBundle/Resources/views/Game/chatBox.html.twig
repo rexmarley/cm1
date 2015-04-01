@@ -1,13 +1,27 @@
 {% set enabled = '' %}
-{% if ((player == 'w' and not game.p2Chatty) or (player == 'b' and not game.p1Chatty)) %}
-	{% set enabled = opponent.username ~ ' does not feel like chatting.' %}
+{% if (not opChatty) %}
+	{% set enabled = "<span class='red'>" ~ opponent.username ~ " does not feel like chatting.</span>" %}
 {% endif %}
-<div id="chatBox" class="row">
-	<div class="col-md-12">
-		<h2>Chat with opponent:</h2>
-		<div>
-			<span>{{ enabled }}</span>
+{% set hidden = '' %}
+{% if (not pChatty) %}
+	{% set hidden = ' hidden' %}
+{% endif %}
+<div id="chatBox" class="row {{ hidden }}">
+	<div id="chatTitle"><label>Chat with opponent:</label></div>
+	<div id="chatDisplay" class="row">
+		<div class="col-md-12">
+			<div id="chatLog">
+				{{ enabled |raw }}
+			</div>
 		</div>
-		<input type="text"/> <a id="sendsubmit" class="btn btn-primary"></a>
+	</div>
+	<div id="chatInput" class="row">
+		<div class="col-md-12">
+			<table>
+				<tr>
+					<td><input type="text"/><a id="chatSend" class="btn btn-primary">Send</a></td>
+				</tr>
+			</table>
+		</div>
 	</div>
 </div>

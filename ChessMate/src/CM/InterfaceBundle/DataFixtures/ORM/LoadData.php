@@ -49,6 +49,7 @@ class LoadData extends AbstractFixture implements OrderedFixtureInterface, Conta
 		$user2->setEmail('me@here2.com');
 		$user2->setLastActiveTime(new \DateTime());
 		$user2->setEnabled(true);
+		$user2->setChatty(false);
         //$user1->setRoles(array('ROLE_ADMIN'));
         $userManager->updateUser($user2, true);
 		

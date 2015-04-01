@@ -209,10 +209,14 @@ class GameController extends Controller
     		$op = 1;
     		$userTime = $this->getMinutesTimeString($p1Time);
     		$opTime = $this->getMinutesTimeString($p2Time);
+    		$pChatty = $game->getPlayerIsChatty(0);
+    		$opChatty = $game->getPlayerIsChatty(1);
     	} else {
     		$op = 0;
     		$userTime = $this->getMinutesTimeString($p2Time);
     		$opTime = $this->getMinutesTimeString($p1Time);
+    		$pChatty = $game->getPlayerIsChatty(1);
+    		$opChatty = $game->getPlayerIsChatty(0);
     	}
     	$opponent = $game->getPlayers()->get($op);
 	    //get taken pieces
@@ -222,6 +226,8 @@ class GameController extends Controller
 	    		array('game' => $game,
 	    			'player' => $colour, 
 	    			'opponent' => $opponent,
+	    			'pChatty' => $pChatty,
+	    			'opChatty' => $opChatty,
 	    			'userTime' => $userTime,
 	    			'opTime' => $opTime,
 	    			'taken' => $taken)
@@ -396,6 +402,41 @@ class GameController extends Controller
      */
     public function toggleChatAction($gameID, $player)
     {
-    	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
+	    $user = $this->getUser();	
+    	$em = $this->getDoctrine()->getManager();
+	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+    	if ($player == 'w') {
+    		$pIndex = 0;
+    	} else {
+    		$pIndex = 1;
+    	}
+    	if ($game->getPlayers()->get($pIndex) != $user) {
+    		throw new AccessDeniedException('You may not toggle your opponent\'s chat!');
+    	}
+    	$game->togglePlayerIsChatty($pIndex);
+    	$user->toggleChatty();
+    	$em->flush();
+    }
+    
+    public function listenAction(Request $request) {
+    	$content = json_decode($request->getContent());
+	    $user = $this->getUser();
+    	$em = $this->getDoctrine()->getManager();
+	    $gameID = $content->gameID;
+	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+    	$opChatty = $content->opChatty;
+    	$pIndex = $game->getPlayers()->indexOf($user);
+    	$opIndex = $pIndex - ($pIndex * 2) + 1;
+    	if ($game->getPlayerIsChatty($opIndex) != $opChatty) {
+    		//chat toggled
+    		$opponent = $game->getPlayers()->get($opIndex);
+    		if ($opChatty) {
+    			$chat = '<br><span class="red">'.$opponent->getUsername().' has disabled chat.</span>';    			
+    		} else {
+    			$chat = '<br><span class="green">'.$opponent->getUsername().' has enabled chat.</span>';    			
+    		}
+    		return new JsonResponse(array('changed' => true, 'chat' => $chat, 'chatToggled' => true)); 
+    	}
+    	return new JsonResponse(array('changed' => false));   
     }
 }

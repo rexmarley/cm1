@@ -54,16 +54,16 @@ class Game
      * @ORM\Column(type="boolean")
      */
     private $p2Joined;
+
+    /**
+     * @ORM\Column(type="array")
+     */
+    protected $chatLog;
     
     /**
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="array")
      */
-    private $p1Chatty;
-    
-    /**
-     * @ORM\Column(type="boolean")
-     */
-    private $p2Chatty;
+    private $chattyPlayers;
     
     /**
      * @ORM\Column(type="bigint", nullable=true)
@@ -115,6 +115,7 @@ class Game
     	$this->setActivePlayerIndex(0);
         $this->lastMove = array();
         $this->lastMoveValidated = true;
+        $this->chatLog = array();
     }
 
     /**
@@ -345,29 +346,6 @@ class Game
     }
 
     /**
-     * Enable/disable chat for player 1
-     *
-     * @param boolean $chatty
-     * @return Game
-     */
-    public function setP1Chatty($chatty)
-    {
-        $this->p1Chatty = $chatty;
-
-        return $this;
-    }
-
-    /**
-     * Check if player 1 has chat enabled
-     *
-     * @return boolean 
-     */
-    public function getP1Chatty()
-    {
-        return $this->p1Chatty;
-    }
-
-    /**
      * Set last move time
      *
      * @param integer $time
@@ -415,26 +393,75 @@ class Game
     }
 
     /**
-     * Enable/disable chat for player 2
+     * Set chat log
      *
-     * @param boolean $chatty
+     * @param array $log
      * @return Game
      */
-    public function setP2Chatty($chatty)
+    public function setChatLog($log)
     {
-        $this->p2Chatty = $chatty;
+        $this->chatLog = $log;
 
         return $this;
     }
 
     /**
-     * Check if player 2 has chat enabled
+     * Get chat log
      *
-     * @return boolean 
+     * @return array 
      */
-    public function getP2Chatty()
+    public function getChatLog()
     {
-        return $this->p2Chatty;
+        return $this->chatLog;
+    }
+
+    /**
+     * Add chat item
+     *
+     * @param string $item
+     * @return Game
+     */
+    public function addChatItem($item)
+    {
+        $this->chatLog[] = $item;
+
+        return $this;
+    }
+
+    /**
+     * Enable/disable chat for player
+     *
+     * @param int $player index
+     * @param bool $chatty
+     * @return Game
+     */
+    public function setPlayerIsChatty($player, $chatty)
+    {
+        $this->chattyPlayers[$player] = $chatty;
+
+        return $this;
+    }
+
+    /**
+     * Check if player has chat enabled
+     *
+     * @return bool 
+     */
+    public function getPlayerIsChatty($player)
+    {
+        return $this->chattyPlayers[$player];
+    }
+    
+    /**
+     * Toggle chat for player
+     * @param int $player
+     */
+    public function togglePlayerIsChatty($player) {
+    	if ($this->chattyPlayers[$player]) {
+    		$this->chattyPlayers[$player] = false;
+    	} else {
+    		$this->chattyPlayers[$player] = true;
+    	}
     }
 
     /**

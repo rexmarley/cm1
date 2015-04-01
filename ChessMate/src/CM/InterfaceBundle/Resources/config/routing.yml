@@ -51,8 +51,12 @@ cm_resign_game:
     defaults: { _controller: "CMInterfaceBundle:Game:resign" }
     
 cm_toggle_chat:
-    path:     /toggleChat/{player}
+    path:     /toggleChat/{gameID}/{player}
     defaults: { _controller: "CMInterfaceBundle:Game:toggleChat" }
+    
+cm_listen:
+    path:     /listen
+    defaults: { _controller: "CMInterfaceBundle:Game:listen" }
     
 cm_js_testBoard:
     path:     /tests

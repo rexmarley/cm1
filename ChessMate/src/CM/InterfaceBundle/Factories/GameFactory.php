@@ -27,9 +27,9 @@ class GameFactory
         $game = new Game($board, $length);
         
         $game->addPlayer($whitePlayer);
-        $game->setP1Chatty($whitePlayer->getChatty());
+        $game->setPlayerIsChatty(0, $whitePlayer->getChatty());
         $game->addPlayer($blackPlayer);
-       	$game->setP2Chatty($blackPlayer->getChatty());
+       	$game->setPlayerIsChatty(1, $blackPlayer->getChatty());
 
         return $game;
     }

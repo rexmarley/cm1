@@ -189,4 +189,16 @@ class User extends BaseUser
     public function getChatty() {
     	return $this->chatty;
     }
+    
+    /**
+     * Toggle chat for player
+     * @param int $player
+     */
+    public function toggleChatty() {
+    	if ($this->chatty) {
+    		$this->chatty = false;
+    	} else {
+    		$this->chatty = true;
+    	}
+    }
 }
