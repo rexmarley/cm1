@@ -9,10 +9,6 @@ cm_interface_login:
 cm_user:
     resource: "@CMUserBundle/Resources/config/routing.yml"
     prefix:   /
-    
-cm_ratchet:
-    resource: "@CMRatchetBundle/Resources/config/routing.yml"
-    prefix:   /rat
 
 app:
     resource: "@AppBundle/Controller/"

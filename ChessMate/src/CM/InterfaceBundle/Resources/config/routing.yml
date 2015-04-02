@@ -22,17 +22,9 @@ cm_interface_join:
     path:     /join/{gameID}
     defaults: { _controller: "CMInterfaceBundle:Game:joinGame" }
     
-cm_interface_checkJoined:
-    path:     /checkJoined/{gameID}
-    defaults: { _controller: "CMInterfaceBundle:Game:checkJoined" }
-    
 cm_send_move:
     path:     /sendMove
     defaults: { _controller: "CMInterfaceBundle:Move:sendMove" }
-    
-cm_get_move:
-    path:     /getMove
-    defaults: { _controller: "CMInterfaceBundle:Move:getMove" }
     
 cm_save_move:
     path:     /saveMove/{gameID}

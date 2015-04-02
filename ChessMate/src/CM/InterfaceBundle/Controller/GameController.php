@@ -420,7 +420,7 @@ class GameController extends Controller
     }
     
     /**
-     * Add chat item
+     * Create chat message
      * @param unknown $gameID
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\JsonResponse

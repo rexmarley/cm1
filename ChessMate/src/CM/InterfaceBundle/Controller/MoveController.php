@@ -64,52 +64,6 @@ class MoveController extends Controller
     	return new JsonResponse(array('sent' => true));
     }
     
-//     /**
-//      * Get opponent's move; validity is checked on receipt
-//      * @param Request $request
-//      * @return \Symfony\Component\HttpFoundation\JsonResponse
-//      */
-//     public function getMoveAction(Request $request) {
-//     	//find game
-//     	$em = $this->getDoctrine()->getManager();
-//     	$gameID = $request->request->get('gameID');
-//     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-//     	$user = $this->getUser();
-// 	    $player = $game->getPlayers()->indexOf($user);
-// 	    if ($game->getLastMoveValidated()) {
-// 	    	$cheat = $game->getCheaterIndex();
-// 	    	if (!is_null($cheat)) {
-// 	    		//player/opponent cheated - report back
-// 	    		if ($cheat == $player) {
-// 	    			$message = 'Game Aborted: Why cheat at chess?';
-// 	    		} else {
-// 	    			$message = 'Game Aborted: Opponent has cheated!';	    			
-// 	    		}
-// 	   	 		return new JsonResponse(array('moved' => true, 'cheat' => $message));	    		
-// 	    	}
-// 	    //check if move made	    	
-// 	    } else if ($game->getLastMoveBy() != $player) {
-// 	    	//get opponent's move
-// 	    	$move = $game->getLastMove();	    	
-// 			//return opponent's unvalidated move
-// 		    return new JsonResponse(
-// 		    	array('moved' => true,
-// 	    				'checkMate' => false,
-// 		    			'from' => $move['from'], 
-// 		    			'to' => $move['to'],
-// 		    			'swapped' => $move['newPiece'],
-// 	    				'enPassant' => $move['enPassant'],
-// 	    				'newBoard' => $move['newBoard']
-// 		    	));	    	
-// 	    } else if (time() - $game->getLastMoveTime() > 15) {
-// 	    	//move not validated by opponent within 15 secs. - assume foul play/game abandoned
-// 	    	$game->setVictorIndex($player);
-// 	    	//switch active player
-// 			$game->switchActivePlayer();
-// 	    }
-// 	    return new JsonResponse(array('moved' => false));	
-//     }
-    
     /**
      * Save move if validated by opponent
      * @param Request $request

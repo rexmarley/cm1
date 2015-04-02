@@ -230,32 +230,29 @@ function validatePawn(colour, from, to) {
  * Check if king is in check
  */
 function inCheck(colour) {
-	var king = colour+'_king';
+	//get king's position
+	var kingSquare = getKingSquare(colour);
 	//get opponent colour
 	colour = getOpponentColour(colour);
+	//check if in check	
+	return (inCheckOnDiagonal(colour, kingSquare) || inCheckByKnight(colour, kingSquare) 
+			|| inCheckOnXAxis(colour, kingSquare) || inCheckOnXAxis(colour, kingSquare) 
+			|| inCheckByPawn(colour, kingSquare));
+}
+
+/**
+ * Get king's indices on abstract board
+ */
+function getKingSquare(colour) {
+	var king = colour+'_king';
 	//get king's position
 	var kingSquare = 0;
 	for (var row = 0; row < 8; row++) {
 		var col = $.inArray(king, abstractBoard[row]);
 		if (col !== -1) {
-			kingSquare = [row, col];
-			break;
+			return [row, col];
 		}
 	}
-	//check in check
-	if (inCheckByPawn(colour, kingSquare)) {
-		return true;
-	} else if (inCheckByKnight(colour, kingSquare)) {
-		return true;
-	} else if (inCheckOnXAxis(colour, kingSquare)) {
-		return true;
-	} else if (inCheckOnYAxis(colour, kingSquare)) {
-		return true;
-	} else if (inCheckOnDiagonal(colour, kingSquare)) {
-		return true;
-	}
-	
-	return false;
 }
 
 /**
@@ -345,8 +342,6 @@ function inCheckByPawn(colour, kingSquare) {
 	}
 	return false;
 }
-
-//TODO: validate moves and check on receiving opponent's move only call server-side validation when dispute
 
 
 /**

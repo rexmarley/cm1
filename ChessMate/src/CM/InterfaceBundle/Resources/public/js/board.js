@@ -10,7 +10,18 @@ $(document).ready( function() {
             	$(this).removeClass('invalid');
                 return true;
             }
-        }
+        },
+		helper: "clone",
+		appendTo: ".board",
+	    start: function(event, ui) {
+	    	//remove any highlight
+	    	$(this).closest('div.square').stop(true,true);
+			selectedPiece = null;
+	        return $(event.target).fadeTo(0, 0);
+	    },
+	    stop: function(event, ui) {
+	        return $(event.target).fadeTo(0, 1);
+	    },
 	});
 
 	/**
@@ -20,6 +31,34 @@ $(document).ready( function() {
 		accept: '.piece',
 		drop: validateMoveOut,
     });
+	
+	var selectedPiece = null;
+	//highlight own pieces on click
+	$('.ui-draggable').on('click', function(e) {
+		//check player's turn and piece (if actual game)
+		if (checkPieceAndTurnForPlayer(this.id.charAt(0))) {
+			if (!selectedPiece || selectedPiece.id != $(this).id) {
+				selectedPiece = $(this);
+				selectedPiece.closest('div.square').effect("highlight", 50000);
+			} else {
+				selectedPiece.closest('div.square').stop(true,true);
+				selectedPiece = null;
+			}
+		} else if (playersTurn) {
+			//attempt take of piece
+			selectedPiece.closest('div.square').stop(true,true);
+			validatePointAndClick(selectedPiece, selectedPiece.closest('div.square').attr('id'), $(this).closest('div.square').attr('id'));
+			selectedPiece = null;			
+		}
+	});
+	//handle point and click movement
+	$('.square').on('click', function(e) {
+		if (selectedPiece && selectedPiece.closest('div.square').attr('id') != this.id) {
+			selectedPiece.closest('div.square').stop(true,true);
+			validatePointAndClick(selectedPiece, selectedPiece.closest('div.square').attr('id'), this.id);
+			selectedPiece = null;
+		}
+	});
 	
 	//override position of loading dialog
 	$('#joiningGameDialog').dialog({
@@ -45,13 +84,6 @@ $(document).ready( function() {
 		}
     }
 	
-	//workaround for hidden overflow hiding draggable
-	$('.square').mouseover(function() {
-		$(this).removeClass('clipped');
-	});
-	$('.square').mouseleave(function() {
-		$(this).addClass('clipped');
-	});
 	$('.choosablePiece').click(function() {
 		swapPawn(this.id);
 	});
@@ -74,6 +106,7 @@ $(document).ready( function() {
 		});		
 	});
 
+	//listener for sent chat
 	$('a#chatSend').on('click', function(e) {
 		e.preventDefault();
 		var msg = $('input#chatMsg').val().trim();
@@ -95,6 +128,7 @@ var tInterval;
 //global for swapping pawn
 var gFrom = [];
 var lastChatSeen = 0;
+
 /**
  * Join Game/check oppponent has joined
  */
@@ -209,6 +243,119 @@ function stopTimer(timerID) {
 }
 
 /**
+ * Validate move made by player
+ */
+function validateMoveOut(event, ui) {
+	//get moved piece
+	var piece = getPieceDetails(ui.draggable.attr('id'));
+	//check player's turn and piece (if actual game)
+	if (!checkPieceAndTurnForPlayer(piece['colour'])) {
+		//invalidate move
+		ui.draggable.addClass('invalid');
+		return false;			
+	}
+	//get abstract indices for from/to squares
+	var from = getAbstractedSquareIndex(ui.draggable.parent().attr('id'));
+	var to = getAbstractedSquareIndex(this.id);
+	//validate move
+	if (!validateMove(piece, from, to, 'Won')) {
+		//invalidate move
+		ui.draggable.addClass('invalid');
+		return false;			
+	}
+	//check for pawn reaching opposing end
+	if (pawnHasReachedOtherSide(piece['type'], piece['colour'], to[0])) {
+		//ajax move on piece selection
+		gFrom = from;
+		openPieceChooser(piece['colour']);
+	} else if ($('.board').attr('id').charAt(7) != 'x') {
+    	//ajax move & validate server-side
+    	//should only fail due to cheating --> display message and manually revert board
+		sendMove(from, to, piece['type'], piece['colour']);
+	}
+	//center piece
+	$(this).append(ui.draggable.css('position','static'));
+
+	return true;
+}
+
+/**
+ * Validate/perform point & click move
+ * @param array from grid-ref.
+ * @param array to grid-ref
+ * @param bool 
+ */
+function validatePointAndClick(moved, gridFrom, gridTo) {
+	var piece = getPieceDetails(moved.attr('id'));
+	//check player's turn and piece (if actual game)
+	if (!checkPieceAndTurnForPlayer(piece['colour'])) {
+		//invalidate move
+		return false;			
+	}
+	//get abstract indices for from/to squares
+	var from = getAbstractedSquareIndex(gridFrom);
+	var to = getAbstractedSquareIndex(gridTo);
+	//validate move
+	if (!validateMove(piece, from, to, 'Won')) {
+		return false;			
+	}
+	//check for pawn reaching opposing end
+	if (pawnHasReachedOtherSide(piece['type'], piece['colour'], to[0])) {
+		//ajax move on piece selection
+		gFrom = from;
+		openPieceChooser(piece['colour']);
+	} else if ($('.board').attr('id').charAt(7) != 'x') {
+    	//ajax move & validate server-side
+    	//should only fail due to cheating
+		sendMove(from, to, piece['type'], piece['colour']);
+	}
+	//make move
+	moved.position({
+        of: 'div#'+gridTo
+    });
+	//center piece
+	$('div#'+gridTo).append(moved.css('position','static'));
+	
+	return true;
+}
+
+/**
+ * Check opponent's move
+ * @param array from grid-ref.
+ * @param array to grid-ref
+ * @param bool|string swapped has pawn been swapped 
+ */
+function checkMoveByOpponent(from, to, swapped, enPassant, newBoard) {
+	var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
+	var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
+	//get moved piece
+	var moved = getOccupant(gridFrom);
+	//check piece exists & question move validity
+	if (moved.length && validateMoveIn(getPieceDetails(moved.attr('id')), from, to, swapped, enPassant, newBoard)) {
+		//save move
+		saveMove();
+		//make move
+		moved.position({
+            of: 'div#'+gridTo
+        });
+		//center piece
+		$('div#'+gridTo).append(moved.css('position','static'));
+		//perform pawn swap
+		if (swapped) {
+			//get new id
+			var num = getNewPieceNumber(swapped);
+			//change piece
+			moved.html($('#pick_'+swapped).html());
+			//set new id
+			moved.attr('id', swapped+'_'+num);					
+		}		
+	} else {
+		//validate server-side & find cheat
+		findCheat();
+	}
+}
+
+/**
  * Validate move made by opponent
  * If invalid, one of the players has cheated
  */
@@ -250,76 +397,16 @@ function validateMoveIn(piece, from, to, newPiece, enPassant, newBoard) {
 }
 
 /**
- * Check opponent's move
- * @param array from grid-ref.
- * @param array to grid-ref
- * @param bool|string swapped has pawn been swapped 
+ * Check player's turn and piece (if actual game)
+ * @param colour
+ * @returns
  */
-function checkMoveByOpponent(from, to, swapped, enPassant, newBoard) {
-	var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
-	var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
-	//get moved piece
-	var moved = getOccupant(gridFrom);
-	//check piece exists & question move validity
-	if (moved.length && validateMoveIn(getPieceDetails(moved.attr('id')), from, to, swapped, enPassant, newBoard)) {
-		//save move
-		saveMove();
-		//make move
-		moved.position({
-            of: 'div#'+gridTo
-        });
-		//center piece
-		$('div#'+gridTo).append(moved.css('position','static'));
-		//perform pawn swap
-		if (swapped) {
-			//get new id
-			var num = getNewPieceNumber(swapped);
-			//change piece
-			moved.html($('#pick_'+swapped).html());
-			//set new id
-			moved.attr('id', swapped+'_'+num);					
-		}		
-	} else {
-		//validate server-side & find cheat
-		findCheat();
-	}
-}
-
-/**
- * Validate move made by player
- */
-function validateMoveOut(event, ui) {
-	//get moved piece
-	var piece = getPieceDetails(ui.draggable.attr('id'));
+function checkPieceAndTurnForPlayer(colour) {
 	//check player's turn and piece (if actual game)
 	if (!playersTurn || ($('.board').attr('id').charAt(7) != 'x' 
-		&& piece['colour'] != $('.board').attr('id').charAt(5))) {
-		//invalidate move
-		ui.draggable.addClass('invalid');
+		&& colour != $('.board').attr('id').charAt(5))) {
 		return false;			
 	}
-	//get abstract indices for from/to squares
-	var from = getAbstractedSquareIndex(ui.draggable.parent().attr('id'));
-	var to = getAbstractedSquareIndex(this.id);
-	//validate move
-	if (!validateMove(piece, from, to, 'Won')) {
-		//invalidate move
-		ui.draggable.addClass('invalid');
-		return false;			
-	}
-	//check for pawn reaching opposing end
-	if (pawnHasReachedOtherSide(piece['type'], piece['colour'], to[0])) {
-		//ajax move on piece selection
-		gFrom = from;
-		openPieceChooser(piece['colour']);
-	} else if ($('.board').attr('id').charAt(7) != 'x') {
-    	//ajax move & validate server-side
-    	//should only fail due to cheating --> display message and manually revert board
-		sendMove(from, to, piece['type'], piece['colour']);
-	}
-	//center piece
-	$(this).append(ui.draggable.css('position','static'));
-
 	return true;
 }
 
@@ -361,6 +448,15 @@ function validateMove(piece, from, to, takenSide) {
     		} else {
         		//if in check, invalidate move
     			if (inCheck(piece['colour'])) {
+            		//highlight king briefly
+            		var kingSquare = getKingSquare(piece['colour']);
+            		var king = getOccupant(getGridRefFromAbstractIndices(kingSquare[0], kingSquare[1]));
+            		var highlight = setInterval(function() {
+                		king.effect("highlight", {color:"#ff3333"}, 250);
+	            	}, 500);
+            		setTimeout(function() {
+            			clearInterval(highlight);
+	            	}, 2500);
                 	//revert board
             		updateAbstractBoard(to, from);
             		abstractBoard[to[0]][to[1]] = occupant;
@@ -497,7 +593,7 @@ function getNewPieceNumber(newPiece) {
 	return num;
 }
 
-var newPiece = false;	//TODO: reset on valid move
+var newPiece = false;
 /**
  * Swap pawn on selection
  */
@@ -561,14 +657,16 @@ function takePiece(toSquare, wonOrLost) {
 	var oldID = taken.attr('id').split('_');
 	var newID = ' div#'+oldID[0]+'_'+oldID[1]+'_t';
 	taken.remove();
-	var newT = $('div#pieces'+wonOrLost+newID);
-	if (newT.hasClass('hidden')) {
-		newT.removeClass('hidden');    		
-	} else if ($(newID+' sub.subscript:first').html().trim() != '') {
-		//increment count
-		$(newID+' sub.subscript:first').html(parseInt($(newID+' sub.subscript:first').html(), 10)+1)
-	} else {
-		$(newID+' sub.subscript:first').html(2);
+	if ($(newID+' sub.subscript').length) {
+		var newT = $('div#pieces'+wonOrLost+newID);
+		if (newT.hasClass('hidden')) {
+			newT.removeClass('hidden');    		
+		} else if ($(newID+' sub.subscript:first').html().trim() != '') {
+			//increment count
+			$(newID+' sub.subscript:first').html(parseInt($(newID+' sub.subscript:first').html(), 10)+1)
+		} else {
+			$(newID+' sub.subscript:first').html(2);
+		}
 	}
 }
 
