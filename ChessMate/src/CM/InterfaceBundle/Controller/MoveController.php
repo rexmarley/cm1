@@ -40,72 +40,75 @@ class MoveController extends Controller
     	$moveTime = time() - $game->getLastMoveTime();
     	$timeLeft = $game->getPlayerTime($player) - $moveTime;
     	if ($timeLeft < $moveTime) {
-    		//throw new AccessDeniedException('You are out of time!');
-	    	$game->setVictorIndex($game->getInactivePlayerIndex());    		
+	    	$game->setVictorIndex($game->getInactivePlayerIndex());
+    		$game->setGameOverMessage('Game Aborted: '.$user->getUsername().' has cheated.');
+    	} else {
+	    	$game->setLastMoveTime(time());
+	    	//get move details
+	    	$move = array(
+	    			'by' => $player,
+	    			'from' => $content->from,
+	    			'to' => $content->to,
+	    			'newBoard' => $content->board,
+	    			'enPassant' => $content->enPassant,
+	    			'newPiece' => $content->newPiece
+	    	);
+		    //save move for validation by opponent
+		    $game->setLastMove($move);
+		    //fopen($filename, a);
+			//mark move as unvalidated
+			$game->setLastMoveValidated(false);
+		    $em->flush();
     	}
-    	$game->setLastMoveTime(time());
-    	//get move details
-    	$move = array(
-    			'from' => $content->from,
-    			'to' => $content->to,
-    			'newBoard' => $content->board,
-    			'enPassant' => $content->enPassant,
-    			'newPiece' => $content->newPiece
-    	);
-	    //save move for validation by opponent
-	    $game->setLastMove($move);
-		//mark move as unvalidated
-		$game->setLastMoveValidated(false);
-	    $em->flush();
 
     	return new JsonResponse(array('sent' => true));
     }
     
-    /**
-     * Get opponent's move; validity is checked on receipt
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
-     */
-    public function getMoveAction(Request $request) {
-    	//find game
-    	$em = $this->getDoctrine()->getManager();
-    	$gameID = $request->request->get('gameID');
-    	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-    	$user = $this->getUser();
-	    $player = $game->getPlayers()->indexOf($user);
-	    if ($game->getLastMoveValidated()) {
-	    	$cheat = $game->getCheaterIndex();
-	    	if (!is_null($cheat)) {
-	    		//player/opponent cheated - report back
-	    		if ($cheat == $player) {
-	    			$message = 'Game Aborted: Why cheat at chess?';
-	    		} else {
-	    			$message = 'Game Aborted: Opponent has cheated!';	    			
-	    		}
-	   	 		return new JsonResponse(array('moved' => true, 'cheat' => $message));	    		
-	    	}
-	    //check if move made	    	
-	    } else if ($game->getActivePlayerIndex() != $player && !$game->getLastMoveValidated()) {
-	    	//get opponent's move
-	    	$move = $game->getLastMove();	    	
-			//return opponent's unvalidated move
-		    return new JsonResponse(
-		    	array('moved' => true,
-	    				'checkMate' => false,
-		    			'from' => $move['from'], 
-		    			'to' => $move['to'],
-		    			'swapped' => $move['newPiece'],
-	    				'enPassant' => $move['enPassant'],
-	    				'newBoard' => $move['newBoard']
-		    	));	    	
-	    } else if (time() - $game->getLastMoveTime() > 15) {
-	    	//move not validated by opponent within 15 secs. - assume foul play/game abandoned
-	    	$game->setVictorIndex($player);
-	    	//switch active player
-			$game->switchActivePlayer();
-	    }
-	    return new JsonResponse(array('moved' => false));	
-    }
+//     /**
+//      * Get opponent's move; validity is checked on receipt
+//      * @param Request $request
+//      * @return \Symfony\Component\HttpFoundation\JsonResponse
+//      */
+//     public function getMoveAction(Request $request) {
+//     	//find game
+//     	$em = $this->getDoctrine()->getManager();
+//     	$gameID = $request->request->get('gameID');
+//     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+//     	$user = $this->getUser();
+// 	    $player = $game->getPlayers()->indexOf($user);
+// 	    if ($game->getLastMoveValidated()) {
+// 	    	$cheat = $game->getCheaterIndex();
+// 	    	if (!is_null($cheat)) {
+// 	    		//player/opponent cheated - report back
+// 	    		if ($cheat == $player) {
+// 	    			$message = 'Game Aborted: Why cheat at chess?';
+// 	    		} else {
+// 	    			$message = 'Game Aborted: Opponent has cheated!';	    			
+// 	    		}
+// 	   	 		return new JsonResponse(array('moved' => true, 'cheat' => $message));	    		
+// 	    	}
+// 	    //check if move made	    	
+// 	    } else if ($game->getLastMoveBy() != $player) {
+// 	    	//get opponent's move
+// 	    	$move = $game->getLastMove();	    	
+// 			//return opponent's unvalidated move
+// 		    return new JsonResponse(
+// 		    	array('moved' => true,
+// 	    				'checkMate' => false,
+// 		    			'from' => $move['from'], 
+// 		    			'to' => $move['to'],
+// 		    			'swapped' => $move['newPiece'],
+// 	    				'enPassant' => $move['enPassant'],
+// 	    				'newBoard' => $move['newBoard']
+// 		    	));	    	
+// 	    } else if (time() - $game->getLastMoveTime() > 15) {
+// 	    	//move not validated by opponent within 15 secs. - assume foul play/game abandoned
+// 	    	$game->setVictorIndex($player);
+// 	    	//switch active player
+// 			$game->switchActivePlayer();
+// 	    }
+// 	    return new JsonResponse(array('moved' => false));	
+//     }
     
     /**
      * Save move if validated by opponent
@@ -183,9 +186,9 @@ class MoveController extends Controller
     	//get user
 	    $player = $game->getPlayers()->indexOf($user);
     	//get player that made move
-    	$mover = $game->getInactivePlayerIndex();
+    	$mover = $game->getActivePlayerIndex();
     	//get player that questioned validity
-    	$shaker = $game->getActivePlayerIndex();
+    	$shaker = $game->getInactivePlayerIndex();
 	    //check for attempted hacks that don't affect gameplay
     	if ($player === false) {
 	    	throw new AccessDeniedException('You are not part of this game!');
@@ -194,7 +197,6 @@ class MoveController extends Controller
     	} else if ($player == $mover) {
 	    	throw new AccessDeniedException('Stop messing about');
     	}
-    	$cheatMessage = 'Game Aborted: ';
     	//get attempted move
     	$attempted = $game->getLastMove();
     	$board = $game->getBoard(); 
@@ -206,7 +208,8 @@ class MoveController extends Controller
     	if (!$piece) {
     		//cheat = inactive player i.e. player that made move
     		$game->setCheaterIndex($mover);
-    		$cheatMessage .= 'Opponent has cheated!';
+    		$game->setVictorIndex($shaker);
+    		$game->setGameOverMessage('Game Aborted: '.$game->getPlayers()->get($mover)->getUsername().' has cheated.');
     	} else {
 	    	$piece = explode("_", $piece);
 	    	//get move details
@@ -220,7 +223,8 @@ class MoveController extends Controller
 	    	//make sure right colour moved
 	    	if ($move['pColour'] == 'w' and $mover == 1 || $move['pColour'] == 'b' and $mover == 0) {
     			$game->setCheaterIndex($mover);
-    			$cheatMessage .= 'Opponent has cheated!';
+    			$game->setVictorIndex($shaker);
+    			$game->setGameOverMessage('Game Aborted: '.$game->getPlayers()->get($mover)->getUsername().' has cheated.');
 	    	} else {
 		    	//get piece validator 
 		    	$validator = $this->get($move['pType'].'_validator');
@@ -229,20 +233,21 @@ class MoveController extends Controller
 		    	if ($valid['valid']) {
 		    		//cheater = active player i.e. player that questioned validity
 	    			$game->setCheaterIndex($shaker);
-    				$cheatMessage .= 'Why cheat at chess?';
+    				$game->setVictorIndex($mover);
+    				$game->setGameOverMessage('Game Aborted: '.$game->getPlayers()->get($shaker)->getUsername().' has cheated.');
 	    			//save validated move
 	    			$this->saveMove($game, $attempted, $em);
 		    	} else {
 	    			//cheat = inactive player i.e. player that made move
 	    			$game->setCheaterIndex($mover);
-    				$cheatMessage .= 'Opponent has cheated!';
+    				$game->setVictorIndex($shaker);
+    				$game->setGameOverMessage('Game Aborted: '.$game->getPlayers()->get($mover)->getUsername().' has cheated.');
 		    	}
 	    	}
     	}
 		//mark move as validated
 		$game->setLastMoveValidated(true);
     	$em->flush();
-	    //return cheater 	
-   	 	return new JsonResponse(array('cheat' => $cheatMessage));
+   	 	return new JsonResponse(array('cheat' => true));
     }
 }

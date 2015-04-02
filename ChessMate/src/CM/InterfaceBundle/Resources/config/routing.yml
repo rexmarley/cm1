@@ -54,6 +54,10 @@ cm_toggle_chat:
     path:     /toggleChat/{gameID}/{player}
     defaults: { _controller: "CMInterfaceBundle:Game:toggleChat" }
     
+cm_send_chat:
+    path:     /sendChat/{gameID}
+    defaults: { _controller: "CMInterfaceBundle:Game:sendChat" }
+    
 cm_listen:
     path:     /listen
     defaults: { _controller: "CMInterfaceBundle:Game:listen" }

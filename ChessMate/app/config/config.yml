@@ -23,6 +23,7 @@ framework:
     
 parameters:
     cm_user.last_active_listener.class: CM\UserBundle\EventListener\LastActiveListener
+    cm_interface.on_flush_listener.class: CM\InterfaceBundle\EventListener\OnFlushListener
 
 # Services
 services:
@@ -31,6 +32,10 @@ services:
         arguments: ["@security.context", "@fos_user.user_manager"]
         tags:
             - { name: kernel.event_listener, event: kernel.controller, method: onCoreController }
+    cm_interface.on_flush_listener:
+        class: "%cm_interface.on_flush_listener.class%"
+        tags:
+            - { name: doctrine.event_listener, event: onFlush }
 
 # Twig Configuration
 twig:

@@ -42,23 +42,14 @@ class Game
     private $activePlayerIndex;
     
     /**
-     * Has player 1 joined game
-     * 
-     * @ORM\Column(type="boolean")
+     * @ORM\Column(type="array")
      */
-    private $p1Joined;
-    
-    /**
-     * Has player 2 joined game
-     * 
-     * @ORM\Column(type="boolean")
-     */
-    private $p2Joined;
+    private $playersJoined;
 
     /**
      * @ORM\Column(type="array")
      */
-    protected $chatLog;
+    //protected $chatLog;
     
     /**
      * @ORM\Column(type="array")
@@ -97,9 +88,16 @@ class Game
      * Victor's index; null if none
      * 0 = white
      * 1 = black
+     * 2 = draw
      * @ORM\Column(type="integer", nullable=true)
      */
     private $victorIndex;
+
+    /**
+     * Game over message
+     * @ORM\Column(type="string", nullable=true)
+     */
+    private $gameOverMessage;
     
     /**
      * Constructor
@@ -108,14 +106,14 @@ class Game
     {
         $this->players = new \Doctrine\Common\Collections\ArrayCollection();
         $this->board = $board;
-        $this->p1Joined = false;
-        $this->p2Joined = false;
+        $this->playersJoined = array(false,false);
         $this->playerTimes = array($length, $length);
     	//set white as active
     	$this->setActivePlayerIndex(0);
-        $this->lastMove = array();
         $this->lastMoveValidated = true;
         $this->chatLog = array();
+    	//set last move by no-one to prevent superfluous check
+        $this->lastMove = array('by'=> 2);
     }
 
     /**
@@ -129,49 +127,28 @@ class Game
     }
 
     /**
-     * Set player 1 as joined
+     * Set player has joined game
      *
-     * @param boolean $joined
+     * @param int $player index
+     * @param bool $joined
      * @return Game
      */
-    public function setP1Joined($joined)
+    public function setPlayerJoined($player, $joined)
     {
-        $this->p1Joined = $joined;
+        $this->playersJoined[$player] = $joined;
 
         return $this;
     }
 
     /**
-     * Check if player 1 has joined
+     * Check if player has joined
+     * @param int $player index
      *
-     * @return boolean 
+     * @return boolean
      */
-    public function getP1Joined()
+    public function getPlayerJoined($player)
     {
-        return $this->p1Joined;
-    }
-
-    /**
-     * Set player 2 as joined
-     *
-     * @param boolean $joined
-     * @return Game
-     */
-    public function setP2Joined($joined)
-    {
-        $this->p2Joined = $joined;
-
-        return $this;
-    }
-
-    /**
-     * Check if player 2 has joined
-     *
-     * @return boolean 
-     */
-    public function getP2Joined()
-    {
-        return $this->p2Joined;
+        return $this->playersJoined[$player];
     }
 
     /**
@@ -181,8 +158,8 @@ class Game
      */
     public function getJoined()
     {
-        return ($this->p1Joined && $this->p2Joined);
-    }    
+        return ($this->playersJoined[0] && $this->playersJoined[1]);
+    }  
 
     /**
      * Set board
@@ -287,7 +264,7 @@ class Game
      */
     public function getInactivePlayerIndex()
     {
-        return $this->activePlayerIndex - ($this->activePlayerIndex * 2) + 1;        
+        return 1 - $this->activePlayerIndex;        
     }
 
     /**
@@ -297,7 +274,7 @@ class Game
      */
     public function switchActivePlayer()
     {
-        $this->activePlayerIndex = $this->activePlayerIndex - ($this->activePlayerIndex * 2) + 1;
+        $this->activePlayerIndex = 1 - $this->activePlayerIndex;
 
         return $this;
     }    
@@ -393,42 +370,6 @@ class Game
     }
 
     /**
-     * Set chat log
-     *
-     * @param array $log
-     * @return Game
-     */
-    public function setChatLog($log)
-    {
-        $this->chatLog = $log;
-
-        return $this;
-    }
-
-    /**
-     * Get chat log
-     *
-     * @return array 
-     */
-    public function getChatLog()
-    {
-        return $this->chatLog;
-    }
-
-    /**
-     * Add chat item
-     *
-     * @param string $item
-     * @return Game
-     */
-    public function addChatItem($item)
-    {
-        $this->chatLog[] = $item;
-
-        return $this;
-    }
-
-    /**
      * Enable/disable chat for player
      *
      * @param int $player index
@@ -467,7 +408,7 @@ class Game
     /**
      * Set last move, for validation
      *
-     * @param array $move[from[y,x], to[y,x], newBoard, enPassantAvailable, newPiece]
+     * @param array $move[by<playerIndex>, from[y,x], to[y,x], newBoard, enPassantAvailable, newPiece]
      * 
      * @return Game
      */
@@ -486,6 +427,16 @@ class Game
     public function getLastMove()
     {
         return $this->lastMove;
+    }
+
+    /**
+     * Get index of player that made last move
+     *
+     * @return array 
+     */
+    public function getLastMoveBy()
+    {
+        return $this->lastMove['by'];
     }
 
     /**
@@ -509,6 +460,67 @@ class Game
     public function getLastMoveValidated()
     {
         return $this->lastMoveValidated;
+    }
+    
+    /**
+     * Check if new move is ready
+     * @param int $player index
+     * 
+     * @return boolean
+     */
+    public function newMoveReady($player) {
+    	return $this->getLastMoveBy() != $player && !$this->getLastMoveValidated();
+    }
+    
+    /**
+     * Check if game is over
+     * @return boolean
+     */
+    public function over() {
+    	return !is_null($this->victorIndex);
+    }
+    
+    /**
+     * Set game over message
+     * 
+     * @return Game
+     */
+    public function setGameOverMessage($message) {
+    	$this->gameOverMessage = $message;
+    	return $this;
+    }
+    
+    /**
+     * Get game over message
+     * @param int $player index
+     * 
+     * @return string
+     */
+    public function getGameOverMessage($player) {
+    	return $this->gameOverMessage;
+    }
+
+    /**
+     * Set victor's index, if game over
+     * @param int index
+     * 
+     * @return Game
+     */
+    public function setVictorIndex($index)
+    {
+        $this->victorIndex = $index;
+
+        return $this;
+    }
+    
+    /**
+     * Get victor's index
+     *
+     * @return \CM\UserBundle\Entity\User 
+     */
+    public function getVictorIndex()
+    {
+        return $this->victorIndex;
     }
 
     /**
@@ -534,30 +546,5 @@ class Game
     public function getCheaterIndex()
     {
         return $this->cheaterIndex;
-    }
-
-    /**
-     * Set victor's index, if game over
-     * @param int index
-     * 
-     * @return Game
-     */
-    public function setVictorIndex($index)
-    {
-        if ($index == 0 || $index == 1) {
-        	$this->victorIndex = $index;
-        }
-
-        return $this;
-    }
-    
-    /**
-     * Get victor's index
-     *
-     * @return \CM\UserBundle\Entity\User 
-     */
-    public function getVictorIndex()
-    {
-        return $this->victorIndex;
     }
 }

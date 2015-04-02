@@ -19,4 +19,6 @@ services:
         class: CM\InterfaceBundle\Helpers\GameOverHelper
     html_helper:
         class: CM\InterfaceBundle\Helpers\HTMLHelper
+    file_service:
+        class: CM\InterfaceBundle\Services\FileService
 

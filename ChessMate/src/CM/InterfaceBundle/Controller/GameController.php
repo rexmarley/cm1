@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use CM\InterfaceBundle\Entity\Game;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use CM\InterfaceBundle\Entity\ChatMessage;
 
 class GameController extends Controller
 {    
@@ -67,7 +68,7 @@ class GameController extends Controller
 	    $user = $this->getUser();	
     	$games = $user->getCurrentGames();
     	
-        return $this->render('CMInterfaceBundle:Game:index.html.twig', array('games' => $games, 'player' => 'x'));
+        return $this->render('CMInterfaceBundle:Game:main.html.twig', array('games' => $games, 'player' => 'x'));
     }
     
 	/**
@@ -112,6 +113,7 @@ class GameController extends Controller
 		    if ($search->getMatched()) {
 		    	//get game id
 		    	while (!$search->getGame()) {
+		    		usleep(500000);
 		    		$em->refresh($search);
 		    	}
 		    	$gameID = $search->getGame()->getId();
@@ -124,8 +126,9 @@ class GameController extends Controller
 		 	    $match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
 		 	    if ($match) {
 					$match = $match[0];
-			    	//set opponent's search as matched
+			    	//set searches as matched
 			    	$match->setMatched(true);
+			    	$search->setMatched(true);
 			    	$em->flush();
 			    	//create game if earlier searcher 
 					if ($search->getId() < $match->getId()) {
@@ -138,13 +141,16 @@ class GameController extends Controller
 					    	}
 				    	}
 		    	    	$game = $this->get('game_factory')->createNewGame($length, $user, $match->getSearcher());
-		    		    $em->persist($game);
+		    	    	$em->persist($game);
 		    		    $match->setGame($game);
+		    	    	$em->flush();
 		    		    //delete own search
 		    		    $em->remove($search);
 				    	$em->flush();
 				    	//get game id
 				    	$gameID = $game->getId();
+				    	//create log files
+				    	//$this->get('file_service')->createLogFiles($gameID);
 					}		 	    	
 		 	    }
 		    }		    
@@ -168,19 +174,20 @@ class GameController extends Controller
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
     public function cancelSearchAction($searchID) {
+    	$cancelled = false;
     	if ($searchID != 0) {
 		    $em = $this->getDoctrine()->getManager();
 		    $search = $em->getRepository('CMInterfaceBundle:GameSearch')->find($searchID);
-	    	$user = $this->getUser();
-	    	if ($search->getSearcher() != $user) {
-		    	throw new AccessDeniedException('This is not your search!');    		
-	    	}
-		    //remove search
- 		    $em->remove($search);
- 		    $em->flush();
-		    $cancelled = true;		
-    	} else {
-    		$cancelled = false;
+		    if ($search) {
+		    	$user = $this->getUser();
+		    	if ($search->getSearcher() != $user) {
+			    	throw new AccessDeniedException('This is not your search!');    		
+		    	}
+			    //remove search
+	 		    $em->remove($search);
+	 		    $em->flush();
+			    $cancelled = true;
+		    }
     	}
 	    
     	return new JsonResponse(array('cancelled' => $cancelled));
@@ -222,7 +229,7 @@ class GameController extends Controller
 	    //get taken pieces
     	$taken = $this->get('html_helper')->getUnicodeTakenPieces($game->getBoard()->getTaken());
 
-	    return $this->render('CMInterfaceBundle:Game:index.html.twig', 
+	    return $this->render('CMInterfaceBundle:Game:main.html.twig', 
 	    		array('game' => $game,
 	    			'player' => $colour, 
 	    			'opponent' => $opponent,
@@ -256,51 +263,43 @@ class GameController extends Controller
 	    //authenticate user/game
 	    $this->checkGameValidity($game, $user);
 	    //join game
-    	if ($game->getPlayers()->get(0) == $user) {
-    		$game->setP1Joined(true);
-    	} else {
-    		$game->setP2Joined(true);
-    	}
+	    $game->setPlayerJoined($game->getPlayers()->indexOf($user), true);	    
     	$em->flush();
 	    
-    	return new JsonResponse(array('joined' => true));    	
+    	return new JsonResponse(array('joined' => $this->checkJoined($user, $game, $em)));    	
     }
     
     /**
      * Check opponent has joined the game
-     * @param int $gameID
-     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     * @param User $user
+     * @param Game $game
+     * @param EntityManager $em
+     * @return boolean
      */
-    public function checkJoinedAction($gameID) {
-	    $user = $this->getUser();	
-    	$em = $this->getDoctrine()->getManager();
-    	$game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-	    //authenticate user/game
-	    $this->checkGameValidity($game, $user);
+    private function checkJoined($user, $game, $em) {
 	    //wait for oppponent to join
 	    $waited = 0;
 	    $em->refresh($game);
-	    while (!$game->getJoined() && $waited < 10) {
-	    	sleep(1); //TODO: change
+	    while (!$game->getJoined() && $waited < 15) {
+			sleep(1);
 	    	$em->refresh($game);
 	    	$waited++;
 	    }
 	    $joined = $game->getJoined();
-	    if (!$joined) {
-	    	$em->refresh($game);
-	    	//cancel game
-	    	if ($game) {
-	    		$em->remove($game);
-	    	}
-	    } else {
+	    if ($joined) {
 	    	//add to user
 	    	$user->addCurrentGame($game);
 	    	//set time
 	    	$game->setLastMoveTime(time());
+	    } else {
+	    	//cancel game
+	    	$em->remove($game);
 	    }
+    	//remove searches
+    	$em->getRepository('CMInterfaceBundle:GameSearch')->removeGameSearches($game);
 	    $em->flush();
 	    
-    	return new JsonResponse(array('joined' => $joined));    	
+    	return $joined;    	
     }
 
 	/**
@@ -379,7 +378,7 @@ class GameController extends Controller
 	    //authenticate user/game
 	    $this->checkGameValidity($game, $user);
     	//cancel game
-    	$game->setInProgress(false);    	
+    	//$game->setInProgress(false);    	
     	
     	return $this->redirect($this->generateUrl('cm_interface_start', array()));	
     }
@@ -391,7 +390,7 @@ class GameController extends Controller
      */
     public function offerDrawAction($gameID)
     {
-    	return $this->render('CMInterfaceBundle:Game:index.html.twig', array());    	
+    	return $this->render('CMInterfaceBundle:Game:main.html.twig', array());    	
     }
 	
     /**
@@ -402,7 +401,8 @@ class GameController extends Controller
      */
     public function toggleChatAction($gameID, $player)
     {
-	    $user = $this->getUser();	
+	    $user = $this->getUser();
+    	
     	$em = $this->getDoctrine()->getManager();
 	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
     	if ($player == 'w') {
@@ -416,6 +416,26 @@ class GameController extends Controller
     	$game->togglePlayerIsChatty($pIndex);
     	$user->toggleChatty();
     	$em->flush();
+    	return new JsonResponse();  
+    }
+    
+    /**
+     * Add chat item
+     * @param unknown $gameID
+     * @param Request $request
+     * @return \Symfony\Component\HttpFoundation\JsonResponse
+     */
+    public function sendChatAction($gameID, Request $request) {
+    	$msg = $request->request->get('msg');
+    	$user = $this->getUser();
+    	$em = $this->getDoctrine()->getManager();
+	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+	    $this->checkGameValidity($game, $user);
+	    $chat = new ChatMessage($game, $user, $msg);
+	    $em->persist($chat);
+    	$em->flush();
+    	
+    	return new JsonResponse();    	
     }
     
     /**
@@ -424,24 +444,82 @@ class GameController extends Controller
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
     public function listenAction(Request $request) {
-    	$content = json_decode($request->getContent());
+    	$content = json_decode($request->getContent());    	
 	    $user = $this->getUser();
+    	
+    	$this->get('session')->save();
+    	
     	$em = $this->getDoctrine()->getManager();
 	    $gameID = $content->gameID;
 	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-    	$opChatty = $content->opChatty;
     	$pIndex = $game->getPlayers()->indexOf($user);
-    	$opIndex = $pIndex - ($pIndex * 2) + 1;
+    	$opIndex = 1 - $pIndex;
+    	$opponent = $game->getPlayers()->get($opIndex);
+	    //wait for game over/new move/draw offered/chat max 20 secs.
+	    $waited = 0;
+	    $drawOffered = false;
+	    $lastSeen = $content->lastChat;
+	    if ($game->getPlayerIsChatty($pIndex)) {
+	    	$chatMsgs = $em->getRepository('CMInterfaceBundle:ChatMessage')->findGamePlayerChat($opponent, $game, $lastSeen);
+	    } else {
+	    	$chatMsgs = array();
+	    }
+	    while (!$game->over() && !$game->newMoveReady($pIndex) && count($chatMsgs) == 0 && !$drawOffered && $waited < 25) {
+	    	sleep(1);
+	    	$em->refresh($game);
+	    	if ($game->getPlayerIsChatty($pIndex)) {
+	    		$chatMsgs = $em->getRepository('CMInterfaceBundle:ChatMessage')->findGamePlayerChat($opponent, $game, $lastSeen);
+	    	}
+	    	$waited++;
+	    }
+	    $gameOver = $game->over();
+	    //allow chat even if game is over
+	    $lastSeen += count($chatMsgs);
+	    
+    	$opChatty = $content->opChatty;
+    	$chatToggled = false;
     	if ($game->getPlayerIsChatty($opIndex) != $opChatty) {
     		//chat toggled
+    		$chatToggled = true;
     		$opponent = $game->getPlayers()->get($opIndex);
     		if ($opChatty) {
-    			$chat = '<br><span class="red">'.$opponent->getUsername().' has disabled chat.</span>';    			
+    			$chatMsgs[] = '<br><span class="red">'.$opponent->getUsername().' has disabled chat.</span>';    			
     		} else {
-    			$chat = '<br><span class="green">'.$opponent->getUsername().' has enabled chat.</span>';    			
+    			$chatMsgs[] = '<br><span class="green">'.$opponent->getUsername().' has enabled chat.</span>';    			
     		}
-    		return new JsonResponse(array('changed' => true, 'chat' => $chat, 'chatToggled' => true)); 
     	}
-    	return new JsonResponse(array('changed' => false));   
+    	$chat = array('msgs' => $chatMsgs, 'toggled' => $chatToggled, 'lastSeen' => $lastSeen);
+	    //check if game is over
+	    if ($gameOver) {
+	    	$message = $game->getGameOverMessage($pIndex);
+	    	return new JsonResponse(array('change' => true, 'gameOver' => true, 'overMsg' => $message, 'chat' => $chat));
+	    } else if ($game->newMoveReady($pIndex)) { 	
+			//return opponent's move for validation
+			$response = $this->getNewMoveResponse($game->getLastMove());
+			$response['chat'] = $chat;
+		    return new JsonResponse($response);
+	    } else if (count($chatMsgs) > 0) { 	
+	    	return new JsonResponse(array('change' => true, 'chat' => $chat));
+	    }
+    	return new JsonResponse(array('change' => false));   
+    }
+
+    /**
+     * Get last move details formatted for validation
+     * 
+     * @param array $move
+     * @return array
+     */
+    private function getNewMoveResponse(array $move) {
+    	return array(
+    			'change' => true,
+    			'gameOver' => false,
+		    	'moved' => true,
+		    	'from' => $move['from'], 
+		    	'to' => $move['to'],
+		    	'swapped' => $move['newPiece'],
+	    		'enPassant' => $move['enPassant'],
+	    		'newBoard' => $move['newBoard']
+		    );
     }
 }

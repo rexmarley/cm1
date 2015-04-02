@@ -73,15 +73,28 @@ $(document).ready( function() {
 			url: url
 		});		
 	});
+
+	$('a#chatSend').on('click', function(e) {
+		e.preventDefault();
+		var msg = $('input#chatMsg').val().trim();
+		$('div#chatLog').append('<br><span class="blue">'+msg+'</span>');
+		var url = $(this).attr('href');
+		$.ajax({
+			type: "POST",
+			url: url,
+			data: {'msg': '<br><span class="yellow">'+msg+'</span>'}
+		});	
+		$('input#chatMsg').val('');
+	});
 });
 
 //allow player to move
 var playersTurn = true;
 //timer interval
 var tInterval;
-var joining;	
 //global for swapping pawn
 var gFrom = [];
+var lastChatSeen = 0;
 /**
  * Join Game/check oppponent has joined
  */
@@ -89,7 +102,7 @@ function joinGame(gameID) {
 	//show loading dialog
 	$('#joiningGameDialog').dialog("open");
 	var loading = 0;
-	joining = setInterval(function() {
+	var joining = setInterval(function() {
 	    if(loading < 3) {
 	        $('#joiningGameDialog span').append('.');
 	        loading++;
@@ -102,20 +115,6 @@ function joinGame(gameID) {
 	$.ajax({
 		type: "POST",
 		url: root + 'join/'+gameID,
-		success: function() {
-			checkOpponentJoined(gameID);
-		}
-	});		
-}
-
-/**
- * Check oppponent has joined game
- */
-function checkOpponentJoined(gameID) {
-	//check opponent has joined
-	$.ajax({
-		type: "POST",
-		url: root + 'checkJoined/'+gameID,
 		success: function(data) {
 			//close loading dialog
 			clearInterval(joining);
@@ -128,7 +127,7 @@ function checkOpponentJoined(gameID) {
 			} else {
 				performOnLoadActions(gameID);
 				inProgress = true;
-			} 			
+			} 	
 		}
 	});		
 }
@@ -140,26 +139,19 @@ function performOnLoadActions(gameID) {
 	//if not players turn
 	if ((activePlayer === 0 && $('.board').attr('id').charAt(5) == 'b')
 			|| (activePlayer === 1 && $('.board').attr('id').charAt(5) == 'w')) {
-    	//wait for opponent's move
     	playersTurn = false;
-    	var gm = setInterval(function() {
-    		//ensure game is joined
-    		if (inProgress) {
-    			getMove(gameID);
-    			listen(gameID);
-    			clearInterval(gm);
-    		}
-    	}, 1000);
 		//start opponent's timer
     	$('#tLeft1').addClass('red');
-    	startTimer('#tLeft1');
+    	setTimeout(function(){
+	    	startTimer('#tLeft1');
+    	}, 1000);
     } else {
 		//start own timer
     	$('#tLeft2').addClass('red');
     	startTimer('#tLeft2');
-		//open general listener
-		listen(gameID);
-	}		
+	}
+	//open general listener
+	listen(gameID, false);
 }
 
 /**
@@ -203,7 +195,7 @@ function startTimer(timerID) {
 			}
 		}
 		timeLeft.text(time[0]+':'+time[1]);
-	}, 1500); //TODO: stop cheating
+	}, 1000);
 }
 
 /**
@@ -294,28 +286,6 @@ function checkMoveByOpponent(from, to, swapped, enPassant, newBoard) {
 }
 
 /**
- * Get opponent's move
- */
-function getMove(gameID) {
-	$.ajax({
-		type: "POST",
-		url: root + 'getMove',
-		data: { 'gameID' : gameID },
-		success: function(data) {
-			if (data['moved']) {
-				if (typeof data['cheat'] === 'undefined') {
-    				checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['newBoard']);
-    			} else {
-    				alert(data['cheat']);     				
-    			}
-			} else {
-				getMove(gameID);
-			}
-		}
-	});		
-}
-
-/**
  * Validate move made by player
  */
 function validateMoveOut(event, ui) {
@@ -345,7 +315,7 @@ function validateMoveOut(event, ui) {
 	} else if ($('.board').attr('id').charAt(7) != 'x') {
     	//ajax move & validate server-side
     	//should only fail due to cheating --> display message and manually revert board
-    	ajaxMove(from, to, piece['type'], piece['colour']);
+		sendMove(from, to, piece['type'], piece['colour']);
 	}
 	//center piece
 	$(this).append(ui.draggable.css('position','static'));
@@ -438,7 +408,8 @@ function findCheat() {
 		type: "POST",
 		url: root+'findCheat/'+game[2],
 		success: function(data) {
-			alert(data['cheat']);
+			//re-open listener
+			listen(game[2], false);
 		}
 	});
 }
@@ -449,18 +420,23 @@ function findCheat() {
  * @param from [y,x]
  * @param to [y,x]
  */
-function ajaxMove(from, to) {
+function sendMove(from, to) {
 	//get game id
 	var game = $('.board').attr('id').split('_');
+	var data = { 
+		'gameID' : game[2],
+		'board' : abstractBoard, 
+		'from' : from, 
+		'to' : to , 
+		'enPassant' : enPassantAvailable, 
+		'newPiece' : newPiece 
+	};
 	$.ajax({
 		type: "POST",
 		url: root+'sendMove',
 		dataType: 'json',
 		contentType: 'application/json',
-		data: JSON.stringify({ 'gameID' : game[2], 'board' : abstractBoard, 'from' : from, 'to' : to , 'enPassant' : enPassantAvailable, 'newPiece' : newPiece }),
-		success: function(data) {
-			getMove(game[2]);
-		}
+		data: JSON.stringify(data)
 	});
 	playersTurn = false;
 	newPiece = false;
@@ -480,7 +456,11 @@ function saveMove() {
 	//save move
 	$.ajax({
 		type: "POST",
-		url: root+'saveMove/'+game[2]
+		url: root+'saveMove/'+game[2],
+		success: function(data) {
+			//re-open listener
+			listen(game[2], false);
+		}
 	});
 	playersTurn = true;
 	switchTimers();
@@ -548,7 +528,7 @@ function swapPawn(pieceID) {
 	//ajax move if real game
 	if ($('.board').attr('id').charAt(7) != 'x') {
     	//validate server-side/get opponent's move
-		ajaxMove(gFrom, [endRow, pawnCol], 'pawn', colour);
+		sendMove(gFrom, [endRow, pawnCol], 'pawn', colour);
 	}
 }
 
@@ -599,25 +579,47 @@ function getOccupant(squareID) {
 	return $('#'+ squareID).children('div.piece');
 }
 
-function listen(gameID) {
+function listen(gameID, gameOverReceived) {
 	$.ajax({
 		type: "POST",
 		url: root+'listen',
 		dataType: 'json',
 		contentType: 'application/json',
-		data: JSON.stringify({'gameID': gameID, 'opChatty': opChatty}),
+		data: JSON.stringify({'gameID': gameID, 'opChatty': opChatty, 'lastChat': lastChatSeen}),
 		success: function(data) {
-			if (data['changed']) {
-				if (typeof data['chat'] !== 'undefined') {
-					$('div#chatLog').append(data['chat']);
-					if (data['chatToggled']) {
-						opChatty = !opChatty;
-					}
+			if (data['change']) {
+				//display any chat messages
+				handleChat(data['chat']);
+				//check for game over or new move
+				if (!gameOverReceived) {
+					if (data['gameOver']) {
+						alert(data['overMsg']);	
+						gameOverReceived = true;
+					} 
+					if (!data['moved']) {
+						//reopen listener
+				    	listen(gameID, gameOverReceived);	
+		    		} else {
+		    			checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['newBoard']);    			
+		    		}
 				}
+			} else {
+		    	listen(gameID, gameOverReceived);					
 			}
-	    	setTimeout(function(){
-	    		listen(gameID);	
-	    	}, 2000);
 		}
 	});	
+}
+
+/**
+ * Handle chat messages/toggle
+ * @param data ajax response
+ */
+function handleChat(chat) {
+	lastChatSeen = chat['lastSeen'];
+	for(var i = 0; i < chat['msgs'].length; i++) {
+		$('div#chatLog').append(chat['msgs'][i].trim());
+	}
+	if (chat['toggled']) {
+		opChatty = !opChatty;
+	}
 }
