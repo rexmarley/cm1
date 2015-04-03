@@ -107,16 +107,23 @@ $(document).ready( function() {
 	});
 
 	//listener for sent chat
-	$('a#chatSend').on('click', function(e) {
+	$('form#chatSend').on('submit', function(e) {
 		e.preventDefault();
 		var msg = $('input#chatMsg').val().trim();
-		$('div#chatLog').append('<br><span class="blue">'+msg+'</span>');
-		var url = $(this).attr('href');
+		var url = $(this).attr('action');
 		$.ajax({
 			type: "POST",
 			url: url,
-			data: {'msg': '<br><span class="yellow">'+msg+'</span>'}
-		});	
+			data: {'msg': '<span class="purple">'+msg+'</span><br>'}
+		});
+		lastChatSeen++;
+		//get username
+		var user = $('#timer2 h1').html().split(':');
+		//add to own window
+		$('div#chatLog').append('<label>'+user[0]+': &nbsp;</label><span class="blue">'+msg+'</span><br>');
+		//always scroll to bottom
+		var scroll = $('div#chatDisplay');
+		scroll.scrollTop(scroll.scrollTop()+300);
 		$('input#chatMsg').val('');
 	});
 });
@@ -713,10 +720,14 @@ function listen(gameID, gameOverReceived) {
  * @param data ajax response
  */
 function handleChat(chat) {
-	lastChatSeen = chat['lastSeen'];
-	for(var i = 0; i < chat['msgs'].length; i++) {
-		$('div#chatLog').append(chat['msgs'][i].trim());
+	lastChatSeen = chat['msgs'][0];
+	for(var i = 0; i < chat['msgs'][1].length; i++) {
+		$('div#chatLog').append(chat['msgs'][1][i].trim());
 	}
+	//always scroll to bottom
+	var scroll = $('div#chatDisplay');
+	scroll.scrollTop(scroll.scrollTop()+300);
+	//check for chat toggled
 	if (chat['toggled']) {
 		opChatty = !opChatty;
 	}

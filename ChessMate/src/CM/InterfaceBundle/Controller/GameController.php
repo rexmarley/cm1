@@ -427,10 +427,12 @@ class GameController extends Controller
      */
     public function sendChatAction($gameID, Request $request) {
     	$msg = $request->request->get('msg');
-    	$user = $this->getUser();
     	$em = $this->getDoctrine()->getManager();
+    	$user = $this->getUser();
 	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
 	    $this->checkGameValidity($game, $user);
+    	//add username to message
+    	$msg = '<label>'.$user->getUsername().': </label> '.$msg;
 	    $chat = new ChatMessage($game, $user, $msg);
 	    $em->persist($chat);
     	$em->flush();
@@ -460,22 +462,25 @@ class GameController extends Controller
 	    $drawOffered = false;
 	    $lastSeen = $content->lastChat;
 	    if ($game->getPlayerIsChatty($pIndex)) {
-	    	$chatMsgs = $em->getRepository('CMInterfaceBundle:ChatMessage')->findGamePlayerChat($opponent, $game, $lastSeen);
+	    	if ($lastSeen == 0) {
+	    		$chatMsgs = $em->getRepository('CMInterfaceBundle:ChatMessage')->findAllGameChat($game);	    		
+	    	} else {
+	    		$chatMsgs = $em->getRepository('CMInterfaceBundle:ChatMessage')->findGamePlayerChat($opponent, $game, $lastSeen);
+	    	}
 	    } else {
-	    	$chatMsgs = array();
+	    	$chatMsgs = array($lastSeen, array());
 	    }
 	    while (!$game->over() && !$game->newMoveReady($pIndex) && count($chatMsgs) == 0 && !$drawOffered && $waited < 25) {
 	    	sleep(1);
 	    	$em->refresh($game);
 	    	if ($game->getPlayerIsChatty($pIndex)) {
+	    		//get opponent's chat - own handled client-side & on reload
 	    		$chatMsgs = $em->getRepository('CMInterfaceBundle:ChatMessage')->findGamePlayerChat($opponent, $game, $lastSeen);
 	    	}
 	    	$waited++;
 	    }
 	    $gameOver = $game->over();
-	    //allow chat even if game is over
-	    $lastSeen += count($chatMsgs);
-	    
+	    //still allow chat if game over	    
     	$opChatty = $content->opChatty;
     	$chatToggled = false;
     	if ($game->getPlayerIsChatty($opIndex) != $opChatty) {
@@ -483,12 +488,12 @@ class GameController extends Controller
     		$chatToggled = true;
     		$opponent = $game->getPlayers()->get($opIndex);
     		if ($opChatty) {
-    			$chatMsgs[] = '<br><span class="red">'.$opponent->getUsername().' has disabled chat.</span>';    			
+    			$chatMsgs[1][] = '<span class="red">'.$opponent->getUsername().' has disabled chat.</span><br>';    			
     		} else {
-    			$chatMsgs[] = '<br><span class="green">'.$opponent->getUsername().' has enabled chat.</span>';    			
+    			$chatMsgs[1][] = '<span class="green">'.$opponent->getUsername().' has enabled chat.</span><br>';    			
     		}
     	}
-    	$chat = array('msgs' => $chatMsgs, 'toggled' => $chatToggled, 'lastSeen' => $lastSeen);
+    	$chat = array('msgs' => $chatMsgs, 'toggled' => $chatToggled);
 	    //check if game is over
 	    if ($gameOver) {
 	    	$message = $game->getGameOverMessage($pIndex);
@@ -498,7 +503,7 @@ class GameController extends Controller
 			$response = $this->getNewMoveResponse($game->getLastMove());
 			$response['chat'] = $chat;
 		    return new JsonResponse($response);
-	    } else if (count($chatMsgs) > 0) { 	
+	    } else if (count($chatMsgs[1]) > 0) { 	
 	    	return new JsonResponse(array('change' => true, 'chat' => $chat));
 	    }
     	return new JsonResponse(array('change' => false));   

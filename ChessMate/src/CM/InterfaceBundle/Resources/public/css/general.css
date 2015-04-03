@@ -228,8 +228,8 @@ a#showCurrentGames {
 .blue {
 	color: #0000ff;	
 }
-.yellow {
-	color: #FFE303;
+.purple {
+	color: #c657da;
 }
 
 div#newGameOptions {
@@ -355,6 +355,10 @@ div#chatBox table {
 	max-width: 100%;
 }
 
+div#chatLog {
+	font-size:1.5em;
+}
+
 div#chatInput {
 	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
 	margin-left: 0.5%;
@@ -364,16 +368,16 @@ div#chatInput {
 }
 
 div#chatInput input {
-	width: 85%;
+	width: 84%;
 	height: 1.9em;
 	font-size: 1.3em;
 }
 
-div#chatInput a {
+div#chatInput input[type="submit"] {
 	width: 12.8%;
 	font-size: 1.2em;
-	margin-left: 2.2%;
-	height: 1.9em;
+	margin-left: 1.5%;
+	height: 2em;
 	padding: 0.5% 0 0;
 }
 

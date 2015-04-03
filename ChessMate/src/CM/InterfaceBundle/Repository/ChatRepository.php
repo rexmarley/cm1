@@ -19,9 +19,9 @@ class ChatRepository extends EntityRepository
 	 * 
 	 * @return array
 	 */
-	public function findGamePlayerChat(User $user, Game $game, $lastSeen = 0)
+	public function findGamePlayerChat(User $user, Game $game, $lastSeen)
 	{
-		$msgs = $this->getEntityManager()
+		$result = $this->getEntityManager()
 		->createQuery(
 				'SELECT m FROM CMInterfaceBundle:ChatMessage m
 				WHERE m.id > :lastSeen
@@ -30,8 +30,50 @@ class ChatRepository extends EntityRepository
 		)
 		->setParameter('lastSeen', $lastSeen)
 		->setParameter('user', $user)
-		->setParameter('game', $user)
-		->getArrayResult();
+		->setParameter('game', $game)
+		->getResult();
+		
+		$res = count($result);
+		if ($res != 0) {
+			//get new last seen
+			$msgs = array($result[$res-1]->getId(), array());
+		} else {
+			$msgs = array($lastSeen, array());			
+		}
+		//restructure
+		foreach ($result as $msg) {
+			$msgs[1][] = $msg->getMessage();
+		}
+		
+		return $msgs;
+	}
+	/**
+	 * Find all chat messages for game
+	 * @param Game $game
+	 * 
+	 * @return array
+	 */
+	public function findAllGameChat(Game $game)
+	{
+		$result = $this->getEntityManager()
+		->createQuery(
+				'SELECT m FROM CMInterfaceBundle:ChatMessage m
+				where m.game = :game'
+		)
+		->setParameter('game', $game)
+		->getResult();
+		
+		$res = count($result);
+		if ($res != 0) {
+			//get new last seen
+			$msgs = array($result[$res-1]->getId(), array());
+		} else {
+			$msgs = array(0, array());			
+		}
+		//restructure
+		foreach ($result as $msg) {
+			$msgs[1][] = $msg->getMessage();
+		}
 		
 		return $msgs;
 	}

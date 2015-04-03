@@ -1,6 +1,6 @@
 {% set enabled = '' %}
 {% if (not opChatty) %}
-	{% set enabled = "<span class='red'>" ~ opponent.username ~ " does not feel like chatting.</span>" %}
+	{% set enabled = "<span class='red'>" ~ opponent.username ~ " does not feel like chatting.</span><br>" %}
 {% endif %}
 {% set hidden = '' %}
 {% if (not pChatty) %}
@@ -19,7 +19,12 @@
 		<div class="col-md-12">
 			<table>
 				<tr>
-					<td><input id="chatMsg" type="text" value=""/><a id="chatSend" href="{{ path('cm_send_chat', {'gameID': gameID}) }}" class="btn btn-primary">Send</a></td>
+					<td>
+						<form id="chatSend" action="{{ path('cm_send_chat', {'gameID': gameID}) }}">
+							<input id="chatMsg" type="text" value=""/>
+							<input type="submit" class="btn btn-primary" value="Send"/>
+						</form>
+					</td>
 				</tr>
 			</table>
 		</div>
