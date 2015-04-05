@@ -88,6 +88,11 @@ $(document).ready( function() {
 		swapPawn(this.id);
 	});
 	
+	$('#resign').click(function(e) {
+		e.preventDefault();
+		$.post($(this).attr('href'));	
+	});
+	
 	$('#offerDraw').click(function(e) {
 		e.preventDefault();
 		$.post($(this).attr('href'));	
