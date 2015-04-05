@@ -130,8 +130,8 @@ class GameController extends Controller
 			    	$match->setMatched(true);
 			    	$search->setMatched(true);
 			    	$em->flush();
-			    	//create game if earlier searcher 
-					if ($search->getId() < $match->getId()) {
+			    	//create game
+					if (!$search->getGame()) {
 				    	//if length is not specified - use opponents settings
 				    	if (!$length) {
 				    		$length = $match->getLength();
@@ -149,8 +149,6 @@ class GameController extends Controller
 				    	$em->flush();
 				    	//get game id
 				    	$gameID = $game->getId();
-				    	//create log files
-				    	//$this->get('file_service')->createLogFiles($gameID);
 					}		 	    	
 		 	    }
 		    }		    
@@ -241,6 +239,11 @@ class GameController extends Controller
 	    		);
     }
     
+    /**
+     * Get time string from seconds mm:ss
+     * @param unknown $seconds
+     * @return string
+     */
     private function getMinutesTimeString($seconds) {
     	$s = $seconds % 60;
     	$minutes = ($seconds - $s) / 60;
@@ -377,20 +380,11 @@ class GameController extends Controller
 	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
 	    //authenticate user/game
 	    $this->checkGameValidity($game, $user);
-    	//cancel game
-    	//$game->setInProgress(false);    	
-    	
-    	return $this->redirect($this->generateUrl('cm_interface_start', array()));	
-    }
-	
-    /**
-     * Offer draw
-     * @param int $gameID
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
-    public function offerDrawAction($gameID)
-    {
-    	return $this->render('CMInterfaceBundle:Game:main.html.twig', array());    	
+    	//resign
+    	$game->setGameOver($game->getPlayers()->get(1 - $game->getPlayers()->indexOf($user)), 
+    			'Game Over: '.$user->getUsername().' has resigned');
+    	$em->flush();
+    	return new JsonResponse();  
     }
 	
     /**
@@ -439,6 +433,43 @@ class GameController extends Controller
     	
     	return new JsonResponse();    	
     }
+	
+    /**
+     * Offer draw
+     * @param int $gameID
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function offerDrawAction($gameID)
+    {
+	    $user = $this->getUser();	
+    	$em = $this->getDoctrine()->getManager();
+	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+	    //authenticate user/game
+	    $this->checkGameValidity($game, $user);
+	    //offer draw
+	    $game->setDrawOfferer($game->getPlayers()->indexOf($user));
+    	$em->flush();
+    	return new JsonResponse();
+    }
+    
+    /**
+     * Accept draw
+     * @param int $gameID
+     */
+    public function acceptDrawAction($gameID) {
+    	$em = $this->getDoctrine()->getManager();
+    	$user = $this->getUser();
+	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
+	    $this->checkGameValidity($game, $user);
+	    //check draw was offered by opponent - set on receipt
+	    if ($game->getDrawOfferer() == $game->getPlayers()->indexOf($user)+2) {
+		    //accept draw
+		    $game->setGameOver(2, "Game Over: Draw Accepted");
+	    	$em->flush();
+	    }
+    	//TODO: return ratings
+    	return new JsonResponse();    	
+    }
     
     /**
      * General listener
@@ -448,18 +479,17 @@ class GameController extends Controller
     public function listenAction(Request $request) {
     	$content = json_decode($request->getContent());    	
 	    $user = $this->getUser();
-    	
+    	//disconnect session
     	$this->get('session')->save();
-    	
+    	$changed = false;
+    	//get game	
     	$em = $this->getDoctrine()->getManager();
 	    $gameID = $content->gameID;
 	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
     	$pIndex = $game->getPlayers()->indexOf($user);
     	$opIndex = 1 - $pIndex;
     	$opponent = $game->getPlayers()->get($opIndex);
-	    //wait for game over/new move/draw offered/chat max 20 secs.
-	    $waited = 0;
-	    $drawOffered = false;
+    	//get all chat on reloads
 	    $lastSeen = $content->lastChat;
 	    if ($game->getPlayerIsChatty($pIndex)) {
 	    	if ($lastSeen == 0) {
@@ -470,7 +500,13 @@ class GameController extends Controller
 	    } else {
 	    	$chatMsgs = array($lastSeen, array());
 	    }
-	    while (!$game->over() && !$game->newMoveReady($pIndex) && count($chatMsgs) == 0 && !$drawOffered && $waited < 25) {
+	    //check if game over already received
+	    $overReceived = $content->overReceived;
+	    //wait for game over/new move/draw offered/chat
+	    $waited = 0;
+	    //check for changes
+	    while ((!$game->over() || $overReceived) && !$game->newMoveReady($pIndex) && count($chatMsgs[1]) == 0 
+	    		&& $game->getDrawOfferer() != $opIndex && $waited < 25) {
 	    	sleep(1);
 	    	$em->refresh($game);
 	    	if ($game->getPlayerIsChatty($pIndex)) {
@@ -495,18 +531,31 @@ class GameController extends Controller
     	}
     	$chat = array('msgs' => $chatMsgs, 'toggled' => $chatToggled);
 	    //check if game is over
-	    if ($gameOver) {
-	    	$message = $game->getGameOverMessage($pIndex);
+	    if ($gameOver && !$overReceived) {
+	    	$message = $game->getGameOverMessage();
 	    	return new JsonResponse(array('change' => true, 'gameOver' => true, 'overMsg' => $message, 'chat' => $chat));
-	    } else if ($game->newMoveReady($pIndex)) { 	
-			//return opponent's move for validation
-			$response = $this->getNewMoveResponse($game->getLastMove());
-			$response['chat'] = $chat;
-		    return new JsonResponse($response);
-	    } else if (count($chatMsgs[1]) > 0) { 	
-	    	return new JsonResponse(array('change' => true, 'chat' => $chat));
+	    } else {
+	    	//check for draw offered
+	    	if ($game->getDrawOfferer() == $opIndex) {
+	    		$drawOffered = true;
+	    		$game->setDrawOfferer($pIndex+2);
+	    		$em->flush();
+	    		$changed = true;
+		    } else {
+	    		$drawOffered = false;
+		    }
+		    //check for new move
+	    	if ($game->newMoveReady($pIndex)) {
+	    		//return opponent's move for validation
+	    		$response = $this->getNewMoveResponse($game->getLastMove());
+	    		$response['chat'] = $chat;
+	    		$response['drawOffered'] = $drawOffered;
+	    		return new JsonResponse($response);
+	    	} else if (count($chatMsgs[1]) > 0) {
+	    		return new JsonResponse(array('change' => true, 'chat' => $chat, 'drawOffered' => $drawOffered));
+	    	}
 	    }
-    	return new JsonResponse(array('change' => false));   
+    	return new JsonResponse(array('change' => $changed, 'chat' => $chat, 'drawOffered' => $drawOffered));   
     }
 
     /**

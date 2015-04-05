@@ -30,13 +30,17 @@ cm_save_move:
     path:     /saveMove/{gameID}
     defaults: { _controller: "CMInterfaceBundle:Move:saveMove" }
     
+cm_offer_draw:
+    path:     /offerDraw/{gameID}
+    defaults: { _controller: "CMInterfaceBundle:Game:offerDraw" }
+    
+cm_accept_draw:
+    path:     /acceptDraw/{gameID}
+    defaults: { _controller: "CMInterfaceBundle:Game:acceptDraw" }
+    
 cm_find_cheat:
     path:     /findCheat/{gameID}
     defaults: { _controller: "CMInterfaceBundle:Move:findCheat" }
-    
-cm_offer_draw:
-    path:     /draw
-    defaults: { _controller: "CMInterfaceBundle:Game:offerDraw" }
     
 cm_resign_game:
     path:     /resign/{gameID}

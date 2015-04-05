@@ -4,6 +4,7 @@ namespace CM\InterfaceBundle\Helpers;
 
 use CM\InterfaceBundle\Entity\Game;
 use CM\InterfaceBundle\Helpers\Validation\ValidationHelper;
+use Doctrine\ORM\EntityManager;
 
 /**
  * Evaluate when a game is over due to checkmate/stalemate/tie
@@ -15,13 +16,21 @@ class GameOverHelper extends ValidationHelper
 	 * @param char $colour The attacking player
 	 * @param Game $game The game
 	 */
-	public function checkGameOver(Game $game, $colour) {
+	public function checkGameOver(Game $game, $colour, EntityManager $em) {
     	$this->setGlobals($game);
     	$gameOver = $this->getGameOver($colour);
     	if ($gameOver) {
-    		$gameOver = 'Game Over: '.$gameOver;
+    		$message = 'Game Over: '.$gameOver;
+    		if ($gameOver == 'Checkmate') {
+    			$game->setGameOver($game->getLastMoveBy(), $message);
+    		} else {
+    			$game->setGameOver(2, $message);
+    		}
+    		$em->flush();
+    		
+    		return $message;	
     	}
-    	return $gameOver;		
+    	return false;		
 	}
 	
 	/**

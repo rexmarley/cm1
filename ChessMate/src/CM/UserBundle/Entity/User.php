@@ -38,7 +38,7 @@ class User extends BaseUser
     protected $registered;
     
     /**
-     * Glicko2 rating
+     * Glicko2 rating ELO instead?
      * 
      * @ORM\Column(type="integer")
      */
@@ -58,6 +58,14 @@ class User extends BaseUser
      * @ORM\Column(type="boolean")
      */
     protected $chatty;
+    
+//     /**
+//      * Connection speed kb/s
+//      * Updated on game start
+//      * 
+//      * @ORM\Column(type="integer", nullable=true)
+//      */
+//     protected $connSpeed;
 
     public function __construct()
     {
@@ -201,4 +209,24 @@ class User extends BaseUser
     		$this->chatty = true;
     	}
     }
+
+//     /**
+//      * Set connection speed
+//      *
+//      * @param kb/s 
+//      */
+//     public function setConnSpeed($speed)
+//     {
+//         $this->connSpeed = $speed;
+//     }
+
+//     /**
+//      * Get connection speed
+//      *
+//      * @return kb/s 
+//      */
+//     public function getConnSpeed()
+//     {
+//         return $this->connSpeed;
+//     }
 }

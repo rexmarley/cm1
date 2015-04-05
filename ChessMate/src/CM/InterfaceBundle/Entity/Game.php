@@ -45,11 +45,6 @@ class Game
      * @ORM\Column(type="array")
      */
     private $playersJoined;
-
-    /**
-     * @ORM\Column(type="array")
-     */
-    //protected $chatLog;
     
     /**
      * @ORM\Column(type="array")
@@ -85,6 +80,14 @@ class Game
     private $cheaterIndex;
 
     /**
+     * Index of player offering draw; null if none
+     * 0 = white
+     * 1 = black
+     * @ORM\Column(type="integer", nullable=true)
+     */
+    private $drawOfferer;
+
+    /**
      * Victor's index; null if none
      * 0 = white
      * 1 = black
@@ -112,6 +115,7 @@ class Game
     	$this->setActivePlayerIndex(0);
         $this->lastMoveValidated = true;
         $this->chatLog = array();
+        $this->drawOfferer = 2;
     	//set last move by no-one to prevent superfluous check
         $this->lastMove = array('by'=> 2);
     }
@@ -364,9 +368,14 @@ class Game
      *
      * @return int 
      */
-    public function getPlayerTime($player)
+    public function getPlayerTime($player, $lag = 0)
     {
-        return $this->playerTimes[$player];
+    	//$lag = 0; //TODO remove lag (from user aswell) just have to work out diff between move time and time received by opponent
+        if ($player == $this->activePlayerIndex && !is_null($this->lastMoveTime)) {
+        	return $this->playerTimes[$player] + $this->lastMoveTime + $lag - time();        	
+        } else {
+        	return $this->playerTimes[$player];        	
+        }
     }
 
     /**
@@ -481,6 +490,18 @@ class Game
     }
     
     /**
+     * Set game over
+     * @param int $victor index, 2 for draw
+     * @param string $message game over message
+     * @return boolean
+     */
+    public function setGameOver($victor, $message) {
+	    $this->setVictorIndex($victor);
+	    //TODO: set won/lost/drawn on players
+    	$this->setGameOverMessage($message);
+    }
+    
+    /**
      * Set game over message
      * 
      * @return Game
@@ -492,12 +513,34 @@ class Game
     
     /**
      * Get game over message
-     * @param int $player index
      * 
      * @return string
      */
-    public function getGameOverMessage($player) {
+    public function getGameOverMessage() {
     	return $this->gameOverMessage;
+    }
+
+    /**
+     * Set index of player offering draw
+     * @param int index
+     * 
+     * @return Game
+     */
+    public function setDrawOfferer($index)
+    {
+        $this->drawOfferer = $index;
+
+        return $this;
+    }
+    
+    /**
+     * Get index of player offering draw
+     *
+     * @return int
+     */
+    public function getDrawOfferer()
+    {
+        return $this->drawOfferer;
     }
 
     /**
@@ -516,7 +559,7 @@ class Game
     /**
      * Get victor's index
      *
-     * @return \CM\UserBundle\Entity\User 
+     * @return int
      */
     public function getVictorIndex()
     {

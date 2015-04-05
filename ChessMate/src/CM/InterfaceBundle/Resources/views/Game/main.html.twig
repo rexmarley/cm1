@@ -16,6 +16,15 @@
 	{% if game is defined %}
 		{% set gameID = game.id %}
 		{% set offset = "" %}
+		<div id="drawOffered" class="row hidden">
+		    <div class="col-md-12">
+		    	<center>
+		    		<label>{{ opponent.username }}</label><span> has offered a draw: </span>
+    				<a id="acceptDraw" href="{{ path('cm_accept_draw', {'gameID': gameID}) }}" class="btn btn-large btn-info">Accept</a>
+    				<a id="declineDraw" class="btn btn-large btn-warning">Decline</a>
+    			</center>
+			</div>
+		</div>
 	{% else %}
 		{% set gameID = null %}
 		{% if games is not empty %}

@@ -88,6 +88,16 @@ $(document).ready( function() {
 		swapPawn(this.id);
 	});
 	
+	$('#offerDraw').click(function(e) {
+		e.preventDefault();
+		$.post($(this).attr('href'));	
+	});
+	
+	$('#acceptDraw').click(function(e) {
+		e.preventDefault();
+		acceptDraw($(this).attr('href'));
+	});
+	
 	//toggle chat
 	$('a#toggleChat').on('click', function(e) {
 		e.preventDefault();
@@ -518,6 +528,27 @@ function findCheat() {
 }
 
 /**
+ * Accept draw
+ */
+function acceptDraw(url) {
+	$.ajax({
+		type: "POST",
+		url: url,
+		success: function(data) {
+			alert("Game Over: Draw Accepted");
+		}
+	});
+	$('#drawOffered').addClass('hidden');
+}
+
+/**
+ * TODO
+ */
+function updateRatings() {
+	
+}
+
+/**
  * Ajax move for opponent retrieval/validation
  * & wait for opponent's move
  * @param from [y,x]
@@ -684,30 +715,41 @@ function getOccupant(squareID) {
 	return $('#'+ squareID).children('div.piece');
 }
 
+/**
+ * Long poll
+ * @param gameID
+ * @param gameOverReceived
+ */
 function listen(gameID, gameOverReceived) {
 	$.ajax({
 		type: "POST",
 		url: root+'listen',
 		dataType: 'json',
 		contentType: 'application/json',
-		data: JSON.stringify({'gameID': gameID, 'opChatty': opChatty, 'lastChat': lastChatSeen}),
+		data: JSON.stringify({'gameID': gameID, 'opChatty': opChatty, 'lastChat': lastChatSeen, 'overReceived': gameOverReceived}),
 		success: function(data) {
 			if (data['change']) {
+				//check for game over or new move
+				if (data['moved']) {
+	    			checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['newBoard']);
+				} else {
+					if (data['gameOver']) {
+						gameOverReceived = true;
+						alert(data['overMsg']);	
+					} else if (data['drawOffered']) {
+						//show draw offered options
+						$('#drawOffered').removeClass('hidden');
+			    		//hide in 10 seconds if not accepted
+				    	setTimeout(function(){
+				    		if (!$('#drawOffered').hasClass('hidden')) {
+								$('#drawOffered').addClass('hidden');					    			
+				    		}
+				    	}, 10000);
+					}
+			    	listen(gameID, gameOverReceived);					
+				}
 				//display any chat messages
 				handleChat(data['chat']);
-				//check for game over or new move
-				if (!gameOverReceived) {
-					if (data['gameOver']) {
-						alert(data['overMsg']);	
-						gameOverReceived = true;
-					} 
-					if (!data['moved']) {
-						//reopen listener
-				    	listen(gameID, gameOverReceived);	
-		    		} else {
-		    			checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['newBoard']);    			
-		    		}
-				}
 			} else {
 		    	listen(gameID, gameOverReceived);					
 			}

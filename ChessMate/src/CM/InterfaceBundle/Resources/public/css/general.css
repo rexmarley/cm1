@@ -373,6 +373,10 @@ div#chatInput input {
 	font-size: 1.3em;
 }
 
+div#drawOffered {
+	font-size: 3em;	
+}
+
 div#chatInput input[type="submit"] {
 	width: 12.8%;
 	font-size: 1.2em;
