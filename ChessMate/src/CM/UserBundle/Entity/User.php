@@ -38,11 +38,25 @@ class User extends BaseUser
     protected $registered;
     
     /**
-     * Glicko2 rating ELO instead?
+     * Glicko rating
      * 
      * @ORM\Column(type="integer")
      */
     protected $rating;
+    
+    /**
+     * Glicko rating deviation
+     * 
+     * @ORM\Column(type="float")
+     */
+    protected $deviation;
+    
+    /**
+     * Last game time (for Glicko)
+     * 
+     * @ORM\Column(type="bigint")
+     */
+    protected $lastPlayedTime;
     
     /**
      * Time of last activity
@@ -58,20 +72,14 @@ class User extends BaseUser
      * @ORM\Column(type="boolean")
      */
     protected $chatty;
-    
-//     /**
-//      * Connection speed kb/s
-//      * Updated on game start
-//      * 
-//      * @ORM\Column(type="integer", nullable=true)
-//      */
-//     protected $connSpeed;
 
     public function __construct()
     {
         parent::__construct();
         $this->currentGames = new ArrayCollection();
         $this->rating = 1500;
+        $this->deviation = 350;
+        $this->lastPlayedTime = time();
         $this->chatty = true;
     }
     
@@ -93,14 +101,14 @@ class User extends BaseUser
     }
     
     /**
-     * Set user rating
+     * Set Glicko user rating
      */
     public function setRating($rating) {
     	$this->rating = $rating;
     }
     
     /**
-     * Get user rating
+     * Get Glicko user rating
      *
      * @return Integer
      */
@@ -109,13 +117,49 @@ class User extends BaseUser
     }
     
     /**
+     * Set Glicko rating deviation
+     */
+    public function setDeviation($rd) {
+    	$this->deviation = $rd;
+    }
+    
+    /**
+     * Get Glicko rating deviation
+     *
+     * @return Integer
+     */
+    public function getDeviation() {
+    	return $this->deviation;
+    }
+    
+    /**
+     * Set time of player's last game
+     * 
+     * @param \Datetime $time
+     */
+    public function setLastPlayedTime($time)
+    {
+    	$this->lastPlayedTime = $time;
+    }
+    
+    /**
+     * Get time of player's last game
+     * 
+     * @return \Datetime
+     */
+    public function getLastPlayedTime()
+    {
+    	return $this->lastPlayedTime;
+    }
+    
+    /**
      * Set time of last activity
      * 
-     * @param \Datetime $activeTime
+     * @param \Datetime $time
      */
-    public function setLastActiveTime($activeTime)
+    public function setLastActiveTime($time)
     {
-    	$this->lastActiveTime = $activeTime;
+    	$this->lastActiveTime = $time;
     }
     
     /**
@@ -209,24 +253,4 @@ class User extends BaseUser
     		$this->chatty = true;
     	}
     }
-
-//     /**
-//      * Set connection speed
-//      *
-//      * @param kb/s 
-//      */
-//     public function setConnSpeed($speed)
-//     {
-//         $this->connSpeed = $speed;
-//     }
-
-//     /**
-//      * Get connection speed
-//      *
-//      * @return kb/s 
-//      */
-//     public function getConnSpeed()
-//     {
-//         return $this->connSpeed;
-//     }
 }

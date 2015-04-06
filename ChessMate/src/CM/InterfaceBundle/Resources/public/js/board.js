@@ -44,7 +44,7 @@ $(document).ready( function() {
 				selectedPiece.closest('div.square').stop(true,true);
 				selectedPiece = null;
 			}
-		} else if (playersTurn) {
+		} else if (playersTurn && selectedPiece) {
 			//attempt take of piece
 			selectedPiece.closest('div.square').stop(true,true);
 			validatePointAndClick(selectedPiece, selectedPiece.closest('div.square').attr('id'), $(this).closest('div.square').attr('id'));
@@ -291,8 +291,7 @@ function validateMoveOut(event, ui) {
 		gFrom = from;
 		openPieceChooser(piece['colour']);
 	} else if ($('.board').attr('id').charAt(7) != 'x') {
-    	//ajax move & validate server-side
-    	//should only fail due to cheating --> display message and manually revert board
+    	//ajax move & confirm validity
 		sendMove(from, to, piece['type'], piece['colour']);
 	}
 	//center piece
@@ -327,8 +326,7 @@ function validatePointAndClick(moved, gridFrom, gridTo) {
 		gFrom = from;
 		openPieceChooser(piece['colour']);
 	} else if ($('.board').attr('id').charAt(7) != 'x') {
-    	//ajax move & validate server-side
-    	//should only fail due to cheating
+    	//ajax move & confirm validity
 		sendMove(from, to, piece['type'], piece['colour']);
 	}
 	//make move

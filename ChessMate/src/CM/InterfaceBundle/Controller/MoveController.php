@@ -24,6 +24,9 @@ class MoveController extends Controller
     	//find game
     	$em = $this->getDoctrine()->getManager();
     	$game = $em->getRepository('CMInterfaceBundle:Game')->find($content->gameID);
+    	if ($game->over()) {
+    		return new JsonResponse(array('sent' => false));    		
+    	}
     	$user = $this->getUser();
     	//make sure valid user for game & turn
 	    $player = $game->getPlayers()->indexOf($user);
