@@ -50,7 +50,7 @@ class User extends BaseUser
     /**
      * Glicko rating deviation
      * 
-     * @ORM\Column(type="float")
+     * @ORM\Column(type="decimal")
      */
     protected $deviation;
     
@@ -120,38 +120,6 @@ class User extends BaseUser
      */
     public function getRegistered() {
     	return $this->registered;
-    }
-    
-    /**
-     * Set Glicko user rating
-     */
-    public function setRating($rating) {
-    	$this->rating = $rating;
-    }
-    
-    /**
-     * Get Glicko user rating
-     *
-     * @return Integer
-     */
-    public function getRating() {
-    	return $this->rating;
-    }
-    
-    /**
-     * Set Glicko rating deviation
-     */
-    public function setDeviation($rd) {
-    	$this->deviation = $rd;
-    }
-    
-    /**
-     * Get Glicko rating deviation
-     *
-     * @return Integer
-     */
-    public function getDeviation() {
-    	return $this->deviation;
     }
     
     /**
@@ -275,6 +243,38 @@ class User extends BaseUser
     		$this->chatty = true;
     	}
     }
+    
+    /**
+     * Set Glicko user rating
+     */
+    public function setRating($rating) {
+    	$this->rating = $rating;
+    }
+    
+    /**
+     * Get Glicko user rating
+     *
+     * @return Integer
+     */
+    public function getRating() {
+    	return $this->rating;
+    }
+    
+    /**
+     * Set Glicko rating deviation
+     */
+    public function setDeviation($rd) {
+    	$this->deviation = $rd;
+    }
+    
+    /**
+     * Get Glicko rating deviation
+     *
+     * @return Integer
+     */
+    public function getDeviation() {
+    	return $this->deviation;
+    }
 	
 	/**
 	 * Adjust rating deviation (at start of each game i.e. period)
@@ -352,7 +352,7 @@ class User extends BaseUser
 	 */
 	private function getMatchDifference($opRating, $opRD) {
 		$g = $this->getG($opRD);
-		$e = $this->getE($this->rating, $opRating, $opRD);
+		$e = $this->getE($opRating, $opRD);
 		return $g*$g*$e*(1-$e);
 	}
 	

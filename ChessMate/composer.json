@@ -67,7 +67,7 @@
         "jquery/jquery": "1.10.2",
         "components/jqueryui": "1.10.4",
         "doctrine/doctrine-fixtures-bundle": "2.2.*",
-        "cboden/ratchet": "0.3.*"
+        "phpunit/phpunit": "4.8.*@dev"
     },
     "scripts": {
         "post-install-cmd": [

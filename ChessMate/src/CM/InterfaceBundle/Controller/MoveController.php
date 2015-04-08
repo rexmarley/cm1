@@ -152,6 +152,8 @@ class MoveController extends Controller
 	    	throw new AccessDeniedException('Move already validated!');
     	} else if ($player == $mover) {
 	    	throw new AccessDeniedException('Stop messing about');
+    	} else if ($game->over()) {
+	    	throw new AccessDeniedException('The game is over');		
     	}
     	//get attempted move
     	$attempted = $game->getLastMove();

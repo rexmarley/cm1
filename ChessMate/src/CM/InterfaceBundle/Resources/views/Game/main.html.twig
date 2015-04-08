@@ -13,7 +13,7 @@
 	    <div class="errors col-md-6">
 		</div>
 	</div>
-	{% if game is defined %}
+	{% if game is defined and not game.over%}
 		{% set gameID = game.id %}
 		{% set offset = "" %}
 		<div id="drawOffered" class="row hidden">
@@ -84,8 +84,8 @@
     {% javascripts '%kernel.root_dir%/../vendor/components/jqueryui/ui/minified/jquery-ui.min.js' %}
         <script type="text/javascript" src="{{ asset_url }}"></script>
     {% endjavascripts %}
-	{% if game is defined %}
-	    <script>
+	<script>
+		{% if game is defined %}
 	    	//set game state
 	    	var gameOver = {{ game.over |json_encode|raw }};
 	    	var activePlayer = {{game.activePlayerIndex }};
@@ -95,8 +95,10 @@
 	    	var enPassantAvailable = {{ game.board.enPassantAvailable |json_encode|raw}};
 	    	//set other
 	    	var opChatty = {{ opChatty |json_encode|raw }};
-	    </script>
-	{% endif %}
+		{% else %}
+			var gameOver = false;
+		{% endif %}
+    </script>
     <script type="text/javascript" src="{{ asset('bundles/cminterface/js/game.js') }}"></script>
     <script type="text/javascript" src="{{ asset('bundles/cminterface/js/boardHelper.js') }}"></script>
     <script type="text/javascript" src="{{ asset('bundles/cminterface/js/board.js') }}"></script>

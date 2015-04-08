@@ -90,17 +90,23 @@ $(document).ready( function() {
 	
 	$('#resign').click(function(e) {
 		e.preventDefault();
-		$.post($(this).attr('href'));	
+		if (!gameOver) {
+			$.post($(this).attr('href'));	
+		}	
 	});
 	
 	$('#offerDraw').click(function(e) {
 		e.preventDefault();
-		$.post($(this).attr('href'));	
+		if (!gameOver) {
+			$.post($(this).attr('href'));	
+		}
 	});
 	
 	$('#acceptDraw').click(function(e) {
 		e.preventDefault();
-		acceptDraw($(this).attr('href'));
+		if (!gameOver) {
+			acceptDraw($(this).attr('href'));
+		}
 	});
 	
 	//toggle chat
@@ -290,7 +296,7 @@ function validateMoveOut(event, ui) {
 		//ajax move on piece selection
 		gFrom = from;
 		openPieceChooser(piece['colour']);
-	} else if ($('.board').attr('id').charAt(7) != 'x') {
+	} else if ($('.board').attr('id').charAt(7) != 'x' && !gameOver) {
     	//ajax move & confirm validity
 		sendMove(from, to, piece['type'], piece['colour']);
 	}
@@ -325,7 +331,7 @@ function validatePointAndClick(moved, gridFrom, gridTo) {
 		//ajax move on piece selection
 		gFrom = from;
 		openPieceChooser(piece['colour']);
-	} else if ($('.board').attr('id').charAt(7) != 'x') {
+	} else if ($('.board').attr('id').charAt(7) != 'x' && !gameOver) {
     	//ajax move & confirm validity
 		sendMove(from, to, piece['type'], piece['colour']);
 	}
@@ -424,7 +430,7 @@ function validateMoveIn(piece, from, to, newPiece, enPassant, newBoard) {
 function checkPieceAndTurnForPlayer(colour) {
 	//check player's turn and piece (if actual game)
 	if (!playersTurn || ($('.board').attr('id').charAt(7) != 'x' 
-		&& colour != $('.board').attr('id').charAt(5))) {
+		&& colour != $('.board').attr('id').charAt(5) && !gameOver)) {
 		return false;			
 	}
 	return true;
@@ -658,7 +664,7 @@ function swapPawn(pieceID) {
 	//close piece-chooser
 	$('#choosePiece_'+colour).dialog("close");
 	//ajax move if real game
-	if ($('.board').attr('id').charAt(7) != 'x') {
+	if ($('.board').attr('id').charAt(7) != 'x'&& !gameOver) {
     	//validate server-side/get opponent's move
 		sendMove(gFrom, [endRow, pawnCol], 'pawn', colour);
 	}
