@@ -133,7 +133,7 @@ $(document).ready( function() {
 		});
 		lastChatSeen++;
 		//get username
-		var user = $('#timer2 h1').html().split(':');
+		var user = $('span#pName2').html().split(':');
 		//add to own window
 		$('div#chatLog').append('<label>'+user[0]+': &nbsp;</label><span class="blue">'+msg+'</span><br>');
 		//always scroll to bottom
@@ -207,7 +207,7 @@ function performOnLoadActions(gameID) {
     	startTimer('#tLeft2');
 	}
 	//open general listener
-	listen(gameID, false);
+	listen(gameID);
 }
 
 /**
@@ -525,7 +525,7 @@ function findCheat() {
 		url: root+'findCheat/'+game[2],
 		success: function(data) {
 			//re-open listener
-			listen(game[2], false);
+			listen(game[2]);
 		}
 	});
 }
@@ -538,17 +538,12 @@ function acceptDraw(url) {
 		type: "POST",
 		url: url,
 		success: function(data) {
+			gameOver = true;
+			updateRatings(data['pRating'], data['opRating']);
 			alert("Game Over: Draw Accepted");
 		}
 	});
 	$('#drawOffered').addClass('hidden');
-}
-
-/**
- * TODO
- */
-function updateRatings() {
-	
 }
 
 /**
@@ -596,7 +591,7 @@ function saveMove() {
 		url: root+'saveMove/'+game[2],
 		success: function(data) {
 			//re-open listener
-			listen(game[2], false);
+			listen(game[2]);
 		}
 	});
 	playersTurn = true;
@@ -723,21 +718,24 @@ function getOccupant(squareID) {
  * @param gameID
  * @param gameOverReceived
  */
-function listen(gameID, gameOverReceived) {
+function listen(gameID) {
 	$.ajax({
 		type: "POST",
 		url: root+'listen',
 		dataType: 'json',
 		contentType: 'application/json',
-		data: JSON.stringify({'gameID': gameID, 'opChatty': opChatty, 'lastChat': lastChatSeen, 'overReceived': gameOverReceived}),
+		data: JSON.stringify({'gameID': gameID, 'opChatty': opChatty, 'lastChat': lastChatSeen, 'overReceived': gameOver}),
 		success: function(data) {
 			if (data['change']) {
+				//display any chat messages
+				handleChat(data['chat']);
 				//check for game over or new move
 				if (data['moved']) {
 	    			checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['newBoard']);
 				} else {
 					if (data['gameOver']) {
-						gameOverReceived = true;
+						gameOver = true;
+						updateRatings(data['pRating'], data['opRating']);
 						alert(data['overMsg']);	
 					} else if (data['drawOffered']) {
 						//show draw offered options
@@ -749,15 +747,23 @@ function listen(gameID, gameOverReceived) {
 				    		}
 				    	}, 10000);
 					}
-			    	listen(gameID, gameOverReceived);					
+			    	listen(gameID);					
 				}
-				//display any chat messages
-				handleChat(data['chat']);
 			} else {
-		    	listen(gameID, gameOverReceived);					
+		    	listen(gameID);					
 			}
 		}
 	});	
+}
+
+/**
+ * Update displayed player ratings
+ * @param pRating
+ * @param opRating
+ */
+function updateRatings(pRating, opRating) {
+	$('label#rating1').html(opRating);
+	$('label#rating2').html(pRating);
 }
 
 /**

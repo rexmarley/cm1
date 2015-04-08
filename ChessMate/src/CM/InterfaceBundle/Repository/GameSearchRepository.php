@@ -35,7 +35,7 @@ class GameSearchRepository extends EntityRepository
 		//find game
 		$search = $this->getEntityManager()
 		->createQuery(
-				'SELECT gs 
+				'SELECT gs, ABS(p.rating - :playerRank) AS closest 
 				FROM CMInterfaceBundle:GameSearch gs
 			    JOIN gs.searcher p
 				WHERE p.id != :playerID
@@ -44,7 +44,8 @@ class GameSearchRepository extends EntityRepository
 				AND :playerRank <= gs.maxRank
 				AND p.rating >= :minRank 
 				AND p.rating <= :maxRank
-				'.$lengthTerm
+				'.$lengthTerm.' 
+				ORDER BY closest ASC'
 		)
 		->setMaxResults(1)
 		->setParameters($queryParams)

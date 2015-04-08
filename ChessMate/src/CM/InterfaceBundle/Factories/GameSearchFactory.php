@@ -27,8 +27,8 @@ class GameSearchFactory
 	    	$playerRank = $player->getRating();
     		if ($skill == 1) {
 				//best match
-				$minRank = $playerRank - 100;
-				$maxRank = $playerRank + 100;
+	    		$minRank = 0;
+	    		$maxRank = 3000;	
 			} else if ($skill == 2) {
 				//lesser skill
 				$maxRank = $playerRank;

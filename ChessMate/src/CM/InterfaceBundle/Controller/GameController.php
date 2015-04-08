@@ -101,6 +101,8 @@ class GameController extends Controller
 	 */
     public function matchSearchAction($searchID)
     {
+    	//disconnect session
+    	$this->get('session')->save();
 	    $em = $this->getDoctrine()->getManager();
 	    $search = $em->getRepository('CMInterfaceBundle:GameSearch')->find($searchID);
 	    $gameID = false;
@@ -108,62 +110,146 @@ class GameController extends Controller
 	    	$user = $this->getUser();
 	    	if ($search->getSearcher() != $user) {
 		    	throw new AccessDeniedException('This is not your search!');    		
+	    	}	    	
+	    	//find match
+	    	$length = $search->getLength();
+	    	$minRank = $search->getMinRank();
+	    	$maxRank = $search->getMaxRank();
+	    	$repo = $em->getRepository('CMInterfaceBundle:GameSearch');
+	    	$match = null;
+	    	$waited = 0;
+	    	while ($search && $waited < 45) {
+		   		if (!$search->getMatched()) {
+	    			$match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
+	    			if ($match) {
+		    			usleep(500000);  
+		   				break;		   			
+		   			}
+		   			$em->refresh($search);
+		   		} else {
+		   			break;		   			
+		   		}
+		    	usleep(500000);  
+		   		$waited++; 		
 	    	}
-	     	//if user's search matched by opponent
-		    if ($search->getMatched()) {
-		    	//get game id
-		    	while (!$search->getGame()) {
-		    		usleep(500000);
-		    		$em->refresh($search);
-		    	}
-		    	$gameID = $search->getGame()->getId();
-		    } else {
-		    	//find match
-		     	$length = $search->getLength();
-		     	$minRank = $search->getMinRank();
-		     	$maxRank = $search->getMaxRank();
-		     	$repo = $em->getRepository('CMInterfaceBundle:GameSearch');
-		 	    $match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
-		 	    if ($match) {
-					$match = $match[0];
-			    	//set searches as matched
-			    	$match->setMatched(true);
-			    	$search->setMatched(true);
-			    	$em->flush();
-			    	//create game
-					if (!$search->getGame()) {
-				    	//if length is not specified - use opponents settings
-				    	if (!$length) {
-				    		$length = $match->getLength();
-				    		//if neither is specified - default 10 mins. each
-					    	if (!$length) {
-					    		$length = 600;
-					    	}
-				    	}
-		    	    	$game = $this->get('game_factory')->createNewGame($length, $user, $match->getSearcher());
-		    	    	$em->persist($game);
-		    		    $match->setGame($game);
-		    	    	$em->flush();
-		    		    //delete own search
-		    		    $em->remove($search);
-				    	$em->flush();
-				    	//get game id
-				    	$gameID = $game->getId();
-					}		 	    	
-		 	    }
-		    }		    
-		    if ($gameID) {	
+		   	$em->refresh($search);
+	    	if ($search->getMatched() || $match) {
+	    		if (!$search->getMatched()) {
+		    		$match = $match[0][0];
+		    		//set searches as matched
+		    		$match->setMatched(true);
+		    		$search->setMatched(true);
+		    		$em->flush();
+	    			//if length is not specified - use opponents settings
+	    			if (!$length) {
+	    				$length = $match->getLength();
+	    				//if neither is specified - default 10 mins. each
+	    				if (!$length) {
+	    					$length = 600;
+	    				}
+	    			}
+	    			$game = $this->get('game_factory')->createNewGame($length, $user, $match->getSearcher());
+	    			$em->persist($game);
+	    			$match->setGame($game);
+	    			$em->flush();
+	    			//delete own search
+	    			//$em->remove($search);
+	    			$em->flush();
+	    			//get game id
+	    			$gameID = $game->getId();
+		   		} else {
+			    	//get game id
+			    	while (!$search->getGame()) {
+			    		usleep(500000);
+			    		$em->refresh($search);
+			    	}
+			    	$gameID = $search->getGame()->getId();
+		   		}
 	    	    //return link to game
     			return new JsonResponse(array('matched' => true,
     											'gameURL' => $this->generateUrl('cm_interface_play', 
     																				array('gameID' => $gameID))));
-		    }
+	    	}
 			//else, report back for retry
 			return new JsonResponse(array('matched' => false));
 		}
 	    //only reachable if search cancelled & ajax aborted
 		return new JsonResponse(array('cancelled' => true));
     }
+    
+// 	/**
+// 	 * Find/create new game
+// 	 * 
+// 	 * @param int $searchID
+// 	 * @return \Symfony\Component\HttpFoundation\JsonResponse
+// 	 */
+//     public function matchSearchAction($searchID)
+//     {
+//     	//disconnect session
+//     	$this->get('session')->save();
+// 	    $em = $this->getDoctrine()->getManager();
+// 	    $search = $em->getRepository('CMInterfaceBundle:GameSearch')->find($searchID);
+// 	    $gameID = false;
+// 	    if ($search) {
+// 	    	$user = $this->getUser();
+// 	    	if ($search->getSearcher() != $user) {
+// 		    	throw new AccessDeniedException('This is not your search!');    		
+// 	    	}
+// 	     	//if user's search matched by opponent
+// 		    if ($search->getMatched()) {
+// 		    	//get game id
+// 		    	while (!$search->getGame()) {
+// 		    		usleep(500000);
+// 		    		$em->refresh($search);
+// 		    	}
+// 		    	$gameID = $search->getGame()->getId();
+// 		    } else {
+// 		    	//find match
+// 		     	$length = $search->getLength();
+// 		     	$minRank = $search->getMinRank();
+// 		     	$maxRank = $search->getMaxRank();
+// 		     	$repo = $em->getRepository('CMInterfaceBundle:GameSearch');
+// 		 	    $match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
+// 		 	    if ($match) {
+// 					$match = $match[0][0];
+// 			    	//set searches as matched
+// 			    	$match->setMatched(true);
+// 			    	$search->setMatched(true);
+// 			    	$em->flush();
+// 			    	//create game
+// 					if ($search->getId() < $match->getId()) {
+// 				    	//if length is not specified - use opponents settings
+// 				    	if (!$length) {
+// 				    		$length = $match->getLength();
+// 				    		//if neither is specified - default 10 mins. each
+// 					    	if (!$length) {
+// 					    		$length = 600;
+// 					    	}
+// 				    	}
+// 		    	    	$game = $this->get('game_factory')->createNewGame($length, $user, $match->getSearcher());
+// 		    	    	$em->persist($game);
+// 		    		    $match->setGame($game);
+// 		    	    	$em->flush();
+// 		    		    //delete own search
+// 		    		    $em->remove($search);
+// 				    	$em->flush();
+// 				    	//get game id
+// 				    	$gameID = $game->getId();
+// 					}		 	    	
+// 		 	    }
+// 		    }		    
+// 		    if ($gameID) {	
+// 	    	    //return link to game
+//     			return new JsonResponse(array('matched' => true,
+//     											'gameURL' => $this->generateUrl('cm_interface_play', 
+//     																				array('gameID' => $gameID))));
+// 		    }
+// 			//else, report back for retry
+// 			return new JsonResponse(array('matched' => false));
+// 		}
+// 	    //only reachable if search cancelled & ajax aborted
+// 		return new JsonResponse(array('cancelled' => true));
+//     }
     
     /**
      * Cancel search
@@ -206,24 +292,16 @@ class GameController extends Controller
 	    $this->checkGameValidity($game, $user);
 	    //get player colour
     	$colour = $this->getPlayerColour($game, $user);
+    	//get player numbers
+    	$pIndex = $game->getPlayers()->indexOf($user);
+    	$opIndex = 1 - $pIndex;
     	//get time left
-    	$p1Time = $game->getPlayerTime(0);
-    	$p2Time = $game->getPlayerTime(1);
+    	$userTime = $this->getMinutesTimeString($game->getPlayerTime($pIndex));
+    	$opTime = $this->getMinutesTimeString($game->getPlayerTime($opIndex));
+    	$pChatty = $game->getPlayerIsChatty($pIndex);
+    	$opChatty = $game->getPlayerIsChatty($opIndex);
     	//get opponent
-    	if ($colour == 'w') {
-    		$op = 1;
-    		$userTime = $this->getMinutesTimeString($p1Time);
-    		$opTime = $this->getMinutesTimeString($p2Time);
-    		$pChatty = $game->getPlayerIsChatty(0);
-    		$opChatty = $game->getPlayerIsChatty(1);
-    	} else {
-    		$op = 0;
-    		$userTime = $this->getMinutesTimeString($p2Time);
-    		$opTime = $this->getMinutesTimeString($p1Time);
-    		$pChatty = $game->getPlayerIsChatty(1);
-    		$opChatty = $game->getPlayerIsChatty(0);
-    	}
-    	$opponent = $game->getPlayers()->get($op);
+    	$opponent = $game->getPlayers()->get($opIndex);
 	    //get taken pieces
     	$taken = $this->get('html_helper')->getUnicodeTakenPieces($game->getBoard()->getTaken());
 
@@ -382,11 +460,16 @@ class GameController extends Controller
 	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
 	    //authenticate user/game
 	    $this->checkGameValidity($game, $user);
+    	$players = $game->getPlayers();
+	    $pIndex = $players->indexOf($user);
+	    $opIndex = 1 - $pIndex;
     	//resign
-    	$game->setGameOver($game->getPlayers()->get(1 - $game->getPlayers()->indexOf($user)), 
-    			'Game Over: '.$user->getUsername().' has resigned');
+    	$game->setGameOver($opIndex, 'Game Over: '.$user->getUsername().' has resigned');
     	$em->flush();
-    	return new JsonResponse();  
+    	$em->refresh($game);
+	    $pRating = $players->get($pIndex)->getRating();
+	    $opRating = $players->get($opIndex)->getRating();
+    	return new JsonResponse(array('pRating' => $pRating, 'opRating' => $opRating));  
     }
 	
     /**
@@ -463,14 +546,24 @@ class GameController extends Controller
     	$user = $this->getUser();
 	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
 	    $this->checkGameValidity($game, $user);
+	    $players = $game->getPlayers();
+	    $pIndex = $players->indexOf($user);
 	    //check draw was offered by opponent - set on receipt
-	    if ($game->getDrawOfferer() == $game->getPlayers()->indexOf($user)+2) {
-		    //accept draw
-		    $game->setGameOver(2, "Game Over: Draw Accepted");
-	    	$em->flush();
+	    if ($game->getDrawOfferer() != $pIndex+2) {
+    		throw new AccessDeniedException('You may not accept your own offer!');
 	    }
-    	//TODO: return ratings
-    	return new JsonResponse();    	
+	    //accept draw
+	    $game->setGameOver(2, "Game Over: Draw Accepted");
+    	$em->flush();
+    	$em->refresh($game);
+    	//reload players - get new ratings
+	    $players = $game->getPlayers();
+    	foreach ($players as $p) {
+    		$em->refresh($p);
+    	}
+	    $pRating = $players->get($pIndex)->getRating();
+	    $opRating = $players->get(1 - $pIndex)->getRating();
+    	return new JsonResponse(array('pRating' => $pRating, 'opRating' => $opRating));
     }
     
     /**
@@ -488,9 +581,10 @@ class GameController extends Controller
     	$em = $this->getDoctrine()->getManager();
 	    $gameID = $content->gameID;
 	    $game = $em->getRepository('CMInterfaceBundle:Game')->find($gameID);
-    	$pIndex = $game->getPlayers()->indexOf($user);
+	    $players = $game->getPlayers();
+    	$pIndex = $players->indexOf($user);
     	$opIndex = 1 - $pIndex;
-    	$opponent = $game->getPlayers()->get($opIndex);
+    	$opponent = $players->get($opIndex);
     	//get all chat on reloads
 	    $lastSeen = $content->lastChat;
 	    if ($game->getPlayerIsChatty($pIndex)) {
@@ -524,7 +618,6 @@ class GameController extends Controller
     	if ($game->getPlayerIsChatty($opIndex) != $opChatty) {
     		//chat toggled
     		$chatToggled = true;
-    		$opponent = $game->getPlayers()->get($opIndex);
     		if ($opChatty) {
     			$chatMsgs[1][] = '<span class="red">'.$opponent->getUsername().' has disabled chat.</span><br>';    			
     		} else {
@@ -535,7 +628,14 @@ class GameController extends Controller
 	    //check if game is over
 	    if ($gameOver && !$overReceived) {
 	    	$message = $game->getGameOverMessage();
-	    	return new JsonResponse(array('change' => true, 'gameOver' => true, 'overMsg' => $message, 'chat' => $chat));
+	    	//get new ratings
+	    	$players = $game->getPlayers();
+	    	foreach ($players as $p) {
+	    		$em->refresh($p);
+	    	}
+	    	$pRating = $players->get($pIndex)->getRating();
+	    	$opRating = $players->get($opIndex)->getRating();
+	    	return new JsonResponse(array('change' => true, 'gameOver' => true, 'pRating' => $pRating, 'opRating' => $opRating, 'overMsg' => $message, 'chat' => $chat));
 	    } else {
 	    	//check for draw offered
 	    	if ($game->getDrawOfferer() == $opIndex) {
@@ -554,10 +654,10 @@ class GameController extends Controller
 	    		$response['drawOffered'] = $drawOffered;
 	    		return new JsonResponse($response);
 	    	} else if (count($chatMsgs[1]) > 0) {
-	    		return new JsonResponse(array('change' => true, 'chat' => $chat, 'drawOffered' => $drawOffered));
+	    		$changed = true;
 	    	}
 	    }
-    	return new JsonResponse(array('change' => $changed, 'chat' => $chat, 'drawOffered' => $drawOffered));   
+    	return new JsonResponse(array('change' => $changed, 'gameOver' => false, 'chat' => $chat, 'drawOffered' => $drawOffered));   
     }
 
     /**

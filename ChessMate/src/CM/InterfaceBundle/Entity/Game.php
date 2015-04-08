@@ -488,26 +488,29 @@ class Game
      * @return boolean
      */
     public function setGameOver($victor, $message) {
-	    $this->setVictorIndex($victor);
-    	$this->setGameOverMessage($message);
 	    //set won/lost/drawn on players
 	    if ($victor == 2) {
 	    	$wResult = 0.5;
 	    	$lResult = 0.5;
-	    	$winner = $this->players->get(0);
-	    	$loser = $this->players->get(1);
+	    	$windex = 0;
+	    	$lIndex = 1;
 	    } else {
 	    	$wResult = 1;
 	    	$lResult = 0;
-	    	$winner = $this->players->get($victor);
-	    	$loser = $this->players->get(1 - $victor);
+	    	$windex = $victor;
+	    	$lIndex = 1 - $victor;
 	    }
+    	$winner = $this->players->get($windex);
+    	$loser = $this->players->get($lIndex);
 	    $winner->updateRating(array(array('opRating' => $loser->getRating(), 'opRD' => $loser->getDeviation(), 'result' => $wResult)));
 	    $loser->updateRating(array(array('opRating' => $winner->getRating(), 'opRD' => $winner->getDeviation(), 'result' => $lResult)));
     	//remove from user's current games
     	foreach ($this->players as $p) {
     		$p->removeCurrentGame($this);
-    	}    	
+    	}
+    	//mark game as over
+	    $this->setVictorIndex($victor);
+    	$this->setGameOverMessage($message);   	
     }
     
     /**

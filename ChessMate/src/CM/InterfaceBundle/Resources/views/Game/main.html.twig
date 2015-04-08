@@ -49,12 +49,12 @@
 		<div class="col-md-6 col-sm-12">
 			{% if gameID %}
 				<div id="midGame">
-					{{ include('CMInterfaceBundle:Game:timer.html.twig', { 'timer': '1', 'timeLeft': opTime, 'pName': opponent.username}) }}
+					{{ include('CMInterfaceBundle:Game:timerAndRating.html.twig', { 'timer': '1', 'timeLeft': opTime, 'user': opponent}) }}
 					{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Lost'}) }}
 					{{ include('CMInterfaceBundle:Game:chatBox.html.twig', {}) }}
 					{{ include('CMInterfaceBundle:Game:midGameOptions.html.twig', {}) }}
 					{{ include('CMInterfaceBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Won'}) }}
-					{{ include('CMInterfaceBundle:Game:timer.html.twig', { 'timer': '2', 'timeLeft': userTime, 'pName': app.user.username}) }}
+					{{ include('CMInterfaceBundle:Game:timerAndRating.html.twig', { 'timer': '2', 'timeLeft': userTime, 'user': app.user}) }}
 				</div>
 			{% else %}
 				<div id="piecesWon" class="row piecesWonLost hidden">
@@ -87,6 +87,7 @@
 	{% if game is defined %}
 	    <script>
 	    	//set game state
+	    	var gameOver = {{ game.over |json_encode|raw }};
 	    	var activePlayer = {{game.activePlayerIndex }};
 	    	var inProgress = {{ game.joined |json_encode|raw }};
 	    	var abstractBoard = {{ game.board.board |json_encode|raw }};

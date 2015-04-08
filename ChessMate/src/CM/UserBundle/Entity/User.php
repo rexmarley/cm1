@@ -87,13 +87,13 @@ class User extends BaseUser
 	 * 
 	 * @var int
 	 */
-	private static $c = 6.32;
+	const CONSTANT = 6.32;
 	
 	/**
 	 * Average period length
 	 * @var int
 	 */
-	private static $periodMins = 806;
+	const PERIOD_MINS = 806;
 
     public function __construct()
     {
@@ -282,22 +282,24 @@ class User extends BaseUser
 	 */
 	public function setStartRD() {
 		$pp = time() - $this->lastPlayedTime;
-		$t = floor($pp / $this->periodMins);
+		$t = floor($pp / self::PERIOD_MINS);
 		$oldRD = $this->deviation;
-		$this->deviation = min(sqrt(($oldRD*$oldRD)+($this->c*$this->c*$t)), 350);
+		$this->deviation = min(sqrt(($oldRD*$oldRD)+(self::CONSTANT*self::CONSTANT*$t)), 350);
 
 		return $this;
 	}
 	
 	/**
-	 * Update player's rating & deviation
-	 * 
+	 * Update player's rating & deviation	 * 
 	 * @param array $matches [opRating, opRD, result]
+	 * @return User
 	 */
 	public function updateRating(array $matches) {
 		$dSq = $this->getDSq($matches);
 		$this->rating = $this->getNewRating($matches, $dSq);
 		$this->deviation = $this->getNewDeviation($dSq);
+
+		return $this;
 	}
 	
 	/**
