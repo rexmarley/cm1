@@ -72,14 +72,6 @@ class Game
     private $playerTimes;
 
     /**
-     * Cheater's index; null if none
-     * 0 = white
-     * 1 = black
-     * @ORM\Column(type="integer", nullable=true)
-     */
-    private $cheaterIndex;
-
-    /**
      * Index of player offering draw; null if none
      * 0 = white
      * 1 = black
@@ -497,8 +489,25 @@ class Game
      */
     public function setGameOver($victor, $message) {
 	    $this->setVictorIndex($victor);
-	    //TODO: set won/lost/drawn on players
     	$this->setGameOverMessage($message);
+	    //set won/lost/drawn on players
+	    if ($victor == 2) {
+	    	$wResult = 0.5;
+	    	$lResult = 0.5;
+	    	$winner = $this->players->get(0);
+	    	$loser = $this->players->get(1);
+	    } else {
+	    	$wResult = 1;
+	    	$lResult = 0;
+	    	$winner = $this->players->get($victor);
+	    	$loser = $this->players->get(1 - $victor);
+	    }
+	    $winner->updateRating(array(array('opRating' => $loser->getRating(), 'opRD' => $loser->getDeviation(), 'result' => $wResult)));
+	    $loser->updateRating(array(array('opRating' => $winner->getRating(), 'opRD' => $winner->getDeviation(), 'result' => $lResult)));
+    	//remove from user's current games
+    	foreach ($this->players as $p) {
+    		$p->removeCurrentGame($this);
+    	}    	
     }
     
     /**
@@ -565,29 +574,13 @@ class Game
     {
         return $this->victorIndex;
     }
-
-    /**
-     * Set cheater's index, if move not valid
-     * @param int index
-     * 
-     * @return Game
-     */
-    public function setCheaterIndex($index)
-    {
-        if ($index == 0 || $index == 1) {
-        	$this->cheaterIndex = $index;
-        }
-
-        return $this;
-    }
     
     /**
-     * Get cheater's index
-     *
-     * @return \CM\UserBundle\Entity\User 
+     * Set rating deviations for period
      */
-    public function getCheaterIndex()
-    {
-        return $this->cheaterIndex;
+    public function setStartRDs() {
+    	foreach ($this->players as $p) {
+    		$p->setStartRD();
+    	}
     }
 }

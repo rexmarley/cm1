@@ -19,6 +19,4 @@ services:
         class: CM\InterfaceBundle\Helpers\GameOverHelper
     html_helper:
         class: CM\InterfaceBundle\Helpers\HTMLHelper
-    ratings_helper:
-        class: CM\InterfaceBundle\Helpers\RatingsHelper
 

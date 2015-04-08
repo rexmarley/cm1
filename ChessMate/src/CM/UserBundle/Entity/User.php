@@ -10,6 +10,9 @@ use Doctrine\Common\Collections\ArrayCollection;
 use CM\InterfaceBundle\Entity\GameSearch;
 
 /**
+ * Glicko rated user
+ * reference: http://www.glicko.net/glicko/glicko.pdf
+ * 
  * @ORM\Entity
  * @ORM\Table(name="cm_user")
  * @ORM\Entity(repositoryClass="CM\UserBundle\Repository\UserRepository")
@@ -72,6 +75,25 @@ class User extends BaseUser
      * @ORM\Column(type="boolean")
      */
     protected $chatty;
+    
+	/**
+	 * Constant governing uncertainty in rating - 
+	 * 60 mths without playing is assumed to make any rating as unreliable as that of an unrated player.
+	 * Average games in a month is estimated at 50
+	 * 
+ 	 * Solve:
+ 	 *  startDeviation = sqrt((averageDeviation*averageDeviation) + (constant*constant*50*60))
+ 	 *  => 350 = sqrt((50*50)+(c*c*50*60)) 
+	 * 
+	 * @var int
+	 */
+	private static $c = 6.32;
+	
+	/**
+	 * Average period length
+	 * @var int
+	 */
+	private static $periodMins = 806;
 
     public function __construct()
     {
@@ -253,4 +275,108 @@ class User extends BaseUser
     		$this->chatty = true;
     	}
     }
+	
+	/**
+	 * Adjust rating deviation (at start of each game i.e. period)
+	 * @return User
+	 */
+	public function setStartRD() {
+		$pp = time() - $this->lastPlayedTime;
+		$t = floor($pp / $this->periodMins);
+		$oldRD = $this->deviation;
+		$this->deviation = min(sqrt(($oldRD*$oldRD)+($this->c*$this->c*$t)), 350);
+
+		return $this;
+	}
+	
+	/**
+	 * Update player's rating & deviation
+	 * 
+	 * @param array $matches [opRating, opRD, result]
+	 */
+	public function updateRating(array $matches) {
+		$dSq = $this->getDSq($matches);
+		$this->rating = $this->getNewRating($matches, $dSq);
+		$this->deviation = $this->getNewDeviation($dSq);
+	}
+	
+	/**
+	 * Calculate new rating based on results of all games in ratings period
+	 * @param array $matches
+	 * @param double $dSq
+	 * 
+	 * @return int
+	 */
+	private function getNewRating(array $matches, $dSq) {
+		$t1 = $this->getQ()/((1/$this->deviation/$this->deviation)+(1/$dSq));
+		$sum = 0;
+		foreach ($matches as $match) {
+			$sum += $this->getG($match['opRD'])*($match['result'] - $this->getE($match['opRating'], $match['opRD']));
+		}
+		return round($this->rating + ($t1 * $sum));
+	}
+		
+	/**
+	 * Calculate new ratings deviation
+	 * For use at start of new rating period
+	 * @param double $dSq
+	 * 
+	 * @return double
+	 */
+	private function getNewDeviation($dSq) {
+		//set minimum RD threshold of 30
+		return max(round(sqrt(((1/$this->deviation/$this->deviation)+(1/$dSq))**-1), 1), 30);
+	}
+	
+	/**
+	 * Get d squared as a summation of all matches within set ratings period
+	 * Implemented on a game by game basis in this instance
+	 */
+	private function getDSq($matches) {
+		$sum = 0;
+		foreach ($matches as $match) {
+			$sum += $this->getMatchDifference($match['opRating'], $match['opRD']);
+		}
+		$q = $this->getQ();
+		return ($q*$q*$sum)**-1;
+	}
+	
+	/**
+	 * Get difference for single match
+	 * @param int $opRating
+	 * @param double $opRD
+	 * 
+	 * @return double
+	 */
+	private function getMatchDifference($opRating, $opRD) {
+		$g = $this->getG($opRD);
+		$e = $this->getE($this->rating, $opRating, $opRD);
+		return $g*$g*$e*(1-$e);
+	}
+	
+	/**
+	 * Get q term of equations
+	 * @return double
+	 */
+	private function getQ() {
+		return log(10)/400;
+	}
+	
+	/**
+	 * Get g term of equations
+	 * @return double
+	 */
+	private function getG($RD) {
+		$q = $this->getQ();
+		return 1/sqrt(1+(3*$q*$q*$RD*$RD/M_PI/M_PI));
+	}
+
+	/**
+	 * Get E term of equations
+	 * @return double
+	 */
+	private function getE($opRating, $opRD) {
+		$pow = -$this->getG($opRD)*($this->rating - $opRating)/400;
+		return 1/(1+(10**$pow));
+	}
 }

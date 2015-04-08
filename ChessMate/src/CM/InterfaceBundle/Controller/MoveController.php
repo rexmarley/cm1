@@ -163,7 +163,6 @@ class MoveController extends Controller
     	$piece = $absBoard[$from[0]][$from[1]];
     	if (!$piece) {
     		//cheat = inactive player i.e. player that made move
-    		$game->setCheaterIndex($mover);
     		$game->setGameOver($shaker, 'Game Aborted: '.$game->getPlayers()->get($mover)->getUsername().' has cheated.');
     	} else {
 	    	$piece = explode("_", $piece);
@@ -177,7 +176,6 @@ class MoveController extends Controller
 	    	);
 	    	//make sure right colour moved
 	    	if ($move['pColour'] == 'w' and $mover == 1 || $move['pColour'] == 'b' and $mover == 0) {
-    			$game->setCheaterIndex($mover);
     			$game->setGameOver($shaker, 'Game Aborted: '.$game->getPlayers()->get($mover)->getUsername().' has cheated.');
 	    	} else {
 		    	//get piece validator 
@@ -186,13 +184,11 @@ class MoveController extends Controller
 		    	$valid = $validator->validateMove($move, $game);
 		    	if ($valid['valid']) {
 		    		//cheater = active player i.e. player that questioned validity
-	    			$game->setCheaterIndex($shaker);
     				$game->setGameOver($mover, 'Game Aborted: '.$game->getPlayers()->get($shaker)->getUsername().' has cheated.');
 	    			//save validated move
 	    			$this->saveMove($game, $attempted, $em);
 		    	} else {
 	    			//cheat = inactive player i.e. player that made move
-	    			$game->setCheaterIndex($mover);
     				$game->setGameOver($shaker, 'Game Aborted: '.$game->getPlayers()->get($mover)->getUsername().' has cheated.');
 		    	}
 	    	}

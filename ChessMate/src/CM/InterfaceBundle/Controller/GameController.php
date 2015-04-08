@@ -292,6 +292,8 @@ class GameController extends Controller
 	    if ($joined) {
 	    	//add to user
 	    	$user->addCurrentGame($game);
+	    	//update rating deviation
+	    	$game->setStartRDs();
 	    	//set time
 	    	$game->setLastMoveTime(time());
 	    } else {
