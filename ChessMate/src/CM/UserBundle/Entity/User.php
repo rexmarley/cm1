@@ -7,7 +7,7 @@ use FOS\UserBundle\Model\User as BaseUser;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\DBAL\Types\BooleanType;
 use Doctrine\Common\Collections\ArrayCollection;
-use CM\InterfaceBundle\Entity\GameSearch;
+use CM\AppBundle\Entity\GameSearch;
 
 /**
  * Glicko rated user
@@ -29,7 +29,7 @@ class User extends BaseUser
     /**
      * Current games
      *
-     * @ORM\ManyToMany(targetEntity="CM\InterfaceBundle\Entity\Game", inversedBy="players")
+     * @ORM\ManyToMany(targetEntity="CM\AppBundle\Entity\Game", inversedBy="players")
      */
     protected $currentGames;
     
@@ -185,10 +185,10 @@ class User extends BaseUser
     /**
      * Add game to user
      *
-     * @param \CM\InterfaceBundle\Entity\Game $currentGames
+     * @param \CM\AppBundle\Entity\Game $currentGames
      * @return User
      */
-    public function addCurrentGame(\CM\InterfaceBundle\Entity\Game $currentGame)
+    public function addCurrentGame(\CM\AppBundle\Entity\Game $currentGame)
     {
         $this->currentGames[] = $currentGame;
 
@@ -198,9 +198,9 @@ class User extends BaseUser
     /**
      * Remove game
      *
-     * @param \CM\InterfaceBundle\Entity\Game $currentGames
+     * @param \CM\AppBundle\Entity\Game $currentGames
      */
-    public function removeCurrentGame(\CM\InterfaceBundle\Entity\Game $currentGame)
+    public function removeCurrentGame(\CM\AppBundle\Entity\Game $currentGame)
     {
         $this->currentGames->removeElement($currentGame);
     }

@@ -5,12 +5,12 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>{% block title %}Chess Mate{% endblock %}</title>
         {% block stylesheets %}
-        	<link href="{{ asset('bundles/cminterface/css/general.css') }}" rel="stylesheet" type="text/css" />
+        	<link href="{{ asset('bundles/cmapp/css/general.css') }}" rel="stylesheet" type="text/css" />
 	        {% stylesheets '%kernel.root_dir%/../vendor/twitter/bootstrap/less/bootstrap.less' %} 
         		<link href="{{ asset_url }}" rel="stylesheet" type="text/css" />
 	        {% endstylesheets %}
         {% endblock %}
-        <link rel="icon" type="image/x-icon" href="{{ asset('bundles/cminterface/images/favicon.ico') }}" />
+        <link rel="icon" type="image/x-icon" href="{{ asset('bundles/cmapp/images/favicon.ico') }}" />
     </head>
     <body>
 		<div class="container-fluid">
@@ -24,7 +24,7 @@
 				   	<table>
 					   	<tr>
 						   	<td id="logo_td">
-				    			<img id="logo" src="{{ asset('bundles/cminterface/images/logo.png') }}"/>
+				    			<img id="logo" src="{{ asset('bundles/cmapp/images/logo.png') }}"/>
 						   	</td>
 						   	<td>
 				    			<span>Chess Mate{{ subtitle }}</span>
@@ -42,7 +42,7 @@
 			    				</div>
 			    			{% elseif game is defined %}
 							   	<div class="col-md-6 col-sm-4 col-xs-4">
-				    				<a  href="{{ path('cm_interface_start', {}) }}" class="btn btn-large btn-success" target="_blank">Play Another</a>
+				    				<a  href="{{ path('cm_start', {}) }}" class="btn btn-large btn-success" target="_blank">Play Another</a>
 			    				</div>
 			    			{% else %}
 				    			{% set offset = ' col-md-offset-6' %}

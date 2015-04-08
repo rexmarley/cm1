@@ -1,0 +1,65 @@
+cm_start:
+    path:     /start
+    defaults: { _controller: "CMAppBundle:Game:start" }
+    
+cm_new_search:
+    path:     /newSearch
+    defaults: { _controller: "CMAppBundle:Game:newSearch" }
+    
+cm_match_search:
+    path:     /matchSearch/{searchID}
+    defaults: { _controller: "CMAppBundle:Game:matchSearch" }
+    
+cm_cancel_search:
+    path:     /cancelSearch/{searchID}
+    defaults: { _controller: "CMAppBundle:Game:cancelSearch", searchID = 0 }
+    
+cm_play_game:
+    path:     /play/{gameID}
+    defaults: { _controller: "CMAppBundle:Game:play" }
+    
+cm_join_game:
+    path:     /join/{gameID}
+    defaults: { _controller: "CMAppBundle:Game:joinGame" }
+    
+cm_send_move:
+    path:     /sendMove
+    defaults: { _controller: "CMAppBundle:Move:sendMove" }
+    
+cm_save_move:
+    path:     /saveMove/{gameID}
+    defaults: { _controller: "CMAppBundle:Move:saveMove" }
+    
+cm_offer_draw:
+    path:     /offerDraw/{gameID}
+    defaults: { _controller: "CMAppBundle:Game:offerDraw" }
+    
+cm_accept_draw:
+    path:     /acceptDraw/{gameID}
+    defaults: { _controller: "CMAppBundle:Game:acceptDraw" }
+    
+cm_find_cheat:
+    path:     /findCheat/{gameID}
+    defaults: { _controller: "CMAppBundle:Move:findCheat" }
+    
+cm_resign_game:
+    path:     /resign/{gameID}
+    defaults: { _controller: "CMAppBundle:Game:resign" }
+    
+cm_toggle_chat:
+    path:     /toggleChat/{gameID}/{player}
+    defaults: { _controller: "CMAppBundle:Game:toggleChat" }
+    
+cm_send_chat:
+    path:     /sendChat/{gameID}
+    defaults: { _controller: "CMAppBundle:Game:sendChat" }
+    
+cm_listen:
+    path:     /listen
+    defaults: { _controller: "CMAppBundle:Game:listen" }
+    
+cm_js_testBoard:
+    path:     /tests
+    defaults: { _controller: "CMAppBundle:JSTests:testJS" }
+
+    

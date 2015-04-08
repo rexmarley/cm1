@@ -1,15 +1,11 @@
-cm_interface:
-    resource: "@CMInterfaceBundle/Resources/config/routing.yml"
+cm_app:
+    resource: "@CMAppBundle/Resources/config/routing.yml"
     prefix:   /game
     
-cm_interface_login:
+cm_app_login:
     path:     /
     defaults: { _controller: "FOSUserBundle:Security:login" }
 
 cm_user:
     resource: "@CMUserBundle/Resources/config/routing.yml"
     prefix:   /
-
-app:
-    resource: "@AppBundle/Controller/"
-    type:     annotation
