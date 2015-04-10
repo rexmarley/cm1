@@ -171,7 +171,7 @@ class User extends BaseUser
      */
     public function getIsOnline()
     {    
-    	return $this->getLastActiveTime() > new \DateTime('5 minutes ago');
+    	return $this->getLastActiveTime() > new \DateTime('3 minutes ago');
     }
 
     /**

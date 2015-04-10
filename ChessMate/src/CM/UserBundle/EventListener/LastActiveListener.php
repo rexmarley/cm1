@@ -23,7 +23,7 @@ class LastActiveListener
     */
     public function onCoreController(FilterControllerEvent $event)
     {
-        // listen for MASTER_REQUESTs
+        // only listen for MASTER_REQUESTs
         if ($event->getRequestType() !== HttpKernel::MASTER_REQUEST) {
             return;
         }
@@ -31,7 +31,7 @@ class LastActiveListener
         // Check if request is from user
         if ($this->securityContext->getToken()) {
             $user = $this->securityContext->getToken()->getUser();
-            //update last active time (every five mins) 
+            //update last active time (every three mins) 
             if ($user instanceof UserInterface && !$user->getIsOnline()) {
                 $user->setLastActiveTime(new \DateTime());
                 $this->userManager->updateUser($user);

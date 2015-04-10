@@ -11,6 +11,7 @@ use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use CM\AppBundle\Entity\Game;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use CM\AppBundle\Entity\ChatMessage;
+use Doctrine\ORM\EntityManager;
 
 class GameController extends Controller
 {    
@@ -44,8 +45,7 @@ class GameController extends Controller
 				$user->setLastActiveTime(new \DateTime());
 			}
 			//give guest average rating
-			//$user->setRating(1000);
-			$user->setRating(1410);
+			$user->setRating(1100);
 			$userManager->updateUser($user);
 			//set login token
 			$token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
@@ -508,6 +508,8 @@ class GameController extends Controller
     	$pIndex = $players->indexOf($user);
     	$opIndex = 1 - $pIndex;
     	$opponent = $players->get($opIndex);
+    	//check opponent has moved within reasonable amount of time
+    	$game = $this->checkFairPlay($game, $pIndex, $em);
     	//get all chat on reloads
 	    $lastSeen = $content->lastChat;
 	    if ($game->getPlayerIsChatty($pIndex)) {
@@ -600,5 +602,38 @@ class GameController extends Controller
 	    		'enPassant' => $move['enPassant'],
 	    		'newBoard' => $move['newBoard']
 		    );
+    }
+    
+    /**
+     * Check for user disconnecting
+     * @param Game $game
+     * @param int $pIndex
+     * @param EntityManager $em
+     * @return Game
+     */
+    private function checkFairPlay(Game $game, $pIndex, EntityManager $em) {
+    	$opponent = $game->getPlayers()->get(1 - $pIndex);
+    	if (!$game->getLastMoveValidated()) {
+    		//user has moved/is waiting
+    		if ((time() - $game->getLastMoveTime()) > 60) {
+    			$game->setGameOver($pIndex, "Game Aborted: ".$opponent->getUsername()." has disconnected");
+    			$em->flush();    			
+    		}
+    	} else if ($game->getActivePlayerIndex() != $pIndex) {
+    		//user has moved/is waiting
+    		$gameLength = $game->getLength();
+    		if ($gameLength < 601) {
+    			$timeOut = 4;
+    		} else if ($gameLength < 1801) {
+    			$timeOut = 6;    			
+    		} else {
+    			$timeOut = 11;    			
+    		}
+    		if ($opponent->getLastActiveTime() < new \DateTime($timeOut.' minutes ago')) {
+    			$game->setGameOver($pIndex, "Game Aborted: ".$opponent->getUsername()." has disconnected");
+    			$em->flush();
+    		}
+    	}
+    	return $game;
     }
 }

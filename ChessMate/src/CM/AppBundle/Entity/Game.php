@@ -65,6 +65,11 @@ class Game
      * @ORM\Column(type="boolean")
      */
     private $lastMoveValidated;
+
+    /**
+     * @ORM\Column(type="integer")
+     */
+    private $length;
     
     /**
      * @ORM\Column(type="array")
@@ -103,6 +108,7 @@ class Game
         $this->board = $board;
         $this->playersJoined = array(false,false);
         $this->playerTimes = array($length, $length);
+        $this->length = $length;
     	//set white as active
     	$this->setActivePlayerIndex(0);
         $this->lastMoveValidated = true;
@@ -316,6 +322,29 @@ class Game
     public function getPlayers()
     {
         return $this->players;
+    }
+
+    /**
+     * Set length
+     *
+     * @param integer $length
+     * @return Game
+     */
+    public function setLength($length)
+    {
+        $this->length = $length;
+
+        return $this;
+    }
+
+    /**
+     * Get length
+     *
+     * @return integer 
+     */
+    public function getLength()
+    {
+        return $this->length;
     }
 
     /**
