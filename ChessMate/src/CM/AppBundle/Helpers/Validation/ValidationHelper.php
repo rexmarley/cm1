@@ -95,15 +95,11 @@ abstract class ValidationHelper
 	 */
 	protected function inCheck($opColour, $kingSquare) {
 		//check in check
-		if ($this->inCheckByPawn($opColour, $kingSquare) 
-			|| $this->inCheckByKnight($opColour, $kingSquare)
-			|| $this->inCheckOnXAxis($opColour, $kingSquare)
-			|| $this->inCheckOnYAxis($opColour, $kingSquare)
-			|| $this->inCheckOnDiagonal($opColour, $kingSquare)) {
-			return true;			
-		}
-
-		return false;
+		return ($this->inCheckByPawn($opColour, $kingSquare) 
+				|| $this->inCheckByKnight($opColour, $kingSquare)
+				|| $this->inCheckOnXAxis($opColour, $kingSquare)
+				|| $this->inCheckOnYAxis($opColour, $kingSquare)
+				|| $this->inCheckOnDiagonal($opColour, $kingSquare));
 	}
 
 	/**

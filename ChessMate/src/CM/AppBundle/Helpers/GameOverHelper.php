@@ -13,24 +13,62 @@ class GameOverHelper extends ValidationHelper
 {
 	/**
 	 * Check if last move ended the game i.e. opponent in checkmate/stalemate/drawn
-	 * @param char $colour The attacking player
 	 * @param Game $game The game
+	 * @param bool|int $gameOver Attacking player's opinion on game over
+	 * @param bool|int $gameOver2 Defending player's opinion on game over
+	 * @param int $pIndex The player confirming/refuting game over
 	 */
-	public function checkGameOver(Game $game, $colour, EntityManager $em) {
-    	$this->setGlobals($game);
-    	$gameOver = $this->getGameOver($colour);
-    	if ($gameOver) {
-    		$message = 'Game Over: '.$gameOver;
-    		if ($gameOver == 'Checkmate') {
-    			$game->setGameOver($game->getLastMoveBy(), $message);
-    		} else {
-    			$game->setGameOver(2, $message);
-    		}
-    		$em->flush();
-    		
-    		return $message;	
+	public function checkGameOver(Game $game, $gameOver, $gameOver2, $pIndex, EntityManager $em) {
+		$over = false;
+    	if ($gameOver != $gameOver2) {
+    		//consensus differs - check for game over    	
+		   	if ($pIndex === 0) {
+		   		$colour = 'b';
+		   	} else {
+		   		$colour = 'w';
+		   	}
+	    	$this->setGlobals($game);
+	    	$msg = $this->getGameOver($colour);
+	    	if ($msg) {
+	    		$over = 'Game Over: '.$msg;
+	    		if ($msg == 'Checkmate') {
+	    			$game->setGameOver(1 - $pIndex, $over);
+	    		} else {
+	    			$game->setGameOver(2, $over);
+	    		}
+	    	}
+    	} else if ($gameOver) {
+	    	$over = 'Game Over: ';
+    		//apply game over
+			if ($gameOver == 3) {
+				//checkmate
+		    	$victor = 1 - $pIndex;
+				$over .= 'Checkmate';
+			} else {
+				//draw
+				$victor = 2;
+				if ($gameOver == 2) {
+					$over .= 'Stalemate';
+				} else {
+					$over .= 'Drawn';
+				}
+			}
+    		$game->setGameOver($victor, $over);
     	}
-    	return false;		
+    	if ($over) {
+    		$em->flush();
+    		//get new ratings for immediate display
+    		$em->refresh($game);
+	    	$players = $game->getPlayers();
+	    	foreach ($players as $p) {
+	    		$em->refresh($p);
+	    	}
+	    	$pRating = $players->get($pIndex)->getRating();
+	    	$opRating = $players->get(1 - $pIndex)->getRating();
+	    	return array('pRating' => $pRating, 'opRating' => $opRating, 'overMsg' => $over);
+    	}
+    	
+    	return false;
 	}
 	
 	/**
@@ -196,7 +234,7 @@ class GameOverHelper extends ValidationHelper
 	private function checkOnYAxisIsDefendable($from, $to, $col, $colour, $opColour) {
 		//get copy of  board
 		$board = $this->board;
-		//get x-axis direction
+		//get y-axis direction
 		$range = abs($to - $from);
 		$y = ($to - $from) / $range;
 		$kingSquare = array($to, $col);
@@ -255,7 +293,7 @@ class GameOverHelper extends ValidationHelper
     /**
      * Check if given colour has any pieces other than king
      * @param char $colour
-     * @return bool mixed
+     * @return bool
      */
     private function alliesLeft($colour) {
 		foreach ($this->board as $row) {

@@ -44,8 +44,11 @@ class MoveController extends Controller
     	$timeLeft = $game->getPlayerTime($player) - $moveTime;
     	if ($timeLeft < $moveTime) {
     		$game->setGameOver($game->getInactivePlayerIndex(), 'Game Aborted: '.$user->getUsername().' has cheated.');
+			$em->flush();
     	} else {
 	    	$game->setLastMoveTime(time());
+	    	//check for game over - if opponent disagrees, validate server-side 
+	    	$gameOver = $content->gameOver;
 	    	//get move details
 	    	$move = array(
 	    			'by' => $player,
@@ -53,25 +56,45 @@ class MoveController extends Controller
 	    			'to' => $content->to,
 	    			'newBoard' => $content->board,
 	    			'enPassant' => $content->enPassant,
-	    			'newPiece' => $content->newPiece
+	    			'newPiece' => $content->newPiece,
+	    			'gameOver' => $gameOver
 	    	);
 		    //save move for validation by opponent
 		    $game->setLastMove($move);
-		    //fopen($filename, a);
 			//mark move as unvalidated
 			$game->setLastMoveValidated(false);
-		    $em->flush();
+			$em->flush();
+			if ($gameOver) {
+				//get new ratings for display; don't update until verified
+				if ($gameOver == 3) {
+					//checkmate
+			    	$wResult = 1;
+			    	$lResult = 0;
+				} else {
+					//draw
+			    	$wResult = 0.5;
+			    	$lResult = 0.5;					
+				}
+				$opponent = $game->getPlayers()->get(1 - $player);
+	    		$user->updateRating(array(array('opRating' => $opponent->getRating(), 'opRD' => $opponent->getDeviation(), 'result' => $wResult)));
+	    		$opponent->updateRating(array(array('opRating' => $user->getRating(), 'opRD' => $user->getDeviation(), 'result' => $lResult)));
+	    		//don't flush
+    			return new JsonResponse(array('gameOver' => true, 'pRating' => $user->getRating(), 'opRating' => $opponent->getRating()));
+			}
     	}
 
-    	return new JsonResponse(array('sent' => true));
+    	return new JsonResponse(array('gameOver' => false));
     }
     
     /**
-     * Save move if validated by opponent
+     * Save move if validated by opponent]
+     * @param int $gameID
      * @param Request $request
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
-    public function saveMoveAction($gameID) {
+    public function saveMoveAction($gameID, Request $request) {
+    	$content = json_decode($request->getContent());
+    	$gameOver = $content->gameOver;
     	$user = $this->getUser();
     	//find game
     	$em = $this->getDoctrine()->getManager();
@@ -92,16 +115,11 @@ class MoveController extends Controller
 		$game->setLastMoveValidated(true);
     	//save move
     	$this->saveMove($game, $move, $em);
-    	//Temp: check for game over
-    	if ($player === 0) {
-    		$colour = 'b';
-    	} else {
-    		$colour = 'w';
-    	}
+    	//check for game over
     	$em->refresh($game);
 		$gameOverHelper = $this->get('game_fin_helper');
-		$gameOver = $gameOverHelper->checkGameOver($game, $colour, $em);
-    	
+		$gameOver = $gameOverHelper->checkGameOver($game, $gameOver, $move['gameOver'], $player, $em);
+
 	    return new JsonResponse(array('saved' => true, 'gameOver' => $gameOver));
     }
     

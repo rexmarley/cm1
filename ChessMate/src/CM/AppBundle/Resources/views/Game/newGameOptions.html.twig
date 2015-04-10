@@ -42,7 +42,7 @@
 	<center>
 		<u><h2 class="red">Current Games</h2></u>
 		{% for game in games %}
-			<h2><a href="{{ path('cm_interface_play', { 'gameID' : game.id })}}">{{ game.whitePlayer }} vs. {{ game.blackPlayer }}</a></h2>		
+			<h2><a href="{{ path('cm_play_game', { 'gameID' : game.id })}}">{{ game.whitePlayer }} vs. {{ game.blackPlayer }}</a></h2>		
 		{% endfor %}
 	</center>
 </div>

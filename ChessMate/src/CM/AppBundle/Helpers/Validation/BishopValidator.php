@@ -2,7 +2,7 @@
 
 namespace CM\AppBundle\Helpers\Validation;
 
-use CM\InterfaceBundle\Entity\Game;
+use CM\AppBundle\Entity\Game;
 use CM\UserBundle\Entity\User;
 use CM\AppBundle\Entity\Board;
 

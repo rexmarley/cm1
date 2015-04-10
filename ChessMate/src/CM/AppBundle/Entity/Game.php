@@ -360,11 +360,10 @@ class Game
      *
      * @return int 
      */
-    public function getPlayerTime($player, $lag = 0)
+    public function getPlayerTime($player)
     {
-    	//$lag = 0; //TODO remove lag (from user aswell) just have to work out diff between move time and time received by opponent
         if ($player == $this->activePlayerIndex && !is_null($this->lastMoveTime)) {
-        	return $this->playerTimes[$player] + $this->lastMoveTime + $lag - time();        	
+        	return $this->playerTimes[$player] + $this->lastMoveTime - time();        	
         } else {
         	return $this->playerTimes[$player];        	
         }

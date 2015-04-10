@@ -1,0 +1,451 @@
+@CHARSET "ISO-8859-1";
+
+body {
+	background: linear-gradient(#6881E6,#ffffff) no-repeat;
+	height:100%;
+	padding-left: 15px;
+    padding-right: 15px;
+}
+
+table {
+	width:100%;
+}
+
+@media screen and (max-width: 1200px) {
+    body {
+    	font-size: 14px !important;
+    }
+	h1 {
+		font-size:2em !important;
+	}
+	h2 {
+		font-size:1.5em !important;
+	}
+	div#newGameOptions {
+		font-size: 1em !important;
+	}
+
+	div.board {
+		width: 41em !important;
+		height: 41em !important;
+		margin-left: auto !important;
+		font-size: 0.85em;
+	}
+	
+	div.square {
+	    height: 5.5em !important;
+	    width: 5.11em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 4em;	
+	}
+
+	div#chatBox {
+		height: 16em !important;
+	}
+}
+
+@media screen and (min-width: 800px) {
+	div#userOptions {
+		margin-top: 5%;
+	}
+}
+
+@media screen and (max-width: 900px) {
+	div#userOptions {
+		margin-top: 5%;
+	}
+
+	div.board {
+		width: 54.4em !important;
+		height: 44em !important;
+		margin-left: auto !important;
+		font-size: 1em;
+	}
+	
+	div.square {
+	    height: 5.5em !important;
+	    width: 6.8em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 5em;	
+	}
+
+	div#chatBox {
+		height: 18em !important;
+	}
+}
+
+@media screen and (max-width: 800px) {
+    body {
+    	font-size: 10px !important;
+    }
+	h1, h2 {
+		font-size:1.8em !important;
+	}
+	div#newGameOptions {
+		font-size: 1.2em !important;
+	}
+
+	div.board {
+		width: 52em !important;
+		height: 52em !important;
+		margin-left: auto !important;
+		font-size: 1.4em;
+	}
+	
+	div.square {
+	    height: 6.5em !important;
+	    width: 6.5em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 5em;	
+	}
+}
+
+@media screen and (max-width: 700px) {
+    body {
+    	font-size: 10px !important;
+    }
+	h1, h2 {
+		font-size:1.8em !important;
+	}
+	div#newGameOptions {
+		font-size: 1.2em !important;
+	}
+
+	div.board {
+		width: 56em !important;
+		height: 56em !important;
+		margin-left: auto !important;
+		font-size: 1em;
+	}
+	
+	div.square {
+	    height: 7em !important;
+	    width: 7em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 5em;	
+	}
+}
+
+@media all and (max-width: 500px) {
+    body {
+    	font-size: 7px !important;
+    }
+	div#newGameOptions {
+		font-size: 1.4em !important;
+	}
+
+	div.board {
+		width: 64em !important;
+		height: 48em !important;
+		margin-left: auto !important;
+		font-size: 1em;
+	}
+	
+	div.square {
+	    height: 6em !important;
+	    width: 8em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 5em;	
+	}
+}
+
+@media all and (max-width: 360px) {
+    body {
+    	font-size: 7px !important;
+    }
+	div#newGameOptions {
+		font-size: 1.4em !important;
+	}
+
+	div.board {
+		width: 41em !important;
+		height: 44em !important;
+		margin-left: auto !important;
+		font-size: 1em;
+	}
+	
+	div.square {
+	    height: 5.5em !important;
+	    width: 5.1em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 5em;	
+	}
+}
+
+div#header {
+	font-size:4em;
+	padding: 1% 1% 1% 0;
+}
+
+img#logo {
+	height:2em;
+}
+
+#logo_td {
+	width:12%;
+}
+
+div.errors {
+	font-size:2em;
+	color: #ff0000;	
+}
+
+div.ui-dialog {
+	cursor: pointer;
+	display: none;	
+}
+
+a#startGame {
+	width:100%;
+	padding:3%;
+	margin-left:0%;
+}
+
+a#showCurrentGames {
+	width:100%;
+	padding:3%;
+	font-size: 2em;
+	margin-left:0%;
+}
+.red {
+	color: #ff0000;	
+}
+.green {
+	color: #00ff00;	
+}
+.blue {
+	color: #0000ff;	
+}
+.purple {
+	color: #c657da;
+}
+
+div#newGameOptions {
+	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
+	font-size: 1.2em;
+}
+div#newGameOptions input[type='radio'][name='duration'] {
+	margin-left:5%;
+}
+
+div#newGameOptions h2 {
+	color: #2E2EFE;
+}
+
+div#newGameOptions input[type="submit"] {
+	width:100%;
+	margin-top: 3%;
+}
+
+div#newGameOptions a {
+	width:100%;
+	margin-top: 3%;
+}
+
+div.board {
+	width: 675px;
+	height: 675px;
+	outline: 1px solid #bdb7b7;
+	margin: 3px;
+	cursor: pointer;
+}
+
+div.square {  
+	float: left;
+    height: 84.35px;
+    width: 84.35px;
+}
+.clipped {
+    overflow: hidden;	
+}
+
+div.light {
+	background: #ffffff;
+}
+
+div.dark {
+	background: #bdb7b7;
+}
+
+div.piece {
+	font-size: 5em;
+	text-align: center;
+	margin-bottom: -2%;
+}
+
+div.piecesWonLost {
+	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
+	min-height: 10em;
+	outline: 1px solid #bdb7b7;
+	font-size: 0.8em;
+	overflow: hidden;
+}
+
+div.piecesWonLost div.piece {
+	min-width:19%;
+	display:inline-block;
+}
+
+div#separator {
+	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
+	width:100%;
+	padding:2px;
+	margin-bottom: 8px;
+}
+
+sub.subscript {
+	font-size:0.4em;
+	margin-left:-10px;
+}
+
+div.timer {
+	margin-top: -2.5%;
+}
+
+div#midGame {
+	margin: 0% 3%;	
+}
+
+div#midGameOptions {
+	margin-left:1%;
+	margin-right:1%;
+	margin-top:3%;
+	margin-bottom:3%;
+}
+
+div#midGameOptions a {
+	width:100%;
+}
+
+div#chatBox {
+	margin-top: 3%;
+	height: 18em;
+	background: #ffffff;
+	border: 1px solid #bdb7b7;
+}
+
+div#chatTitle {
+	background: #CCCCE7;
+	font-size:1.2em;
+}
+
+div#chatDisplay {
+	height: 67.3%;
+	border: 1px inset #CCCCE7;
+	margin-left: 0.5%;
+	margin-top: 0.5%;
+	margin-bottom: 0.9%;
+	width: 99%;	
+    overflow-y: scroll;
+}
+
+div#chatBox table {
+	max-width: 100%;
+}
+
+div#chatLog {
+	font-size:1.5em;
+}
+
+div#chatInput {
+	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
+	margin-left: 0.5%;
+	width: 99%;
+	height:3em;
+	border: 1px outset #CCCCE7;
+}
+
+div#chatInput input {
+	width: 84%;
+	height: 1.9em;
+	font-size: 1.3em;
+}
+
+div#drawOffered {
+	font-size: 3em;	
+}
+
+div#chatInput input[type="submit"] {
+	width: 12.8%;
+	font-size: 1.2em;
+	margin-left: 1.5%;
+	height: 2em;
+	padding: 0.5% 0 0;
+}
+
+div.login {
+	background: radial-gradient(#CCCCE7, #5884b0) no-repeat;
+	font-size:1.5em;
+	margin-left:auto;
+	margin-right:auto;
+    border-radius: 10px;
+	font-weight:strong;
+	padding: 0.6em;
+}
+
+div.login input[type=text], div.login input[type=email], div.login input[type=password] {
+	margin-top: 0.2%;
+	margin-bottom: 0.8%;
+}
+
+div.login li {
+	font-size:1em;
+	color: #ff0000;
+}
+
+div#loginOptions {
+	margin-left: 7px;
+}
+
+div#loginOptions a {
+	font-size:1.5em;
+}
+
+div#login input[type=text], div#login input[type=email], div#login input[type=password] {
+	width:100%;
+}
+
+div#login input[type=text], div#login input[type=email], div#login input[type=password] {
+	width:100%;
+}
+
+div#login input[type=submit] {
+    width:100%;
+}
+
+div#login label[for=remember_me], #remember_me {	
+	display:inline;
+}
+
+div#register input[type=text], div#register input[type=email], div#register input[type=password] {
+	width:90%;
+}
+
+div#register label, div#login label, div.profile {
+	width:100%;
+	text-align:right;
+}
+
+div.profile input[type=text], div.profile input[type=email], div.profile input[type=password] {
+	width:100%;
+}
+
+div#register input[type=submit] {
+	margin-top: 10px;
+}
+
+div#reset input[type=text], div#reset input[type=email], div#reset input[type=password] {
+	width:68%;
+}
