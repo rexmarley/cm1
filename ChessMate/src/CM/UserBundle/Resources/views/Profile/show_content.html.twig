@@ -4,17 +4,17 @@
 	<div id="showProfile" class="fos_user_user_show login profile">
 		<div class="row">
 		    <div class="col-md-12">
-		    	<center><h2><u>Profile</u></span></h2>
+		    	<center><h2><u>Rating: {{ app.user.rating }}</u></span></h2>
 			</div>
 		</div>
 		<div class="row">
 		    <div class="col-md-2 col-xs-2">
 				<label>{{ 'profile.show.username'|trans }}: </label>
 			</div>
-		    <div class="col-md-4">
+		    <div class="col-md-5">
 				<input type="text" value="{{ user.username }}" disabled/>
 			</div>
-		    <div class="col-md-2 col-xs-2">
+		    <div class="col-md-1 col-xs-1">
 				<label>{{ 'profile.show.email'|trans }}:</label> 
 			</div>
 		    <div class="col-md-4">
@@ -24,7 +24,10 @@
 		<br>
 		<div class="row">
 		    <div class="col-md-12">
-	        	<center><a class="btn btn-lg btn-success" href="{{ path('cm_start', {}) }}">Home</a></center>
+	        	<center>
+	        		<a class="btn btn-lg btn-success" href="{{ path('cm_start', {}) }}">Home</a>	        		
+				    <a class="btn btn-lg btn-primary" href="{{ path('fos_user_profile_edit', {}) }}">Edit</a>
+	        	</center>
 			</div>
 		</div>
 	</div>

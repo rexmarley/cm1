@@ -103,6 +103,8 @@ class User extends BaseUser
         $this->deviation = 350;
         $this->lastPlayedTime = time();
         $this->chatty = true;
+        $this->registered = true;
+        $this->lastActiveTime = new \DateTime();
     }
     
     /**

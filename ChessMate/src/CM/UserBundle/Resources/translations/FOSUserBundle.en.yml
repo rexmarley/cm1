@@ -39,7 +39,7 @@ change_password:
 # Registration
 registration:
     check_email: An email has been sent to %email%. It contains an activation link you must click to activate your account.
-    confirmed: Registration Successful! Welcome %username%.
+    confirmed: Registration Complete! Welcome %username%.
     back: Login
     submit: Register
     flash:

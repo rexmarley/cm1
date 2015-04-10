@@ -95,13 +95,13 @@ class GameOverHelper extends ValidationHelper
 		foreach ($reachables as $square) {
 			if (!$this->inCheck($colour, $square)) {
 				//put king back
-				$this->board[$kingSquare[0]][$kingSquare[1]] = $opColour.'_king';
+				$this->board[$kingSquare[0]][$kingSquare[1]] = $opColour.'_k';
 				return false;
 			}
 		}
 		//--> no safe squares within reach
 		//put king back
-		$this->board[$kingSquare[0]][$kingSquare[1]] = $opColour.'_king';
+		$this->board[$kingSquare[0]][$kingSquare[1]] = $opColour.'_k';
 		//check if in check
 		if (!$this->inCheck($colour, $kingSquare)) {
 			//check for stalemate
@@ -125,7 +125,7 @@ class GameOverHelper extends ValidationHelper
 		//--> only one active threat
 		//restore board state
 		$this->board[$checkThreat[0]][$checkThreat[1]] = $threat;
-		if ($threat == $opColour.'_knight') {
+		if ($threat == $opColour.'_n') {
 			//get copy of  board
 			$board = $this->board;
 			//attempt to take knight
@@ -298,7 +298,7 @@ class GameOverHelper extends ValidationHelper
     private function alliesLeft($colour) {
 		foreach ($this->board as $row) {
 			foreach ($row as $piece) {
-				if ($piece && $piece[0] == $colour && $piece != $colour.'_king') {
+				if ($piece && $piece[0] == $colour && $piece != $colour.'_k') {
 					return true;
 				}
 			}

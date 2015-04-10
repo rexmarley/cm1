@@ -46,6 +46,10 @@ abstract class ValidationHelper
     		if ($this->inCheck($opColour, $this->getKingSquare($colour))) {
     			return array('valid' => false);
     		}
+	    	//check no changes to board
+    		if ($move['newBoard'] != $this->board) {
+    			return array('valid' => false);
+    		}
     		//mark piece as moved
     		$this->game->getBoard()->setPieceAsMoved($move['from'][0], $move['from'][1]);
     		//add/remove En passant
@@ -78,7 +82,7 @@ abstract class ValidationHelper
      * @return array [y,x]
      */
     protected function getKingSquare($colour) {    	
-		$king = $colour.'_king';
+		$king = $colour.'_k';
 		//get king's position
 		for ($row = 0; $row < 8; $row++) {
 			$col = array_search($king, $this->board[$row]);
@@ -109,8 +113,8 @@ abstract class ValidationHelper
 		$row = $kingSquare[0];
 		$col = $kingSquare[1];
 		$blocks = [false,false,false,false];
-		$bishop = $opColour.'_bishop';
-		$queen = $opColour.'_queen';
+		$bishop = $opColour.'_b';
+		$queen = $opColour.'_q';
 		for ($i = 1; $i < 8; $i++) {
 			$threats = [
 				$this->getPieceAt($row+$i, $col-$i), 
@@ -150,8 +154,8 @@ abstract class ValidationHelper
 	 */
 	protected function inCheckOnXAxis($opColour, $kingSquare) {
 		$row = $kingSquare[0];
-		$queen = $opColour.'_queen';
-		$rook = $opColour.'_rook';
+		$queen = $opColour.'_q';
+		$rook = $opColour.'_r';
 		//radiate out (for checkmates)
 		for ($col = $kingSquare[1]-1; $col >= 0; $col--) {
 			if ($this->board[$row][$col] == $rook || $this->board[$row][$col] == $queen) {
@@ -177,8 +181,8 @@ abstract class ValidationHelper
 	 */
 	protected function inCheckOnYAxis($opColour, $kingSquare) {
 		$col = $kingSquare[1];
-		$queen = $opColour.'_queen';
-		$rook = $opColour.'_rook';
+		$queen = $opColour.'_q';
+		$rook = $opColour.'_r';
 		//radiate out
 		for ($row = $kingSquare[0]-1; $row >= 0; $row--) {
 			if ($this->board[$row][$col] == $rook || $this->board[$row][$col] == $queen) {
@@ -205,35 +209,35 @@ abstract class ValidationHelper
 	protected function inCheckByKnight($opColour, $kingSquare) {
 		$x = $kingSquare[1];
 		$y = $kingSquare[0];
-		if ($this->pieceAt($y+2, $x-1, $opColour.'_knight')) {
+		if ($this->pieceAt($y+2, $x-1, $opColour.'_n')) {
 			$this->checkThreat = array($y+2, $x-1);
 			return true;			
 		}
-		if ($this->pieceAt($y+2, $x+1, $opColour.'_knight')) {
+		if ($this->pieceAt($y+2, $x+1, $opColour.'_n')) {
 			$this->checkThreat = array($y+2, $x+1);
 			return true;			
 		}
-		if ($this->pieceAt($y+1, $x-2, $opColour.'_knight')) {
+		if ($this->pieceAt($y+1, $x-2, $opColour.'_n')) {
 			$this->checkThreat = array($y+1, $x-2);
 			return true;			
 		}
-		if ($this->pieceAt($y+1, $x+2, $opColour.'_knight')) {
+		if ($this->pieceAt($y+1, $x+2, $opColour.'_n')) {
 			$this->checkThreat = array($y+1, $x+2);
 			return true;			
 		}
-		if ($this->pieceAt($y-1, $x-2, $opColour.'_knight')) {
+		if ($this->pieceAt($y-1, $x-2, $opColour.'_n')) {
 			$this->checkThreat = array($y-1, $x-2);
 			return true;			
 		}
-		if ($this->pieceAt($y-1, $x+2, $opColour.'_knight')) {
+		if ($this->pieceAt($y-1, $x+2, $opColour.'_n')) {
 			$this->checkThreat = array($y-1, $x+2);
 			return true;			
 		}
-		if ($this->pieceAt($y-2, $x-1, $opColour.'_knight')) {
+		if ($this->pieceAt($y-2, $x-1, $opColour.'_n')) {
 			$this->checkThreat = array($y-2, $x-1);
 			return true;			
 		}
-		if ($this->pieceAt($y-2, $x+1, $opColour.'_knight')) {
+		if ($this->pieceAt($y-2, $x+1, $opColour.'_n')) {
 			$this->checkThreat = array($y-2, $x+1);
 			return true;			
 		}
@@ -248,11 +252,11 @@ abstract class ValidationHelper
 		if ($opColour == 'w') {
 			$dir = -1;
 		}
-		if ($this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]-1, $opColour.'_pawn')) {
+		if ($this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]-1, $opColour.'_p')) {
 			$this->checkThreat = array($kingSquare[0]+$dir, $kingSquare[1]-1);
 			return true;			
 		}
-		if ($this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]+1, $opColour.'_pawn')) {
+		if ($this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]+1, $opColour.'_p')) {
 			$this->checkThreat = array($kingSquare[0]+$dir, $kingSquare[1]+1);
 			return true;			
 		}

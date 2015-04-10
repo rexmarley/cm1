@@ -362,7 +362,9 @@ class Game
      */
     public function getPlayerTime($player)
     {
-        if ($player == $this->activePlayerIndex && !is_null($this->lastMoveTime)) {
+        if ($this->over()) {
+        	return 0;
+        } else if ($player == $this->activePlayerIndex && !is_null($this->lastMoveTime)) {
         	return $this->playerTimes[$player] + $this->lastMoveTime - time();        	
         } else {
         	return $this->playerTimes[$player];        	

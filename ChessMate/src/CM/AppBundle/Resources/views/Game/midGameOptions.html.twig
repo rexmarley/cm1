@@ -1,9 +1,10 @@
 <div id="midGameOptions" class="row">
+	{% set hidden = '' %}
+	{% if game.over%}
+		{% set hidden = 'hidden' %}
+	{% endif %}
 	<div class="col-md-4">
-    	<a id="resign" href="{{ path('cm_resign_game', {'gameID': gameID}) }}" class="btn btn-large btn-danger">Resign</a>
-	</div>
-	<div class="col-md-4">
-    	<a id="offerDraw" href="{{ path('cm_offer_draw', {'gameID': gameID}) }}" class="btn btn-large btn-success">Offer Draw</a>
+    	<a id="offerDraw" href="{{ path('cm_offer_draw', {'gameID': gameID}) }}" class="btn btn-large btn-success {{ hidden }}">Offer Draw</a>
 	</div>
 	<div class="col-md-4">
 		{% if (pChatty) %}
@@ -12,5 +13,8 @@
 			{% set chat = 'Enable Chat' %}
 		{% endif %}
     	<a id="toggleChat" href="{{ path('cm_toggle_chat', { 'gameID' : gameID, 'player' : player }) }}" class="btn btn-large btn-warning">{{ chat }}</a>
+	</div>
+	<div class="col-md-4">
+    	<a id="resign" href="{{ path('cm_resign_game', {'gameID': gameID}) }}" class="btn btn-large btn-danger {{ hidden }}">Resign</a>
 	</div>
 </div>	

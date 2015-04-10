@@ -152,9 +152,6 @@ class GameController extends Controller
 	    			$em->persist($game);
 	    			$match->setGame($game);
 	    			$em->flush();
-	    			//delete own search
-	    			//$em->remove($search);
-	    			$em->flush();
 	    			//get game id
 	    			$gameID = $game->getId();
 		   		} else {
@@ -176,80 +173,6 @@ class GameController extends Controller
 	    //only reachable if search cancelled & ajax aborted
 		return new JsonResponse(array('cancelled' => true));
     }
-    
-// 	/**
-// 	 * Find/create new game
-// 	 * 
-// 	 * @param int $searchID
-// 	 * @return \Symfony\Component\HttpFoundation\JsonResponse
-// 	 */
-//     public function matchSearchAction($searchID)
-//     {
-//     	//disconnect session
-//     	$this->get('session')->save();
-// 	    $em = $this->getDoctrine()->getManager();
-// 	    $search = $em->getRepository('CMAppBundle:GameSearch')->find($searchID);
-// 	    $gameID = false;
-// 	    if ($search) {
-// 	    	$user = $this->getUser();
-// 	    	if ($search->getSearcher() != $user) {
-// 		    	throw new AccessDeniedException('This is not your search!');    		
-// 	    	}
-// 	     	//if user's search matched by opponent
-// 		    if ($search->getMatched()) {
-// 		    	//get game id
-// 		    	while (!$search->getGame()) {
-// 		    		usleep(500000);
-// 		    		$em->refresh($search);
-// 		    	}
-// 		    	$gameID = $search->getGame()->getId();
-// 		    } else {
-// 		    	//find match
-// 		     	$length = $search->getLength();
-// 		     	$minRank = $search->getMinRank();
-// 		     	$maxRank = $search->getMaxRank();
-// 		     	$repo = $em->getRepository('CMAppBundle:GameSearch');
-// 		 	    $match = $repo->findGameSearch($user, $length, $minRank, $maxRank);
-// 		 	    if ($match) {
-// 					$match = $match[0][0];
-// 			    	//set searches as matched
-// 			    	$match->setMatched(true);
-// 			    	$search->setMatched(true);
-// 			    	$em->flush();
-// 			    	//create game
-// 					if ($search->getId() < $match->getId()) {
-// 				    	//if length is not specified - use opponents settings
-// 				    	if (!$length) {
-// 				    		$length = $match->getLength();
-// 				    		//if neither is specified - default 10 mins. each
-// 					    	if (!$length) {
-// 					    		$length = 600;
-// 					    	}
-// 				    	}
-// 		    	    	$game = $this->get('game_factory')->createNewGame($length, $user, $match->getSearcher());
-// 		    	    	$em->persist($game);
-// 		    		    $match->setGame($game);
-// 		    	    	$em->flush();
-// 		    		    //delete own search
-// 		    		    $em->remove($search);
-// 				    	$em->flush();
-// 				    	//get game id
-// 				    	$gameID = $game->getId();
-// 					}		 	    	
-// 		 	    }
-// 		    }		    
-// 		    if ($gameID) {	
-// 	    	    //return link to game
-//     			return new JsonResponse(array('matched' => true,
-//     											'gameURL' => $this->generateUrl('cm_play_game', 
-//     																				array('gameID' => $gameID))));
-// 		    }
-// 			//else, report back for retry
-// 			return new JsonResponse(array('matched' => false));
-// 		}
-// 	    //only reachable if search cancelled & ajax aborted
-// 		return new JsonResponse(array('cancelled' => true));
-//     }
     
     /**
      * Cancel search

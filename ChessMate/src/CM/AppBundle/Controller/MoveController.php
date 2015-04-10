@@ -192,7 +192,8 @@ class MoveController extends Controller
 	    			'to' => $to,
 	    			'pColour' => $piece[0],
 	    			'pType' => $piece[1],
-	    			'newPiece' => $attempted['newPiece']
+	    			'newPiece' => $attempted['newPiece'],
+	    			'newBoard' => $attempted['newBoard']
 	    	);
 	    	//make sure right colour moved
 	    	if ($move['pColour'] == 'w' and $mover == 1 || $move['pColour'] == 'b' and $mover == 0) {

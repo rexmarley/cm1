@@ -3,7 +3,12 @@
 {% trans_default_domain 'FOSUserBundle' %}
 
 {% block fos_user_content %}
-    <center><h1>{{ 'registration.confirmed'|trans({'%username%': user.username}) }}</h1></center>
+    <center>
+    	<h1>{{ 'registration.confirmed'|trans({'%username%': user.username}) }}</h1><br>
+    	<a href="{{ path('cm_start', {}) }}" class="btn btn-large btn-success" style="font-size:1.6em; padding:1%;">
+    		Start Playing
+    	</a>
+    </center>
     {% if app.session is not empty %}
         {% set targetUrl = app.session.get('_security.' ~ app.security.token.providerKey ~ '.target_path') %}
         {% if targetUrl is not empty %}

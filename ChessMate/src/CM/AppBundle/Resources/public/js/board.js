@@ -506,7 +506,7 @@ function checkPieceAndTurnForPlayer(colour) {
  * @return Boolean
  */
 function pawnHasReachedOtherSide(pieceType, pieceColour, toY) {
-	if (pieceType == 'pawn' && ((pieceColour == 'w' && toY == 7) || (pieceColour == 'b' && toY == 0))) {
+	if (pieceType == 'p' && ((pieceColour == 'w' && toY == 7) || (pieceColour == 'b' && toY == 0))) {
 		return true;
 	}
 	return false;
@@ -521,9 +521,9 @@ function pawnHasReachedOtherSide(pieceType, pieceColour, toY) {
 function moveCastle(to, colour) {
 	to[0] = parseInt(to[0], '10')
 	if (to[1] == 2) {
-		$('#d_'+(to[0]+1)).append($('#'+colour+'_rook_'+to[0]+'0'));
+		$('#d_'+(to[0]+1)).append($('#'+colour+'_r_'+to[0]+'0'));
 	} else {
-		$('#f_'+(to[0]+1)).append($('#'+colour+'_rook_'+to[0]+'7'));
+		$('#f_'+(to[0]+1)).append($('#'+colour+'_r_'+to[0]+'7'));
 	}
 	castled = false;
 }
@@ -552,9 +552,7 @@ function acceptDraw(url) {
 		type: "POST",
 		url: url,
 		success: function(data) {
-			gameOver = true;
-			updateRatings(data['pRating'], data['opRating']);
-			alert("Game Over: Draw Accepted");
+			updateGameOver(data['pRating'], data['opRating'], "Game Over: Draw Accepted");
 		}
 	});
 	$('#drawOffered').addClass('hidden');
@@ -604,9 +602,7 @@ function sendMove(from, to, colour) {
 		success: function(data) {
 			if (data['gameOver']) {
 				//update ratings cosmetically
-				gameOver = true;
-				updateRatings(data['pRating'], data['opRating']);
-				alert(message);
+				updateGameOver(data['pRating'], data['opRating'], message);
 			}
 		}
 	});
@@ -631,9 +627,7 @@ function saveMove(over) {
 		data: JSON.stringify({'gameOver': over}),
 		success: function(data) {
 			if (data['gameOver']) {
-				gameOver = true;
-				updateRatings(data['gameOver']['pRating'], data['gameOver']['opRating']);
-				alert(data['gameOver']['overMsg']);
+				updateGameOver(data['gameOver']['pRating'], data['gameOver']['opRating'], data['gameOver']['overMsg']);
 			}
 			//re-open listener
 			listen(game[2]);
@@ -660,7 +654,7 @@ function openPieceChooser(colour) {
 
 /**
  * Get new piece number, for html id
- * @param newPiece e.g. 'w_queen'
+ * @param newPiece e.g. 'w_q' => white queen
  */
 function getNewPieceNumber(newPiece) {
 	//get new id
@@ -691,7 +685,7 @@ function swapPawn(pieceID) {
 	if (colour == 'b') {
 		endRow = 0;
 	}
-	var pawnCol = $.inArray(colour+'_pawn', abstractBoard[endRow]);
+	var pawnCol = $.inArray(colour+'_p', abstractBoard[endRow]);
 	//update abstract board
 	abstractBoard[endRow][pawnCol] = newPiece;
 	//update real board
@@ -779,9 +773,7 @@ function listen(gameID) {
 	    			checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['newBoard']);
 				} else {
 					if (data['gameOver']) {
-						gameOver = true;
-						updateRatings(data['pRating'], data['opRating']);
-						alert(data['overMsg']);	
+						updateGameOver(data['pRating'], data['opRating'], data['overMsg']);
 					} else if (data['drawOffered']) {
 						//show draw offered options
 						$('#drawOffered').removeClass('hidden');
@@ -802,15 +794,25 @@ function listen(gameID) {
 }
 
 /**
- * Update displayed player ratings
- * @param pRating
- * @param opRating
+ * Show game over message, update displayed ratings,
+ * stop timers & hide controls 
+ * @param int pRating
+ * @param int opRating
+ * @param string overMsg
  */
-function updateRatings(pRating, opRating) {
+function updateGameOver(pRating, opRating, overMsg) {
+	gameOver = true;
 	$('label#rating1').html('('+opRating+')');
 	$('label#rating2').html('('+pRating+')');
 	//stop timers
 	clearInterval(tInterval);
+	//hide resign/offer draw
+	if (!$('a#offerDraw').hasClass('hidden')) {
+		$('a#offerDraw').addClass('hidden');
+		$('a#resign').addClass('hidden');
+	}
+	//show message
+	alert(overMsg);
 }
 
 /**

@@ -25,10 +25,10 @@
 				QUnit.test("testUpdateAbstractBoard", function( assert ) {
 					updateAbstractBoard([1,4],[3,2]);
 					assert.equal(abstractBoard[1][4], false);
-					assert.equal(abstractBoard[3][2], 'w_pawn');
+					assert.equal(abstractBoard[3][2], 'w_p');
 					updateAbstractBoard([7,3],[4,3]);
 					assert.equal(abstractBoard[7][3], false);
-					assert.equal(abstractBoard[4][3], 'b_queen');
+					assert.equal(abstractBoard[4][3], 'b_q');
 					//reset board
 					updateAbstractBoard([3,2],[1,4]);
 					updateAbstractBoard([4,3],[7,3]);						
@@ -339,7 +339,7 @@
 					updateAbstractBoard([1,5], [2,6]);
 					//test not in check
 					assert.equal(inCheck('w'), false);
-					assert.equal(abstractBoard[5][5], 'b_knight');
+					assert.equal(abstractBoard[5][5], 'b_n');
 					//test in check by knight
 					updateAbstractBoard([5,5], [4,7]);
 					assert.equal(inCheck('w'), true);
@@ -365,7 +365,7 @@
 					//check by pawn
 					updateAbstractBoard([6,6], [4,6]);
 					assert.equal(inCheck('w'), true);					
-					//CHECKMATE exclusively tested server-side
+					//CHECKMATE TODO
 				});				
 			</script>
 		</head>

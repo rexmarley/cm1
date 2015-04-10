@@ -6,14 +6,14 @@ var letterAt = ['a','b','c','d','e','f','g','h'];
 if (typeof activePlayer === 'undefined') {
 	//create default board state (for non-games i.e. practice on start screen)
 	var abstractBoard = [
-		                ['w_rook','w_knight','w_bishop','w_queen','w_king','w_bishop','w_knight','w_rook'],
-		                ['w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn'],
+		                ['w_r','w_n','w_b','w_q','w_k','w_b','w_n','w_r'],
+		                ['w_p','w_p','w_p','w_p','w_p','w_p','w_p','w_p'],
 		                [false, false, false, false, false, false, false, false],
 		                [false, false, false, false, false, false, false, false],
 		                [false, false, false, false, false, false, false, false],
 		                [false, false, false, false, false, false, false, false],
-			            ['b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn'],
-		                ['b_rook','b_knight','b_bishop','b_queen','b_king','b_bishop','b_knight','b_rook']
+			            ['b_p','b_p','b_p','b_p','b_p','b_p','b_p','b_p'],
+		                ['b_r','b_n','b_b','b_q','b_k','b_b','b_n','b_r']
 	                ];
 	//include redundant middle board to avoid resolving indices
 	var unmoved = [
@@ -67,17 +67,17 @@ function getGridRefFromAbstractIndices(y, x) {
  * @param to	[y,x]
  */
 function validatePieceType(type, colour, from, to) {
-	if (type == 'pawn') {
+	if (type == 'p') {
 		return validatePawn(colour, from, to);
-	} else if (type == 'rook') {
+	} else if (type == 'r') {
 		return validateRook(from, to);
-	} else if (type == 'knight') {
+	} else if (type == 'n') {
 		return validateKnight(from, to);
-	} else if (type == 'bishop') {
+	} else if (type == 'b') {
 		return validateBishop(from, to);
-	} else if (type == 'queen') {
+	} else if (type == 'q') {
 		return validateQueen(from, to);	
-	} else if (type == 'king') {
+	} else if (type == 'k') {
 		return validateKing(colour, from, to);
 	}
 	return false;
@@ -401,7 +401,7 @@ function checkApplyEnPassant(move, to, colour) {
 		//get opponent's colour
 		colour = getOpponentColour(colour);
 		//look left/right
-		if (abstractBoard[to[0]][to[1]-1] == colour+'_pawn' || abstractBoard[to[0]][to[1]+1] == colour+'_pawn') {
+		if (abstractBoard[to[0]][to[1]-1] == colour+'_p' || abstractBoard[to[0]][to[1]+1] == colour+'_p') {
 			enPassantAvailable = to;
 		}
 	}	
@@ -429,7 +429,7 @@ function checkEnPassantPerformed(moved) {
  * Get king's indices on abstract board
  */
 function getKingSquare(colour) {
-	var king = colour+'_king';
+	var king = colour+'_k';
 	//get king's position
 	var kingSquare = 0;
 	for (var row = 0; row < 8; row++) {
@@ -457,8 +457,8 @@ function inCheckOnDiagonal(colour, kingSquare) {
 	var row = kingSquare[0];
 	var col = kingSquare[1];
 	var blocks = [false,false,false,false];	
-	var bishop = colour+'_bishop';
-	var queen = colour+'_queen';
+	var bishop = colour+'_b';
+	var queen = colour+'_q';
 	for (var i = 1; i < 8; i++) {
 		var threats = [
 			getPieceAt(row+i, col-i), 
@@ -497,8 +497,8 @@ function inCheckOnDiagonal(colour, kingSquare) {
  */
 function inCheckOnXAxis(colour, kingSquare) {
 	var row = kingSquare[0];
-	var queen = colour+'_queen';
-	var rook = colour+'_rook';
+	var queen = colour+'_q';
+	var rook = colour+'_r';
 	//radiate out (for checkmates)
 	for (var col = kingSquare[1]-1; col >= 0; col--) {
 		if (abstractBoard[row][col] == rook || abstractBoard[row][col] == queen) {
@@ -524,8 +524,8 @@ function inCheckOnXAxis(colour, kingSquare) {
  */
 function inCheckOnYAxis(colour, kingSquare) {
 	var col = kingSquare[1];
-	var queen = colour+'_queen';
-	var rook = colour+'_rook';
+	var queen = colour+'_q';
+	var rook = colour+'_r';
 	//radiate out
 	for (var row = kingSquare[0]-1; row >= 0; row--) {
 		if (abstractBoard[row][col] == rook || abstractBoard[row][col] == queen) {
@@ -552,7 +552,7 @@ function inCheckOnYAxis(colour, kingSquare) {
 function inCheckByKnight(colour, kingSquare) {
 	var x = kingSquare[1];
 	var y = kingSquare[0];
-	var knight = colour+'_knight';
+	var knight = colour+'_n';
 	if (pieceAt(y+2, x-1, knight)) {
 		checkThreat = [y+2, x-1];
 		return true;			
@@ -596,7 +596,7 @@ function inCheckByPawn(colour, kingSquare) {
 	if (colour == 'w') {
 		dir = -1;
 	}
-	var pawn = colour+'_pawn';
+	var pawn = colour+'_p';
 	if (pieceAt(kingSquare[0]+dir, kingSquare[1]-1, pawn)) {
 		checkThreat = [kingSquare[0]+dir, kingSquare[1]-1];
 		return true;			
@@ -634,13 +634,13 @@ function checkGameOver(colour) {
 	for (var i = 0; i < reachables.length; i++) {
 		if (!inCheck(colour, reachables[i])) {
 			//put king back
-			abstractBoard[kingSquare[0]][kingSquare[1]] = opColour+'_king';
+			abstractBoard[kingSquare[0]][kingSquare[1]] = opColour+'_k';
 			return false;			
 		}
 	}
 	//--> no safe squares within reach
 	//put king back
-	abstractBoard[kingSquare[0]][kingSquare[1]] = opColour+'_king';
+	abstractBoard[kingSquare[0]][kingSquare[1]] = opColour+'_k';
 	//check if in check
 	if (!inCheck(colour, kingSquare)) {
 		//check for stalemate
@@ -666,7 +666,7 @@ function checkGameOver(colour) {
 	//--> only one active threat
 	//restore board state
 	abstractBoard[cThreat[0]][cThreat[1]] = threat;
-	if (threat == opColour+'_knight') {
+	if (threat == opColour+'_n') {
 		//get copy of  board
 		var board = abstractBoard.slice();
 		//attempt to take knight
@@ -710,7 +710,7 @@ function getAlliesLeft(colour) {
 	for (var row = 0; row < 8; row++) {
 		for (var col = 0; col < 8; col++) {
 			var piece = abstractBoard[row][col];
-			if (piece && piece.charAt(0) == colour && piece != colour+'_king') {
+			if (piece && piece.charAt(0) == colour && piece != colour+'_k') {
 				return true;
 			}			
 		}		

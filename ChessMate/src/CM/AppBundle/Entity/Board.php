@@ -84,21 +84,21 @@ class Board
     private function setDefaultBoard()
     {
         $this->board = array(
-    		array('w_rook','w_knight','w_bishop','w_queen','w_king','w_bishop','w_knight','w_rook'),
-    		array('w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn','w_pawn'),
+    		array('w_r','w_n','w_b','w_q','w_k','w_b','w_n','w_r'),
+    		array('w_p','w_p','w_p','w_p','w_p','w_p','w_p','w_p'),
     		array(false, false, false, false, false, false, false, false),
     		array(false, false, false, false, false, false, false, false),
     		array(false, false, false, false, false, false, false, false),
     		array(false, false, false, false, false, false, false, false),
-    		array('b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn','b_pawn'),
-    		array('b_rook','b_knight','b_bishop','b_queen','b_king','b_bishop','b_knight','b_rook')
+    		array('b_p','b_p','b_p','b_p','b_p','b_p','b_p','b_p'),
+    		array('b_r','b_n','b_b','b_q','b_k','b_b','b_n','b_r')
     	);
     }
     
     private function setDefaultTaken() {
     	$this->takenPieces = array(
-    			'w_pawn' => 0, 'w_rook' => 0, 'w_knight' => 0, 'w_bishop' => 0, 'w_queen' => 0,
-    			'b_pawn' => 0, 'b_rook' => 0, 'b_knight' => 0, 'b_bishop' => 0, 'b_queen' => 0
+    			'w_p' => 0, 'w_r' => 0, 'w_n' => 0, 'w_b' => 0, 'w_q' => 0,
+    			'b_p' => 0, 'b_r' => 0, 'b_n' => 0, 'b_b' => 0, 'b_q' => 0
     	);    	
     }
 
