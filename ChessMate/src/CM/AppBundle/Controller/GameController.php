@@ -239,6 +239,22 @@ class GameController extends Controller
 	    			'taken' => $taken)
 	    		);
     }
+	
+    /**
+     * Play against computer
+     * 
+     * @param int $skill
+     * @return \Symfony\Component\HttpFoundation\Response
+     */
+    public function playComputerAction($skill = 2)
+    {
+    	$taken = $this->get('html_helper')->getUnicodeTakenPieces(array(
+    			'w_p' => 0, 'w_r' => 0, 'w_n' => 0, 'w_b' => 0, 'w_q' => 0,
+    			'b_p' => 0, 'b_r' => 0, 'b_n' => 0, 'b_b' => 0, 'b_q' => 0
+    	));
+	    return $this->render('CMAppBundle:Game:playComputer.html.twig', 
+	    		array('skillLevel' => $skill, 'player' => 'w', 'taken' => $taken));
+    }
     
     /**
      * Get time string from seconds mm:ss

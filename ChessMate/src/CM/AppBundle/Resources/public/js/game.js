@@ -89,6 +89,8 @@ $(document).ready( function() {
 		//cancel first
 		cancelSearch();
 		$('#findingGameDialog').dialog("close");
+    	var skill = $('#newSearchForm').find('input[name="skill"]:checked').val();
+		location.href = $(this).attr('href')+'/'+skill;
 	});
 
     $("a#findGame").on('click', function() {
@@ -102,7 +104,10 @@ $(document).ready( function() {
     		$('#findingGameDialog p').html('');
 	    	createSearch(true);
 	    } else {
-	        //computer opponent TODO
+	        //computer opponent
+	    	var uri = $('a#playComputer').attr('href');
+	    	var skill = $('#newSearchForm').find('input[name="skill"]:checked').val();
+	    	location.href = uri+'/'+skill;
 	    }
     });
 });

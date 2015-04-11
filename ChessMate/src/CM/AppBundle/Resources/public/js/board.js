@@ -21,6 +21,14 @@ $(document).ready( function() {
 	        return $(event.target).fadeTo(0, 0);
 	    },
 	    stop: function(event, ui) {
+	    	//check for game over (for non-games/computer opponent)
+	    	if ($('.board').attr('id').charAt(7) == 'x' && !newPiece) {
+	    		var over = checkGameOver(event.target.id[0]);
+	    		if (over) {
+		    		alert(getGameOverMessage(over));
+		    		gameOver = true;
+	    		}
+	    	}
 	        return $(event.target).fadeTo(0, 1);
 	    },
 	});
@@ -30,7 +38,7 @@ $(document).ready( function() {
 	 */
 	$('.square').droppable({
 		accept: '.piece',
-		drop: validateMoveOut,
+		drop: validateDragAndDrop,
     });
 	
 	//highlight own pieces on click
@@ -50,7 +58,7 @@ $(document).ready( function() {
 						selectedPiece = null;			
 					}
 				}
-			} else if ($('.board').attr('id').charAt(7) == 'x' || this.id.charAt(0) == $('.board').attr('id').charAt(5)) {
+			} else if ($('.board').attr('id').charAt(5) == 'x' || this.id.charAt(0) == $('.board').attr('id').charAt(5)) {
 				//select own piece
 				selectedPiece = $(this);
 				selectedPiece.closest('div.square').effect("highlight", 50000);				
@@ -278,9 +286,9 @@ function stopTimer(timerID) {
 }
 
 /**
- * Validate move made by player
+ * Validate drag & drop move
  */
-function validateMoveOut(event, ui) {
+function validateDragAndDrop(event, ui) {
 	//get moved piece
 	var piece = getPieceDetails(ui.draggable.attr('id'));
 	//check player's turn and piece (if actual game)
@@ -309,6 +317,11 @@ function validateMoveOut(event, ui) {
 	}
 	//center piece
 	$(this).append(ui.draggable.css('position','static'));
+	//check if playing computer
+	if (typeof computerOpponent !== 'undefined') {
+		//defined in computer.js
+		switchToComputerOpponent(from, to);
+	}
 
 	return true;
 }
@@ -347,8 +360,21 @@ function validatePointAndClick(moved, gridFrom, gridTo) {
         of: 'div#'+gridTo
     });
 	//center piece
-	$('div#'+gridTo).append(moved.css('position','static'));
-	
+	$('div#'+gridTo).append(moved.css('position','static'));	
+	//check for game over (for non-games/computer opponent)
+	if ($('.board').attr('id').charAt(7) == 'x' && !newPiece) {
+		var over = checkGameOver(piece['colour']);
+		if (over) {
+    		alert(getGameOverMessage(over));
+    		gameOver = true;
+		}
+	} 
+	//check if playing computer 
+	if (typeof computerOpponent !== 'undefined') {
+		//defined in computer.js
+		switchToComputerOpponent(from, to);
+	}
+
 	return true;
 }
 
@@ -491,7 +517,7 @@ function validateMove(piece, from, to, takenSide) {
  */
 function checkPieceAndTurnForPlayer(colour) {
 	//check player's turn and piece (if actual game)
-	if (gameOver || !playersTurn || ($('.board').attr('id').charAt(7) != 'x' 
+	if (gameOver || !playersTurn || ($('.board').attr('id').charAt(5) != 'x' 
 		&& colour != $('.board').attr('id').charAt(5))) {
 		return false;			
 	}
@@ -559,6 +585,26 @@ function acceptDraw(url) {
 }
 
 /**
+ * Get game over message
+ * @param over
+ * @return String
+ */
+function getGameOverMessage(over) {
+	var message = '';
+	if (over !== false) {
+		message = 'Game Over: ';
+		if (over == 1) {
+			message = message + 'Drawn';
+		} else if (over == 2) {
+			message = message + 'Stalemate';
+		} else if (over == 3) {
+			message = message + 'Checkmate';				
+		}
+	}
+	return message;
+}
+
+/**
  * Ajax move for opponent retrieval/validation
  * & wait for opponent's move
  * @param array from [y,x]
@@ -571,16 +617,7 @@ function sendMove(from, to, colour) {
 	var message = '';
 	if (!newPiece) {
 		over = checkGameOver(colour);
-		if (over !== false) {
-			message = 'Game Over: ';
-			if (over == 1) {
-				message = message + 'Drawn';
-			} else if (over == 2) {
-				message = message + 'Stalemate';
-			} else if (over == 3) {
-				message = message + 'Checkmate';				
-			}
-		}
+		message = getGameOverMessage(over);
 	}
 	//get game id
 	var game = $('.board').attr('id').split('_');
@@ -700,6 +737,9 @@ function swapPawn(pieceID) {
 	if ($('.board').attr('id').charAt(7) != 'x'&& !gameOver) {
     	//send move for validation
 		sendMove(gFrom, [endRow, pawnCol], colour);
+	} else if (typeof computerOpponent !== 'undefined') {
+		//defined in computer.js
+		swapPieceInFEN(colour, type, [endRow, pawnCol]);
 	}
 }
 

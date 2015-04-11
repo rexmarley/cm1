@@ -29,7 +29,7 @@ class User extends BaseUser
     /**
      * Current games
      *
-     * @ORM\ManyToMany(targetEntity="CM\AppBundle\Entity\Game", inversedBy="players")
+     * @ORM\ManyToMany(targetEntity="CM\AppBundle\Entity\Game")
      */
     protected $currentGames;
     

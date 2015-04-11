@@ -26,7 +26,7 @@ class Game
     /**
      * Players
      *
-     * @ORM\ManyToMany(targetEntity="CM\UserBundle\Entity\User", inversedBy="currentGames", cascade={"persist"})
+     * @ORM\ManyToMany(targetEntity="CM\UserBundle\Entity\User", cascade={"persist"})
      * @ORM\JoinTable(name="game_players",
      * joinColumns={@ORM\JoinColumn(name="game_id", referencedColumnName="id")},
      * inverseJoinColumns={@ORM\JoinColumn(name="user_id", referencedColumnName="id")})

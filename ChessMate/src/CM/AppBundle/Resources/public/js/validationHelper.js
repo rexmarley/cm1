@@ -652,7 +652,7 @@ function checkGameOver(colour) {
 	}
 	//--> in check
 	//check if more than one threat from different angles
-	var cThreat = checkThreat;
+	var cThreat = checkThreat.slice();
 	//replace threat with blocker
 	var threat = abstractBoard[cThreat[0]][cThreat[1]];
 	abstractBoard[cThreat[0]][cThreat[1]] = colour+'_x';
@@ -668,7 +668,7 @@ function checkGameOver(colour) {
 	abstractBoard[cThreat[0]][cThreat[1]] = threat;
 	if (threat == opColour+'_n') {
 		//get copy of  board
-		var board = abstractBoard.slice();
+		var board = getBoardCopy();
 		//attempt to take knight
 		if (!getSquareIsReachableWithoutCausingCheck(cThreat, opColour, colour, kingSquare)) {
 			//knight not takeable - revert board
@@ -699,6 +699,14 @@ function checkGameOver(colour) {
 		}
 	}
 	return false;	
+}
+
+function getBoardCopy() {
+	var board = [];
+	for (var i = 0; i < 8; i++) {
+		board[i] = abstractBoard[i].slice();
+	}
+	return board;
 }
 
 /**
@@ -799,7 +807,7 @@ function getSquareIsReachableWithoutCausingCheck(target, colour, opColour, kingS
  */
 function checkOnXAxisIsDefendable(from, to, row, colour, opColour) {
 	//get copy of  board
-	var board = abstractBoard.slice();
+	var board = getBoardCopy();
 	//get x-axis direction
 	var range = Math.abs(to - from);
 	var x = (to - from) / range;
@@ -832,7 +840,7 @@ function checkOnXAxisIsDefendable(from, to, row, colour, opColour) {
  */
 function checkOnYAxisIsDefendable(from, to, col, colour, opColour) {
 	//get copy of  board
-	var board = abstractBoard.slice();
+	var board = getBoardCopy();
 	//get y-axis direction
 	var range = Math.abs(to - from);
 	var y = (to - from) / range;
@@ -866,7 +874,7 @@ function checkOnYAxisIsDefendable(from, to, col, colour, opColour) {
  */
 function checkOnDiagIsDefendable(fromX, fromY, toX, toY, colour, opColour) {
 	//get copy of  board
-	var board = abstractBoard.slice();
+	var board = getBoardCopy();
 	//get range
 	var range = Math.abs(fromX - toX);
 	//get x-axis direction
