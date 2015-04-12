@@ -12,11 +12,11 @@ cm_match_search:
     
 cm_cancel_search:
     path:     /cancelSearch/{searchID}
-    defaults: { _controller: "CMAppBundle:Game:cancelSearch", searchID = 0 }
+    defaults: { _controller: "CMAppBundle:Game:cancelSearch", searchID : 0 }
     
 cm_play_computer:
     path:     /play/computer/{skill}
-    defaults: { _controller: "CMAppBundle:Game:playComputer", skill = 2 }
+    defaults: { _controller: "CMAppBundle:Game:playComputer", skill : 2 }
     
 cm_play_game:
     path:     /play/{gameID}

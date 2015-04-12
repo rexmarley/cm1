@@ -88,14 +88,42 @@ $(document).ready(function(){
 	$('.board').attr('id', 'game_w_x');
 	//set skill level
 	if (difficulty == 1) {
-		searchDepth = 3;
+		setDifficulty(2);
 	} else if (difficulty == 3) {
-		searchDepth = 18;		
+		setDifficulty(7);		
 	} else {
-		searchDepth = 8;
-		//TODO slider
+		setDifficulty(4);
 	}
+	
+	//change skill level
+	$('#difficultySlider').slider({
+	      min: 1,
+	      max: 10,
+	      value: (searchDepth + 1)/2,
+	      animate: 'fast',
+	      slide: function( event, ui ) {
+	    	  setDifficulty(ui.value);
+	    	  $('#difficultySlider').attr('title', ui.value);
+	      }
+	  }).attr("title", (searchDepth + 1)/2);
 });
+
+function setDifficulty(skill) {
+	var diff;
+	if (skill == 1) {
+		diff = 'Very Easy';
+	} else if (skill < 4) {
+		diff = 'Easy';
+	} else if (skill < 6) {
+		diff = 'Average';
+	} else if (skill < 8) {
+		diff = 'Hard';
+	} else {
+		diff = 'Very Hard';
+	}
+	$('#diffLabel').html('('+diff+')');
+	searchDepth = Math.min((skill*2)-1, 19);
+}
 
 function swapPieceInFEN(colour, type, [endRow, pawnCol]) {
 	//TODO
@@ -111,28 +139,66 @@ function switchToComputerOpponent(from, to) {
 }
 
 function updateFEN(from, to) {
-	//from/to => [letterPos - 1, numberPos -1]
 	var split = fen.split('/');
-//	console.log(to[0]);
-//	console.log(to[1]);
+	//get 'from' row
 	var fRow = split[7 - from[0]];
-	var tRow = split[7 - to[0]];
-	//convert column indices to fen
-	console.log(fRow);
 	var fCol = getFenIndex(fRow, from[1]);
-	var tCol = getFenIndex(tRow, to[1]);
-	var moved = fRow.charAt(fCol);
 	//update 'from' row
 	split[7 - from[0]] = updateFRowFEN(fRow, fCol);
+	//get moved piece
+	var moved = fRow.charAt(fCol);
+	//get 'to' row
+	var tRow = split[7 - to[0]];
+	var tCol = getFenIndex(tRow, to[1]);
 	//update 'to' row
 	split[7 - to[0]] = updateTRowFEN(tRow, tCol, to[1], moved);
+	//check for castling
+	if (moved == 'k' || moved == 'K') {
+		if (Math.abs(from[1]-to[1]) == 2) {
+			//only possible if castling
+			if (moved == 'K') {
+				var rook = 'R';
+			} else {
+				var rook = 'r';				
+			}
+			//get row again
+			tRow = split[7 - to[0]];
+			console.log('a:', tRow);
+			if (from[1] < to[1]) {
+				//king-side
+				var rookFCol = 7;
+				var rookTCol = 5;
+				fCol = getFenIndex(tRow, 5);
+				tRow = tRow.substr(0, fCol) + (parseInt(tRow.charAt(fCol), 10) - 1) + rook + tRow.charAt(fCol+1) + '1';
+			} else {
+				//queen-side
+				var rookFCol = 0;
+				var rookTCol = 3;
+				tRow = '2' + tRow.charAt(2) + rook + '1' + tRow.substr(4, tRow.length - 4);
+			}
+			//move castle
+			split[7 - to[0]] = tRow;
+			//update abstract & actual board if computer move
+			if (!abstractBoard[from[0]][rookTCol]) {
+	    		updateAbstractBoard([from[0], rookFCol], [to[0], rookTCol]);
+				//get grid refs.
+				var gridFrom = getGridRefFromAbstractIndices(from[0], rookFCol);
+				var gridTo = getGridRefFromAbstractIndices(to[0], rookTCol);
+				var moved = getOccupant(gridFrom);
+				moved.position({
+		            of: 'div#'+gridTo
+		        });	
+				//center piece
+				$('div#'+gridTo).append(moved.css('position','static'));
+			}
+		}
+	}
 	
 	fen = split.join('/');
 }
 
 function getFenIndex(row, col) {
 	var count = 0;
-	//console.log('row: ',row);
 	for (var i = 0; i < row.length; i++) {
 		if (count == col) {
 			return i;
@@ -150,15 +216,29 @@ function getFenIndex(row, col) {
 
 function updateFRowFEN(row, col) {
 	//check if adjacent columns contain counts/empties or pieces
-	if (col > 0 && row.charAt(col - 1) % 1 === 0 && col < row.length && row.charAt(col + 1) % 1 === 0) {
+	if (col == 0) {
+		//edge piece
+		if (row.charAt(1) % 1 === 0) {
+			row = (parseInt(row.charAt(1), 10) + 1) + row.substr(2, row.length - 2);
+		} else {
+			row = '1' + row.substr(1, row.length - 1);			
+		}
+	} else if (col == row.length - 1) {
+		//edge piece
+		if (row.charAt(col - 1) % 1 === 0) {
+			row = (parseInt(row.charAt(col - 1), 10) + 1) + row.substr(2, col - 1);
+		} else {
+			row = row.substr(0, col - 1) + '1';			
+		}		
+	} else if (col > 0 && row.charAt(col - 1) % 1 === 0 && col < row.length && row.charAt(col + 1) % 1 === 0) {
 		//counts on both sides
-		row = row.substr(0, col - 2) + (parseInt(row.charAt(col - 1), 10) + parseInt(row.charAt(col + 1), 10) + 1) + row.substr(col+2, row.length - 1);		
+		row = row.substr(0, col - 1) + (parseInt(row.charAt(col - 1), 10) + parseInt(row.charAt(col + 1), 10) + 1) + row.substr(col+2, row.length - col - 1);		
 	} else if (col > 0 && row.charAt(col - 1) % 1 === 0) {
 		//count on left side
-		row = row.substr(0, col - 2) + (parseInt(row.charAt(col - 1), 10) + 1) + row.substr(col+1, row.length - 1);		
+		row = row.substr(0, col - 1) + (parseInt(row.charAt(col - 1), 10) + 1) + row.substr(col+1, row.length - col);
 	} else if (col < row.length && row.charAt(col + 1) % 1 === 0) {
 		//count on right side
-		row = row.substr(0, col) + (parseInt(row.charAt(col + 1), 10) + 1) + row.substr(col+2, row.length - 1);		
+		row = row.substr(0, col) + (parseInt(row.charAt(col + 1), 10) + 1) + row.substr(col+2, row.length - col - 1);
 	} else {
 		//pieces both sides
 		row = row.substr(0, col) + '1' + row.substr(col+1, row.length - 1);
@@ -169,11 +249,19 @@ function updateFRowFEN(row, col) {
 function updateTRowFEN(row, fenCol, col, moved) {
 	var square = row.charAt(fenCol);
 	//check if to square is empty i.e. numeric
-	console.log(square);
+	var before = '';
+	var after = '';
 	if (square % 1 === 0) {
-		if (row.length - 1 == fenCol) {
+		if (row.length == 1) {
+			console.log(row);
 			//empty row
-			row = col + moved + (7 - col);
+			if (col > 0) {
+				before = col;
+			}
+			if (col < 7) {
+				after = (7 - col);
+			}
+			row = before + moved + after;
 		} else {
 			//find position in total
 			for (var i = 0; i < fenCol; i++) {
@@ -183,18 +271,12 @@ function updateTRowFEN(row, fenCol, col, moved) {
 					col--;
 				}
 			}
-			var before = '';
 			if (col > 0) {
 				before = col;
 			}
-			var after = '';
 			if (parseInt(square, 10) - col > 1) {
 				after = parseInt(square, 10) - col - 1;
 			}
-			console.log('aaaaaaaaa');
-			console.log(before);
-			console.log(moved);
-			console.log(after);
 			row = row.substr(0, fenCol) + before + moved + after + row.substr(fenCol + 1, row.length - 1);			
 		}	
 	} else {
@@ -212,11 +294,10 @@ function switchPlayer(colour) {
 //castling handled one colour at a time
 function updateFENSuffixes(colour, fRow, fCol, tRow) {
 	var split = fen.split('/');
-	//console.log(fCol, fRow,'aa');
 	var fenRow = split[7 - fRow];
-	//console.log(fenRow);
-	var moved = fenRow.charAt(getFenIndex(fenRow, fRow));
-	//console.log('ok');
+	var moved = fenRow.charAt(getFenIndex(fenRow, fCol));
+	console.log('ok');
+	console.log(moved, wCastling, fRow, fCol);
 	//handle castling
 	if (colour == 'w') {
 		wCastling = getIndividualCastlingFEN(moved, wCastling, fRow, fCol);
@@ -244,16 +325,16 @@ function getIndividualCastlingFEN(moved, pCastling, fRow, fCol) {
 	//handle castling 
 	if (pCastling.length > 0) {
 		if (moved == 'k' || moved == 'K') {
-			pCastling == '';
+			pCastling = '';
 		} else if ((moved == 'r' && fRow == 7) || (moved == 'R' && fRow == 0)) {
 			if (pCastling.length > 1) {
 				//castle possible on both sides
 				if (fCol == 0) {
 					//castle no longer possible on queen-side
-					pCastling == pCastling.charAt(0);
+					pCastling = pCastling.charAt(0);
 				} else if (fCol == 7) {
 					//castle no longer possible on king-side
-					pCastling == pCastling.charAt(1);					
+					pCastling = pCastling.charAt(1);					
 				}
 			} else {
 				//castle only possible on one side
@@ -261,13 +342,13 @@ function getIndividualCastlingFEN(moved, pCastling, fRow, fCol) {
 					//castle king-side possible
 					if (fCol == 7) {
 						//castle no longer possible on king-side
-						pCastling == '';					
+						pCastling = '';					
 					}
 				} else {
 					//castle queen-side possible
 					if (fCol == 0) {
 						//castle no longer possible on queen-side
-						pCastling == '';	
+						pCastling = '';	
 					}
 				}
 			}

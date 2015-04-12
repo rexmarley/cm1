@@ -385,6 +385,18 @@ div#chatInput input[type="submit"] {
 	padding: 0.5% 0 0;
 }
 
+div#difficultySlider {
+	margin: 1%;
+	margin-bottom: 3%;
+	padding: 1.4%;
+	background: #f0f8ff;
+	border: 1px inset #000000;
+}
+div#difficultySlider .ui-slider-handle {
+	padding: 2%;
+	background: #5d8aa8;
+}
+
 div.login {
 	background: radial-gradient(#CCCCE7, #5884b0) no-repeat;
 	font-size:1.5em;

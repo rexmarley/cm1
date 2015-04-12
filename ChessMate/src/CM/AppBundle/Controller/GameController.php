@@ -246,7 +246,7 @@ class GameController extends Controller
      * @param int $skill
      * @return \Symfony\Component\HttpFoundation\Response
      */
-    public function playComputerAction($skill = 2)
+    public function playComputerAction($skill)
     {
     	$taken = $this->get('html_helper')->getUnicodeTakenPieces(array(
     			'w_p' => 0, 'w_r' => 0, 'w_n' => 0, 'w_b' => 0, 'w_q' => 0,
