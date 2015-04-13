@@ -17,9 +17,9 @@ class PawnValidator extends ValidationHelper
 	protected function validatePiece($move) {
     	$from = $move['from'];
     	$to = $move['to'];
-    	$colour = $move['pColour'];
+    	$colour = $this->getPieceColour($move['piece']);
 		$spaces = 1;
-		if (!$this->game->getBoard()->getPieceIsMoved($from[0], $from[1])) {
+		if (($colour == 'w' && $from[0] == 1) || ($colour == 'b' && $from[0] == 6)) {
 			//allow initial movement of 2 spaces
 			$spaces = 2;
 		}
@@ -29,20 +29,18 @@ class PawnValidator extends ValidationHelper
 		$moved = abs($dir);
 		if ($this->vacant($to[0], $to[1]) && $from[1] == $to[1] && $moved <= $spaces) {
 			if (($colour == 'w' && $to[0] > $from[0]) || ($colour == 'b' && $to[0] < $from[0])) {
-				$this->checkApplyEnPassant($moved, $to, $colour);
-				$valid = true;
+				return true;
 			}
 		} else if ($this->onDiagonal($from, $to) && (($colour == 'w' && $dir == 1) || $colour == 'b' && $dir == -1))  {
-    		$enPassantAvailable = $this->game->getBoard()->getEnPassantAvailable();
+    		$enPassant = $this->game->getBoard()->getEnPassant();
     		if ($this->checkTakePiece($to, $colour)) {
 				//allow diagonal take
 				$valid = true;    			
     		}
 			//check/perform En passant
-			else if ($enPassantAvailable[0] == $from[0] && $enPassantAvailable[1] == $to[1]) {
+			else if ($enPassant[0] == $to[0] && $enPassant[1] == $to[1]) {
 				//take pawn
 				$this->board[$from[0]][$to[1]] = false;
-				$this->game->getBoard()->setEnPassantAvailable(null);
 				return true;    
 			}
 		}
@@ -55,20 +53,5 @@ class PawnValidator extends ValidationHelper
 			}
 		}
 		return $valid;
-	}
-	
-	/**
-	 * Mark a piece as vulnerable to En passant
-	 */
-	private function checkApplyEnPassant($move, $to, $colour) {
-		if ($move == 2) {
-			//get opponent's colour
-			$colour = $this->getOpponentColour($colour);
-			//look left/right
-			if (($to[1] > 0 && $this->board[$to[0]][$to[1]-1] == $colour.'_p')
-					 || ($to[1] < 7 && $this->board[$to[0]][$to[1]+1] == $colour.'_p')) {
-				$this->enPassant = $to;
-			}
-		}
 	}
 }

@@ -4,29 +4,20 @@ var letterAt = ['a','b','c','d','e','f','g','h'];
 
 //allow abstract validation
 if (typeof activePlayer === 'undefined') {
-	//create default board state (for non-games i.e. practice on start screen)
+	//create default board state (for non-games i.e. practice/computer opponent)
 	var abstractBoard = [
-		                ['w_r','w_n','w_b','w_q','w_k','w_b','w_n','w_r'],
-		                ['w_p','w_p','w_p','w_p','w_p','w_p','w_p','w_p'],
+		                ['R','N','B','Q','K','B','N','R'],
+		                ['P','P','P','P','P','P','P','P'],
 		                [false, false, false, false, false, false, false, false],
 		                [false, false, false, false, false, false, false, false],
 		                [false, false, false, false, false, false, false, false],
 		                [false, false, false, false, false, false, false, false],
-			            ['b_p','b_p','b_p','b_p','b_p','b_p','b_p','b_p'],
-		                ['b_r','b_n','b_b','b_q','b_k','b_b','b_n','b_r']
+			            ['p','p','p','p','p','p','p','p'],
+		                ['r','n','b','q','k','b','n','r']
 	                ];
-	//include redundant middle board to avoid resolving indices
-	var unmoved = [
-				[true, true, true, true, true, true, true, true],
-				[true, true, true, true, true, true, true, true],
-				[false, false, false, false, false, false, false, false],
-				[false, false, false, false, false, false, false, false],
-				[false, false, false, false, false, false, false, false],
-				[false, false, false, false, false, false, false, false],
-				[true, true, true, true, true, true, true, true],
-				[true, true, true, true, true, true, true, true]
-	        ];
-	var enPassantAvailable = false;
+	var enPassant = null;
+	//castling
+	var castling = {'w': 'KQ', 'b': 'kq'};
 }
 //efficiency variables
 var castled = false;
@@ -58,6 +49,54 @@ function getGridRefFromAbstractIndices(y, x) {
 	return x+'_'+(parseInt(y, '10') + 1);
 }
 
+/**
+ * Get piece colour
+ * @param piece
+ * @returns char
+ */
+function getPieceColour(piece) {
+	if (piece.toUpperCase() == piece) {
+		return 'w';
+	}
+	return 'b';
+}
+
+/**
+ * Get player's piece (uppercase for white)
+ * @param colour
+ * @param piece
+ * @returns
+ */
+function getPlayerPiece(colour, piece) {
+	if (colour == 'w') {
+		return piece.toUpperCase();
+	}
+	return piece;
+}
+
+/**
+ * Get opponent's colour
+ */
+function getOpponentColour(colour) {
+	if (colour == 'w') {
+		colour = 'b';
+	} else {
+		colour = 'w';			
+	}
+	return colour;
+}
+
+/**
+ * Update abstract board,
+ * handles taking automatically
+ * @param from	[y,x]
+ * @param to	[y,x]
+ */
+function updateAbstractBoard(from, to) {
+	abstractBoard[to[0]][to[1]] = abstractBoard[from[0]][from[1]];
+	abstractBoard[from[0]][from[1]] = false;
+}
+
 //---------------------------------------- movement validation --------------------------------------------//
 
 /**
@@ -66,18 +105,19 @@ function getGridRefFromAbstractIndices(y, x) {
  * @param from	[y,x]
  * @param to	[y,x]
  */
-function validatePieceType(type, colour, from, to) {
-	if (type == 'p') {
+function validatePieceType(piece, colour, from, to) {
+	var piece = piece.toUpperCase();
+	if (piece == 'P') {
 		return validatePawn(colour, from, to);
-	} else if (type == 'r') {
+	} else if (piece == 'R') {
 		return validateRook(from, to);
-	} else if (type == 'n') {
+	} else if (piece == 'N') {
 		return validateKnight(from, to);
-	} else if (type == 'b') {
+	} else if (piece == 'B') {
 		return validateBishop(from, to);
-	} else if (type == 'q') {
+	} else if (piece == 'Q') {
 		return validateQueen(from, to);	
-	} else if (type == 'k') {
+	} else if (piece == 'K') {
 		return validateKing(colour, from, to);
 	}
 	return false;
@@ -145,9 +185,10 @@ function validateKing(colour, from, to) {
 	var kingSquare = getKingSquare(colour);
 	if (Math.abs(to[1] - from[1]) <= 1 && Math.abs(to[0] - from[0]) <= 1) {
 		return true;
-	} else if (unmoved[from[0]][from[1]] && to[0] == from[0] && !inCheck(getOpponentColour(colour), kingSquare)) {
+	} else if (castling[colour].length > 0 && to[0] == from[0] && !inCheck(getOpponentColour(colour), kingSquare)) {
 		//handle castling
-		if (to[1] == 2 || to[1] == 6) {
+		if ((to[1] == 2 && castling[colour].indexOf(getPlayerPiece(colour, 'q')) > -1) 
+				|| (to[1] == 6 && castling[colour].indexOf(getPlayerPiece(colour, 'k')) > -1)) {
 			var rookFromCol = 0;
 			var start = 1;
 			var end = 4;
@@ -158,32 +199,29 @@ function validateKing(colour, from, to) {
 				end = 7;
 				rookToCol = 5;
 			}
-			//check castle is unmoved
-			if (unmoved[from[0]][rookFromCol]) {
-				//check intermittent points are vacant
-				for (var i = start; i < end; i++) {
-					if (!vacant(from[0], i)) {
-						return false;
-					}
-					// if in check at intermittent points, return false
-					var nextSpace = [from[0], i];
-		    		updateAbstractBoard(from, nextSpace);
-		    		//get king's position
-		    		var kingSquare = getKingSquare(colour);
-		    		if (inCheck(getOpponentColour(colour), kingSquare)) {
-						//put king back in place
-			    		updateAbstractBoard(nextSpace, from);
-		    			return false;
-		    		}
+			//check intermittent points are vacant
+			for (var i = start; i < end; i++) {
+				if (!vacant(from[0], i)) {
+					return false;
+				}
+				// if in check at intermittent points, return false
+				var nextSpace = [from[0], i];
+	    		updateAbstractBoard(from, nextSpace);
+	    		//get king's position
+	    		var kingSquare = getKingSquare(colour);
+	    		if (inCheck(getOpponentColour(colour), kingSquare)) {
 					//put king back in place
 		    		updateAbstractBoard(nextSpace, from);
-				}
-	        	//update abstract board
-	    		updateAbstractBoard([from[0], rookFromCol], [to[0], rookToCol]);
-				//flag castled - prevent recheck of inCheck()
-				castled = true;
-				return true;
+	    			return false;
+	    		}
+				//put king back in place
+	    		updateAbstractBoard(nextSpace, from);
 			}
+        	//update abstract board
+    		updateAbstractBoard([from[0], rookFromCol], [to[0], rookToCol]);
+			//flag castled - prevent recheck of inCheck()
+			castled = true;
+			return true;
 		}
 	}
 	return false;
@@ -196,7 +234,7 @@ function validateKing(colour, from, to) {
  */
 function validatePawn(colour, from, to) {
 	var spaces = 1;
-	if (unmoved[from[0]][from[1]]) {
+	if ((colour == 'w' && from[0] == 1) || (colour == 'b' && from[0] == 6)) {
 		//allow initial movement of 2 spaces
 		spaces = 2;
 	}
@@ -205,14 +243,13 @@ function validatePawn(colour, from, to) {
 	var move = Math.abs(dir);
 	if (vacant(to[0], to[1]) && from[1] == to[1] && move <= spaces) {
 		if ((colour == 'w' && to[0] > from[0]) || (colour == 'b' && to[0] < from[0])) {
-			checkApplyEnPassant(move, to, colour);
 			return true;
 		}
 	} else if (onDiagonal(from, to) 
-		&& ((colour == 'w' && dir == 1) || colour == 'b' && dir == -1))  {
+		&& ((colour == 'w' && dir == 1) || (colour == 'b' && dir == -1)))  {
 		if (checkTakePiece(to, colour)) {
 			return true;
-		} else if (enPassantAvailable[0] == from[0] && enPassantAvailable[1] == to[1]) {
+		} else if (enPassant[0] == to[0] && enPassant[1] == to[1]) {
 			//perform En passant
 			//allow revert if in check
 			var epTaken = abstractBoard[from[0]][to[1]];
@@ -227,8 +264,8 @@ function validatePawn(colour, from, to) {
 				abstractBoard[to[0]][to[1]] = epTaken;
 				return false;				
 			}
-			enPassantAvailable = false;
 			enPassantPerformed = true;
+			enPassant = null;
 			return true;
 		}
 	}
@@ -236,7 +273,7 @@ function validatePawn(colour, from, to) {
 }
 
 /**
- * Check given piece is at given square
+ * Check given piece is at given row/col
  */
 function pieceAt(row, column, piece) {
 	if (row > -1 && row < 8 && column > -1 && column < 8) {
@@ -248,36 +285,13 @@ function pieceAt(row, column, piece) {
 }
 
 /**
- * Get piece/false at given square
+ * Get piece/false at given row/col
  */
 function getPieceAt(row, column) {
 	if (row > -1 && row < 8 && column > -1 && column < 8) {
 		return abstractBoard[row][column];
 	}
 	return false;
-}
-
-/**
- * Get opponent's colour
- */
-function getOpponentColour(colour) {
-	if (colour == 'w') {
-		colour = 'b';
-	} else {
-		colour = 'w';			
-	}
-	return colour;
-}
-
-/**
- * Update abstract board,
- * handles taking automatically
- * @param from	[y,x]
- * @param to	[y,x]
- */
-function updateAbstractBoard(from, to) {
-	abstractBoard[to[0]][to[1]] = abstractBoard[from[0]][from[1]];
-	abstractBoard[from[0]][from[1]] = false;
 }
 
 /**
@@ -362,7 +376,7 @@ function vacant(row, column) {
  */
 function occupiedByOwnPiece(row, column, colour) {
 	if (row > -1 && row < 8 && column > -1 && column < 8) {
-		if (!vacant(row, column) && abstractBoard[row][column].charAt(0) == colour) {
+		if (!vacant(row, column) && getPieceColour(abstractBoard[row][column]) == colour) {
 			return true;
 		}
 	}
@@ -375,7 +389,7 @@ function occupiedByOwnPiece(row, column, colour) {
  */
 function occupiedByOtherPiece(row, column, colour) {
 	if (row > -1 && row < 8 && column > -1 && column < 8) {
-		if (!vacant(row, column) && abstractBoard[row][column].charAt(0) != colour) {
+		if (!vacant(row, column) && getPieceColour(abstractBoard[row][column]) != colour) {
 			return true;
 		}
 	}
@@ -394,33 +408,72 @@ function checkTakePiece(square, colour) {
 }
 
 /**
- * Mark a piece as vulnerable to En passant
+ * Update castling availability for player (FEN)
+ * @param moved
+ * @param colour
+ * @param fRow
+ * @param fCol
+ * @returns String
  */
-function checkApplyEnPassant(move, to, colour) {
-	if (move == 2) {
-		//get opponent's colour
-		colour = getOpponentColour(colour);
-		//look left/right
-		if (abstractBoard[to[0]][to[1]-1] == colour+'_p' || abstractBoard[to[0]][to[1]+1] == colour+'_p') {
-			enPassantAvailable = to;
+function updateCastling(moved, colour, fRow, fCol) {
+	//get player's castling privileges
+	var pCastling = castling[colour];
+	if (pCastling.length > 0) {
+		if (moved == 'k' || moved == 'K') {
+			pCastling = '';
+		} else if ((moved == 'r' && fRow == 7) || (moved == 'R' && fRow == 0)) {
+			if (pCastling.length > 1) {
+				//castle possible on both sides
+				if (fCol == 0) {
+					//castle no longer possible on queen-side
+					pCastling = pCastling.charAt(0);
+				} else if (fCol == 7) {
+					//castle no longer possible on king-side
+					pCastling = pCastling.charAt(1);					
+				}
+			} else {
+				//castle only possible on one side
+				if (pCastling == 'K' || pCastling == 'k') {
+					//castle king-side possible
+					if (fCol == 7) {
+						//castle no longer possible on king-side
+						pCastling = '';					
+					}
+				} else {
+					//castle queen-side possible
+					if (fCol == 0) {
+						//castle no longer possible on queen-side
+						pCastling = '';	
+					}
+				}
+			}
 		}
-	}	
+	}
+	castling[colour] = pCastling;
+}
+
+/**
+ * Set/unset En passant availability
+ */
+function setEnPassant(moved, fRow, fCol, tRow) {
+	if (moved == 'p' && fRow == 6 && tRow == 4) {
+		enPassant = [5, fCol];
+	} else if (moved == 'P' && fRow == 1 && tRow == 3) {
+		enPassant = [2, fCol];		
+	} else {
+		enPassant = null;
+	}
 }
 	
 /**
  * Check En passant has been performed
- * @param moved the moved piece's start square
  */
-function checkEnPassantPerformed(moved) {
+function checkEnPassantPerformed() {
 	if (enPassantPerformed) {
 		enPassantPerformed = false;
 		return true;
 	}
-	//check En passant time-out
-	if (enPassantAvailable != moved) {
-		enPassantAvailable = false;
-	}
-	return false;		
+	return false;
 }
 
 //---------------------------------------- in check validation --------------------------------------------//
@@ -429,7 +482,7 @@ function checkEnPassantPerformed(moved) {
  * Get king's indices on abstract board
  */
 function getKingSquare(colour) {
-	var king = colour+'_k';
+	var king = getPlayerPiece(colour, 'k');
 	//get king's position
 	var kingSquare = 0;
 	for (var row = 0; row < 8; row++) {
@@ -457,8 +510,8 @@ function inCheckOnDiagonal(colour, kingSquare) {
 	var row = kingSquare[0];
 	var col = kingSquare[1];
 	var blocks = [false,false,false,false];	
-	var bishop = colour+'_b';
-	var queen = colour+'_q';
+	var bishop = getPlayerPiece(colour, 'b');
+	var queen = getPlayerPiece(colour, 'q');
 	for (var i = 1; i < 8; i++) {
 		var threats = [
 			getPieceAt(row+i, col-i), 
@@ -497,8 +550,8 @@ function inCheckOnDiagonal(colour, kingSquare) {
  */
 function inCheckOnXAxis(colour, kingSquare) {
 	var row = kingSquare[0];
-	var queen = colour+'_q';
-	var rook = colour+'_r';
+	var rook = getPlayerPiece(colour, 'r');
+	var queen = getPlayerPiece(colour, 'q');
 	//radiate out (for checkmates)
 	for (var col = kingSquare[1]-1; col >= 0; col--) {
 		if (abstractBoard[row][col] == rook || abstractBoard[row][col] == queen) {
@@ -524,8 +577,8 @@ function inCheckOnXAxis(colour, kingSquare) {
  */
 function inCheckOnYAxis(colour, kingSquare) {
 	var col = kingSquare[1];
-	var queen = colour+'_q';
-	var rook = colour+'_r';
+	var rook = getPlayerPiece(colour, 'r');
+	var queen = getPlayerPiece(colour, 'q');
 	//radiate out
 	for (var row = kingSquare[0]-1; row >= 0; row--) {
 		if (abstractBoard[row][col] == rook || abstractBoard[row][col] == queen) {
@@ -552,7 +605,7 @@ function inCheckOnYAxis(colour, kingSquare) {
 function inCheckByKnight(colour, kingSquare) {
 	var x = kingSquare[1];
 	var y = kingSquare[0];
-	var knight = colour+'_n';
+	var knight = getPlayerPiece(colour, 'n');
 	if (pieceAt(y+2, x-1, knight)) {
 		checkThreat = [y+2, x-1];
 		return true;			
@@ -596,7 +649,7 @@ function inCheckByPawn(colour, kingSquare) {
 	if (colour == 'w') {
 		dir = -1;
 	}
-	var pawn = colour+'_p';
+	var pawn = getPlayerPiece(colour, 'p');
 	if (pieceAt(kingSquare[0]+dir, kingSquare[1]-1, pawn)) {
 		checkThreat = [kingSquare[0]+dir, kingSquare[1]-1];
 		return true;			
@@ -620,6 +673,7 @@ function checkGameOver(colour) {
 	var opColour = getOpponentColour(colour);
 	//get opponent's king's square
 	var kingSquare = getKingSquare(opColour);
+	var king = getPlayerPiece(opColour, 'k');
 	//check for draw
 	var alliesLeft = getAlliesLeft(opColour);
 	if (!alliesLeft && !getAlliesLeft(colour)) {
@@ -634,13 +688,13 @@ function checkGameOver(colour) {
 	for (var i = 0; i < reachables.length; i++) {
 		if (!inCheck(colour, reachables[i])) {
 			//put king back
-			abstractBoard[kingSquare[0]][kingSquare[1]] = opColour+'_k';
+			abstractBoard[kingSquare[0]][kingSquare[1]] = king;
 			return false;			
 		}
 	}
 	//--> no safe squares within reach
 	//put king back
-	abstractBoard[kingSquare[0]][kingSquare[1]] = opColour+'_k';
+	abstractBoard[kingSquare[0]][kingSquare[1]] = king;
 	//check if in check
 	if (!inCheck(colour, kingSquare)) {
 		//check for stalemate
@@ -655,7 +709,7 @@ function checkGameOver(colour) {
 	var cThreat = checkThreat.slice();
 	//replace threat with blocker
 	var threat = abstractBoard[cThreat[0]][cThreat[1]];
-	abstractBoard[cThreat[0]][cThreat[1]] = colour+'_x';
+	abstractBoard[cThreat[0]][cThreat[1]] = 'x';
 	//if still in check, threat cannot be taken or blocked
 	if (inCheck(colour, kingSquare)) {
 		//restore board state
@@ -666,7 +720,7 @@ function checkGameOver(colour) {
 	//--> only one active threat
 	//restore board state
 	abstractBoard[cThreat[0]][cThreat[1]] = threat;
-	if (threat == opColour+'_n') {
+	if (threat == getPlayerPiece(opColour, 'n')) {
 		//get copy of  board
 		var board = getBoardCopy();
 		//attempt to take knight
@@ -718,7 +772,7 @@ function getAlliesLeft(colour) {
 	for (var row = 0; row < 8; row++) {
 		for (var col = 0; col < 8; col++) {
 			var piece = abstractBoard[row][col];
-			if (piece && piece.charAt(0) == colour && piece != colour+'_k') {
+			if (piece && getPieceColour(piece) == colour && piece != getPlayerPiece(colour, 'k')) {
 				return true;
 			}			
 		}		
@@ -755,7 +809,7 @@ function getReachableSquaresForKing(kingSquare, colour) {
 	for (var row = rowStart; row <= rowEnd; row++) {
 		for (var col = colStart; col <= colEnd; col++) {
 			var occupant = abstractBoard[row][col];
-			if (!occupant || occupant.charAt(0) != colour) {
+			if (!occupant || getPieceColour(occupant) != colour) {
 				reachables.push([row, col]);					
 			}
 		}			
@@ -788,7 +842,7 @@ function getSquareIsReachableWithoutCausingCheck(target, colour, opColour, kingS
 			//new check created
 			//defender cannot be moved, ignore in further attempts
 			abstractBoard[target[0]][target[1]] = false;
-			abstractBoard[source[0]][source[1]] = 'x_x';
+			abstractBoard[source[0]][source[1]] = 'x';
 		}
 	}
 	return false;

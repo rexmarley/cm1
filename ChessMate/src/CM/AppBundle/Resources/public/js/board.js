@@ -1,78 +1,5 @@
 $(document).ready( function() {
-
-	/**
-	 * Make pieces draggable
-	 */
-	$('.ui-draggable').draggable({
-        containment : '.board',
-        revert: function() {
-        	//validate based on droppable.drop
-            if ($(this).hasClass('invalid')) {
-            	$(this).removeClass('invalid');
-                return true;
-            }
-        },
-		helper: "clone",
-		appendTo: ".board",
-	    start: function(event, ui) {
-	    	//remove any highlight
-	    	$(this).closest('div.square').stop(true,true);
-			selectedPiece = null;
-	        return $(event.target).fadeTo(0, 0);
-	    },
-	    stop: function(event, ui) {
-	    	//check for game over (for non-games/computer opponent)
-	    	if ($('.board').attr('id').charAt(7) == 'x' && !newPiece) {
-	    		var over = checkGameOver(event.target.id[0]);
-	    		if (over) {
-		    		alert(getGameOverMessage(over));
-		    		gameOver = true;
-	    		}
-	    	}
-	        return $(event.target).fadeTo(0, 1);
-	    },
-	});
-
-	/**
-	 * Make squares droppable
-	 */
-	$('.square').droppable({
-		accept: '.piece',
-		drop: validateDragAndDrop,
-    });
-	
-	//highlight own pieces on click
-	$('.ui-draggable').on('click', function(e) {
-		//check player's turn and piece (if actual game)
-		if (!gameOver && playersTurn) {
-			if (selectedPiece) {
-				if (selectedPiece.id != $(this).id) {
-					selectedPiece.closest('div.square').stop(true,true);
-					if (this.id.charAt(0) == selectedPiece.id.charAt(0)) {
-						//reselect piece
-						selectedPiece = $(this);
-						$(this).closest('div.square').effect("highlight", 50000);
-					} else {
-						//attempt take
-						validatePointAndClick(selectedPiece, selectedPiece.closest('div.square').attr('id'), $(this).closest('div.square').attr('id'));
-						selectedPiece = null;			
-					}
-				}
-			} else if ($('.board').attr('id').charAt(5) == 'x' || this.id.charAt(0) == $('.board').attr('id').charAt(5)) {
-				//select own piece
-				selectedPiece = $(this);
-				selectedPiece.closest('div.square').effect("highlight", 50000);				
-			}
-		}
-	});
-	//handle point and click movement
-	$('.square').on('click', function(e) {
-		if (selectedPiece && selectedPiece.hasClass('piece') && selectedPiece.closest('div.square').attr('id') != this.id) {
-			selectedPiece.closest('div.square').stop(true,true);
-			validatePointAndClick(selectedPiece, selectedPiece.closest('div.square').attr('id'), this.id);
-			selectedPiece = null;
-		}
-	});
+	setMovement();
 	
 	//override position of loading dialog
 	$('#joiningGameDialog').dialog({
@@ -171,6 +98,84 @@ var tInterval;
 //global for swapping pawn
 var gFrom = [];
 var lastChatSeen = 0;
+
+function setMovement() {
+	/**
+	 * Make pieces draggable
+	 */
+	$('.ui-draggable').draggable({
+        containment : '.board',
+        revert: function() {
+        	//validate based on droppable.drop
+            if ($(this).hasClass('invalid')) {
+            	$(this).removeClass('invalid');
+                return true;
+            }
+        },
+		helper: "clone",
+		appendTo: ".board",
+	    start: function(event, ui) {
+	    	//remove any highlight
+	    	$(this).closest('div.square').stop(true,true);
+			selectedPiece = null;
+	        return $(event.target).fadeTo(0, 0);
+	    },
+	    stop: function(event, ui) {
+	    	//check for game over (for non-games/computer opponent)
+	    	if ($('.board').attr('id').charAt(7) == 'x' && !newPiece) {
+	    		var over = checkGameOver(getPieceColour(event.target.id[0]));
+	    		if (over) {
+		    		alert(getGameOverMessage(over));
+		    		gameOver = true;
+	    		}
+	    	}
+	        return $(event.target).fadeTo(0, 1);
+	    },
+	});
+
+	/**
+	 * Make squares droppable
+	 */
+	$('.square').droppable({
+		accept: '.piece',
+		drop: validateDragAndDrop,
+    });
+	
+	//highlight own pieces on click
+	$('.ui-draggable').on('click', function(e) {
+		//check player's turn and piece (if actual game)
+		var piece = this.id.charAt(0);
+		var colour = getPieceColour(piece);
+		if (!gameOver && playersTurn) {
+			if (selectedPiece) {
+				if (selectedPiece.id != $(this).id) {
+					selectedPiece.closest('div.square').stop(true,true);
+					if (colour == getPieceColour(selectedPiece.id.charAt(0))) {
+						//reselect piece
+						selectedPiece = $(this);
+						$(this).closest('div.square').effect("highlight", 50000);
+					} else {
+						//attempt take
+						validatePointAndClick(selectedPiece, selectedPiece.closest('div.square').attr('id'), $(this).closest('div.square').attr('id'));
+						selectedPiece = null;			
+					}
+				}
+			} else if ($('.board').attr('id').charAt(5) == 'x' || colour == $('.board').attr('id').charAt(5)) {
+				//select own piece
+				selectedPiece = $(this);
+				selectedPiece.closest('div.square').effect("highlight", 50000);				
+			}
+		}
+	});
+	//handle point and click movement
+	$('.square').on('click', function(e) {
+		if (selectedPiece && selectedPiece.hasClass('piece') && selectedPiece.closest('div.square').attr('id') != this.id) {
+			selectedPiece.closest('div.square').stop(true,true);
+			validatePointAndClick(selectedPiece, selectedPiece.closest('div.square').attr('id'), this.id);
+			selectedPiece = null;
+		}
+	});
+}
 
 /**
  * Join Game/check oppponent has joined
@@ -290,9 +295,10 @@ function stopTimer(timerID) {
  */
 function validateDragAndDrop(event, ui) {
 	//get moved piece
-	var piece = getPieceDetails(ui.draggable.attr('id'));
+	var piece = ui.draggable.attr('id').charAt(0);
+	var colour = getPieceColour(piece);
 	//check player's turn and piece (if actual game)
-	if (!checkPieceAndTurnForPlayer(piece['colour'])) {
+	if (!checkPieceAndTurnForPlayer(colour)) {
 		//invalidate move
 		ui.draggable.addClass('invalid');
 		return false;			
@@ -301,19 +307,19 @@ function validateDragAndDrop(event, ui) {
 	var from = getAbstractedSquareIndex(ui.draggable.parent().attr('id'));
 	var to = getAbstractedSquareIndex(this.id);
 	//validate move
-	if (!validateMove(piece, from, to, 'Won')) {
+	if (!validateMove(piece, colour, from, to, 'Won')) {
 		//invalidate move
 		ui.draggable.addClass('invalid');
 		return false;			
 	}
 	//check for pawn reaching opposing end
-	if (pawnHasReachedOtherSide(piece['type'], piece['colour'], to[0])) {
+	if (pawnHasReachedOtherSide(piece, colour, to[0])) {
 		//ajax move on piece selection
 		gFrom = from;
-		openPieceChooser(piece['colour']);
+		openPieceChooser(colour);
 	} else if ($('.board').attr('id').charAt(7) != 'x' && !gameOver) {
     	//ajax move & confirm validity
-		sendMove(from, to, piece['colour']);
+		sendMove(from, to, colour);
 	}
 	//center piece
 	$(this).append(ui.draggable.css('position','static'));
@@ -333,9 +339,10 @@ function validateDragAndDrop(event, ui) {
  * @param bool 
  */
 function validatePointAndClick(moved, gridFrom, gridTo) {
-	var piece = getPieceDetails(moved.attr('id'));
+	var piece = moved.attr('id').charAt(0);
+	var colour = getPieceColour(piece);
 	//check player's turn and piece (if actual game)
-	if (!checkPieceAndTurnForPlayer(piece['colour'])) {
+	if (!checkPieceAndTurnForPlayer(colour)) {
 		//invalidate move
 		return false;			
 	}
@@ -343,17 +350,17 @@ function validatePointAndClick(moved, gridFrom, gridTo) {
 	var from = getAbstractedSquareIndex(gridFrom);
 	var to = getAbstractedSquareIndex(gridTo);
 	//validate move
-	if (!validateMove(piece, from, to, 'Won')) {
+	if (!validateMove(piece, colour, from, to, 'Won')) {
 		return false;			
 	}
 	//check for pawn reaching opposing end
-	if (pawnHasReachedOtherSide(piece['type'], piece['colour'], to[0])) {
+	if (pawnHasReachedOtherSide(piece, colour, to[0])) {
 		//ajax move on piece selection
 		gFrom = from;
-		openPieceChooser(piece['colour']);
+		openPieceChooser(colour);
 	} else if ($('.board').attr('id').charAt(7) != 'x' && !gameOver) {
     	//ajax move & confirm validity
-		sendMove(from, to, piece['colour']);
+		sendMove(from, to, colour);
 	}
 	//make move
 	moved.position({
@@ -363,7 +370,7 @@ function validatePointAndClick(moved, gridFrom, gridTo) {
 	$('div#'+gridTo).append(moved.css('position','static'));	
 	//check for game over (for non-games/computer opponent)
 	if ($('.board').attr('id').charAt(7) == 'x' && !newPiece) {
-		var over = checkGameOver(piece['colour']);
+		var over = checkGameOver(colour);
 		if (over) {
     		alert(getGameOverMessage(over));
     		gameOver = true;
@@ -384,16 +391,17 @@ function validatePointAndClick(moved, gridFrom, gridTo) {
  * @param array to grid-ref
  * @param bool|string swapped has pawn been swapped 
  */
-function checkMoveByOpponent(from, to, swapped, enPassant, newBoard) {
+function checkMoveByOpponent(from, to, swapped, enPassant, newCastling, newBoard) {
 	var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
 	var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
 	//get moved piece
 	var moved = getOccupant(gridFrom);
-	var piece = getPieceDetails(moved.attr('id'));
+	var piece = moved.attr('id').charAt(0);
+	var colour = getPieceColour(piece);
 	//check piece exists & question move validity
-	if (moved.length && validateMoveIn(piece, from, to, swapped, enPassant, newBoard)) {
+	if (moved.length && validateMoveIn(piece, colour, from, to, swapped, enPassant, newCastling, newBoard)) {
 		//check if opponent's move ended game
-		var over = checkGameOver(piece['colour']);		
+		var over = checkGameOver(colour);		
 		//save move
 		saveMove(over);
 		//make move
@@ -421,26 +429,30 @@ function checkMoveByOpponent(from, to, swapped, enPassant, newBoard) {
  * Validate move made by opponent
  * If invalid, one of the players has cheated
  */
-function validateMoveIn(piece, from, to, newPiece, enPassant, newBoard) {
+function validateMoveIn(piece, colour, from, to, newPiece, enPassant, newCastling, newBoard) {
 	//check opponent's piece
-	if (piece['colour'] == $('.board').attr('id').charAt(5)) {
+	if (colour == $('.board').attr('id').charAt(5)) {
 		return false;			
 	}
 	//check if target is occupied by own piece
-	if (occupiedByOwnPiece(to[0], to[1], piece['colour'])) {
+	if (occupiedByOwnPiece(to[0], to[1], colour)) {
 		return false;
 	}
 	//validate move
-	if (!validateMove(piece, from, to, 'Lost')) {
+	if (!validateMove(piece, colour, from, to, 'Lost')) {
 		return false;			
 	}
 	//ensure en passant is correct
-	if (enPassant[0] != enPassantAvailable[0] || enPassant[1] != enPassantAvailable[1]) {
+	if (enPassant[0] != enPassant[0] || enPassant[1] != enPassant[1]) {
+		return false;
+	}
+	//check castling
+	if (JSON.stringify(newCastling) != JSON.stringify(castling)) {
 		return false;
 	}
 	//check swapped piece
 	if (newPiece) {
-		if (!pawnHasReachedOtherSide(piece['type'], piece['colour'], to[0])) {
+		if (!pawnHasReachedOtherSide(piece, colour, to[0])) {
 			return false;	
 		}
 		//update abstract board
@@ -461,13 +473,13 @@ function validateMoveIn(piece, from, to, newPiece, enPassant, newBoard) {
 /**
  * Validate move
  */
-function validateMove(piece, from, to, takenSide) {
+function validateMove(piece, colour, from, to, takenSide) {
 	//check if target is occupied by own piece
-	if (occupiedByOwnPiece(to[0], to[1], piece['colour'])) {
+	if (occupiedByOwnPiece(to[0], to[1], colour)) {
 		return false;
 	}		
 	//validate move
-	var valid = validatePieceType(piece['type'], piece['colour'], from, to);
+	var valid = validatePieceType(piece, colour, from, to);
 	if(valid) {
 		if (checkEnPassantPerformed(to)) {
 			takePiece(getGridRefFromAbstractIndices(from[0],to[1]), takenSide);
@@ -478,12 +490,12 @@ function validateMove(piece, from, to, takenSide) {
     		updateAbstractBoard(from, to);
     		if (castled) {
     			//check already checked
-				moveCastle(to, piece['colour']);
+				moveCastle(to, colour);
     		} else {
         		//if in check, invalidate move
         		//get king's position
-        		var kingSquare = getKingSquare(piece['colour']);
-    			if (inCheck(getOpponentColour(piece['colour']), kingSquare)) {
+        		var kingSquare = getKingSquare(colour);
+    			if (inCheck(getOpponentColour(colour), kingSquare)) {
             		//highlight king briefly
             		var king = getOccupant(getGridRefFromAbstractIndices(kingSquare[0], kingSquare[1]));
             		var highlight = setInterval(function() {
@@ -503,8 +515,12 @@ function validateMove(piece, from, to, takenSide) {
 					takePiece(getGridRefFromAbstractIndices(to[0],to[1]), takenSide);	    				
     			}
     		}
+    		if ($.inArray(piece, ['k', 'K', 'r', 'R']) !== -1) {
+	    		//update castling availability
+	    		updateCastling(piece, colour, from[0], from[1]);
+    		}
+    		setEnPassant(piece, from[0], from[1], to[0]);
 		}
-		unmoved[from[0]][from[1]] = false;
 	}
 
 	return valid;
@@ -526,13 +542,13 @@ function checkPieceAndTurnForPlayer(colour) {
 
 /**
  * Check for pawn reaching opposing end
- * @param pieceType
- * @param pieceColour
+ * @param piece
+ * @param colour
  * @param toY
  * @return Boolean
  */
-function pawnHasReachedOtherSide(pieceType, pieceColour, toY) {
-	if (pieceType == 'p' && ((pieceColour == 'w' && toY == 7) || (pieceColour == 'b' && toY == 0))) {
+function pawnHasReachedOtherSide(piece, colour, toY) {
+	if (piece.toUpperCase() == 'P' && ((colour == 'w' && toY == 7) || (colour == 'b' && toY == 0))) {
 		return true;
 	}
 	return false;
@@ -547,9 +563,9 @@ function pawnHasReachedOtherSide(pieceType, pieceColour, toY) {
 function moveCastle(to, colour) {
 	to[0] = parseInt(to[0], '10')
 	if (to[1] == 2) {
-		$('#d_'+(to[0]+1)).append($('#'+colour+'_r_'+to[0]+'0'));
+		$('#d_'+(to[0]+1)).append($('#'+getPlayerPiece(colour, 'r')+'_'+to[0]+'0'));
 	} else {
-		$('#f_'+(to[0]+1)).append($('#'+colour+'_r_'+to[0]+'7'));
+		$('#f_'+(to[0]+1)).append($('#'+getPlayerPiece(colour, 'r')+'_'+to[0]+'7'));
 	}
 	castled = false;
 }
@@ -623,10 +639,11 @@ function sendMove(from, to, colour) {
 	var game = $('.board').attr('id').split('_');
 	var data = { 
 		'gameID' : game[2],
-		'board' : abstractBoard, 
+		'board' : abstractBoard, //TODO fen
+		'castling': castling,
 		'from' : from, 
 		'to' : to , 
-		'enPassant' : enPassantAvailable, 
+		'enPassant' : enPassant, 
 		'newPiece' : newPiece,
 		'gameOver' : over
 	};
@@ -675,14 +692,6 @@ function saveMove(over) {
 }
 
 /**
- * Get piece type/colour from id
- */
-function getPieceDetails(pieceID) {
-	var piece = pieceID.split('_');
-	return {'colour':piece[0], 'type':piece[1]};
-}
-
-/**
  * Open piece-chooser dialog
  */
 function openPieceChooser(colour) {
@@ -691,7 +700,7 @@ function openPieceChooser(colour) {
 
 /**
  * Get new piece number, for html id
- * @param newPiece e.g. 'w_q' => white queen
+ * @param newPiece
  */
 function getNewPieceNumber(newPiece) {
 	//get new id
@@ -711,18 +720,17 @@ var newPiece = false;
  */
 function swapPawn(pieceID) {
 	//get selected piece
-	var piece = pieceID.split('_');
-	var colour = piece[1];
-	var type = piece[2];
+	var piece = pieceID.charAt(0);
+	var colour = getPieceColour(piece);
 	//get new piece & id
-	newPiece = colour+'_'+type;
+	newPiece = piece;
 	var num = getNewPieceNumber(newPiece);
 	//get pawn position
 	var endRow = 7;
 	if (colour == 'b') {
 		endRow = 0;
 	}
-	var pawnCol = $.inArray(colour+'_p', abstractBoard[endRow]);
+	var pawnCol = $.inArray(getPlayerPiece(colour, 'p'), abstractBoard[endRow]);
 	//update abstract board
 	abstractBoard[endRow][pawnCol] = newPiece;
 	//update real board
@@ -739,7 +747,7 @@ function swapPawn(pieceID) {
 		sendMove(gFrom, [endRow, pawnCol], colour);
 	} else if (typeof computerOpponent !== 'undefined') {
 		//defined in computer.js
-		swapPieceInFEN(colour, type, [endRow, pawnCol]);
+		swapPieceInFEN(newPiece, [endRow, pawnCol]);
 	}
 }
 
@@ -769,8 +777,7 @@ function checkAndTakePiece(square, wonOrLost) {
 function takePiece(toSquare, wonOrLost) {
 	//get taken piece
 	var taken = getOccupant(toSquare);
-	var oldID = taken.attr('id').split('_');
-	var newID = ' div#'+oldID[0]+'_'+oldID[1]+'_t';
+	var newID = ' div#'+taken.attr('id').charAt(0)+'_t';
 	taken.remove();
 	if ($(newID+' sub.subscript').length) {
 		var newT = $('div#pieces'+wonOrLost+newID);
@@ -810,7 +817,7 @@ function listen(gameID) {
 				handleChat(data['chat']);
 				//check for game over or new move
 				if (data['moved']) {
-	    			checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['newBoard']);
+	    			checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['castling'], data['newBoard']);
 				} else {
 					if (data['gameOver']) {
 						updateGameOver(data['pRating'], data['opRating'], data['overMsg']);

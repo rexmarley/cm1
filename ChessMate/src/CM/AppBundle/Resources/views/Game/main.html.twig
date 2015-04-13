@@ -89,8 +89,8 @@
 	    	var activePlayer = {{game.activePlayerIndex }};
 	    	var inProgress = {{ game.joined |json_encode|raw }};
 	    	var abstractBoard = {{ game.board.board |json_encode|raw }};
-	    	var unmoved = {{ game.board.unmoved |json_encode|raw}};
-	    	var enPassantAvailable = {{ game.board.enPassantAvailable |json_encode|raw}};
+	    	var castling = {{ game.board.castling |json_encode|raw}};
+	    	var enPassant = {{ game.board.enPassant |json_encode|raw}};
 	    	//set other
 	    	var opChatty = {{ opChatty |json_encode|raw }};
 		{% else %}

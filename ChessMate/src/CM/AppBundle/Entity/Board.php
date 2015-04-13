@@ -24,10 +24,10 @@ class Board
      */
     protected $board;
 
-    /**
-     * @ORM\Column(type="array")
-     */
-    protected $unmoved;
+     /**
+      * @ORM\Column(type="array")
+      */
+     protected $castling;
     
     /**
      * Has pawn been swapped
@@ -37,10 +37,10 @@ class Board
     private $pawnSwapped;
 
     /**
-     * The position of a pawn vulnerable to En passant
+     * A position vulnerable to En passant
      * @ORM\Column(type="array", nullable=true)
      */
-    protected $enPassantAvailable;
+    protected $enPassant;
 
     /**
      * @ORM\Column(type="array")
@@ -70,9 +70,9 @@ class Board
     public function setDefaults()
     {
     	$this->setDefaultBoard();
-    	$this->setDefaultUnmoved();
+    	$this->castling = array('KQ','kq');
     	$this->setDefaultTaken();
-    	$this->enPassantAvailable = null;
+    	$this->enPassant = null;
     	$this->pawnSwapped = false;
     }
 
@@ -84,21 +84,21 @@ class Board
     private function setDefaultBoard()
     {
         $this->board = array(
-    		array('w_r','w_n','w_b','w_q','w_k','w_b','w_n','w_r'),
-    		array('w_p','w_p','w_p','w_p','w_p','w_p','w_p','w_p'),
-    		array(false, false, false, false, false, false, false, false),
-    		array(false, false, false, false, false, false, false, false),
-    		array(false, false, false, false, false, false, false, false),
-    		array(false, false, false, false, false, false, false, false),
-    		array('b_p','b_p','b_p','b_p','b_p','b_p','b_p','b_p'),
-    		array('b_r','b_n','b_b','b_q','b_k','b_b','b_n','b_r')
+				array('R','N','B','Q','K','B','N','R'),
+	    		array('P','P','P','P','P','P','P','P'),
+	    		array(false, false, false, false, false, false, false, false),
+	    		array(false, false, false, false, false, false, false, false),
+	    		array(false, false, false, false, false, false, false, false),
+	    		array(false, false, false, false, false, false, false, false),
+	    		array('p','p','p','p','p','p','p','p'),
+	    		array('r','n','b','q','k','b','n','r')
     	);
     }
     
     private function setDefaultTaken() {
     	$this->takenPieces = array(
-    			'w_p' => 0, 'w_r' => 0, 'w_n' => 0, 'w_b' => 0, 'w_q' => 0,
-    			'b_p' => 0, 'b_r' => 0, 'b_n' => 0, 'b_b' => 0, 'b_q' => 0
+    			'P' => 0, 'R' => 0, 'N' => 0, 'B' => 0, 'Q' => 0,
+    			'p' => 0, 'r' => 0, 'n' => 0, 'b' => 0, 'q' => 0
     	);    	
     }
 
@@ -126,45 +126,45 @@ class Board
     }
 
     /**
-     * Set unmoved
+     * Set castling options for player
      *
-     * @param array $unmoved
+     * @param string $castling
+     * @param int $pIndex
      * @return Board
      */
-    public function setUnmoved(array $unmoved)
+    public function setPlayerCastling($castling, $pIndex)
     {
-        $this->unmoved = $unmoved;
+        $this->castling[$pIndex] = $castling;
 
         return $this;
     }
 
     /**
-     * set default unmoved
+     * Get castling options for player
      *
      * @return array 
      */
-    public function setDefaultUnmoved()
+    public function getPlayerCastling($pIndex)
     {
-        $this->unmoved = array(
-    			array(true, true, true, true, true, true, true, true),
-    			array(true, true, true, true, true, true, true, true),
-    			array(false, false, false, false, false, false, false, false),
-    			array(false, false, false, false, false, false, false, false),
-    			array(false, false, false, false, false, false, false, false),
-    			array(false, false, false, false, false, false, false, false),
-    			array(true, true, true, true, true, true, true, true),
-    			array(true, true, true, true, true, true, true, true)
-    	);
+        return $this->castling[$pIndex];
     }
 
     /**
-     * Get unmoved
+     * Set castling options for both players
      *
-     * @return array 
+     * @param array $castling
+     * @return Board
      */
-    public function getUnmoved()
+    public function setCastling($castling)
     {
-        return $this->unmoved;
+        $this->castling[0] = $castling['w'];
+        $this->castling[1] = $castling['b'];
+
+        return $this;
+    }
+    
+    public function getCastling() {
+    	return array('w' => $this->castling[0], 'b' => $this->castling[1]);
     }
 
     /**
@@ -201,24 +201,6 @@ class Board
         $this->takenPieces[$taken]++;
 
         return $this;
-    }
-    
-    /**
-     * Mark piece as moved
-     * @param int $row
-     * @param int $column
-     */
-    public function setPieceAsMoved($row, $column) {
-    	$this->unmoved[$row][$column] = false;
-    }
-    
-    /**
-     * Check if piece is moved
-     * @param int $row
-     * @param int $column
-     */
-    public function getPieceIsMoved($row, $column) {
-    	return !$this->unmoved[$row][$column];
     }
 
     /**
@@ -281,23 +263,23 @@ class Board
     /**
      * Set indices for a piece vulnerable to En passant
      *
-     * @param array|null $pawnPosition The vulnerable pawn's position
+     * @param array|null $position 1 row behind vulnerable pawn
      * @return Board
      */
-    public function setEnPassantAvailable($pawnPosition)
+    public function setEnPassant($position)
     {
-        $this->enPassantAvailable = $pawnPosition;
+        $this->enPassant = $position;
 
         return $this;
     }
 
     /**
-     * Get indices for a piece vulnerable to En passant
+     * Get indices vulnerable to En passant
      *
      * @return null if En passant is unavailable
      */
-    public function getEnPassantAvailable()
+    public function getEnPassant()
     {
-        return $this->enPassantAvailable;
+        return $this->enPassant;
     }
 }

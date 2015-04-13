@@ -12,6 +12,7 @@ abstract class ValidationHelper
     protected $game;
     protected $board;
     protected $enPassant = null;
+    protected $castling = null;
     protected $pieceSwapped = false;
     protected $checkThreat = null;
 	
@@ -26,11 +27,12 @@ abstract class ValidationHelper
     public function validateMove(array $move, Game $game)
     {
     	$this->setGlobals($game);
-    	//check piece type/colour matches origin
+    	//check piece matches origin
     	//and target square is not occupied by own piece
-    	$colour = $move['pColour'];
-    	if (($this->board[$move['from'][0]][$move['from'][1]] != $colour.'_'.$move['pType'])
-    		|| ($this->board[$move['to'][0]][$move['to'][1]] && $this->board[$move['to'][0]][$move['to'][1]][0] == $colour) ) {
+    	$colour = $this->getPieceColour($move['colour']);
+    	if (($this->board[$move['from'][0]][$move['from'][1]] != $move['piece'])
+    		|| ($this->board[$move['to'][0]][$move['to'][1]] 
+    			&& $this->getPieceColour($this->board[$move['to'][0]][$move['to'][1]]) == $colour) ) {
     		return array('valid' => false);
     	}
     	//validate piece
@@ -40,20 +42,28 @@ abstract class ValidationHelper
     		if (!$this->pieceSwapped) {
     			$this->updateAbstractBoard($move['from'], $move['to']);
     		}
+    		//update En passant
+    		$this->setEnPassant($move['piece'], $move['from'][0], $move['from'][1], $move['to'][0]);
+    		//check changes
+    		if ($move['enPassant'] != $this->enPassant) {
+    			return array('valid' => false);    			
+    		}
 			//get opponent colour
 			$opColour = $this->getOpponentColour($colour);
     		//if in check, invalidate move
     		if ($this->inCheck($opColour, $this->getKingSquare($colour))) {
     			return array('valid' => false);
     		}
-	    	//check no changes to board
+    		//check changes to castling
+    		if ($move['castling'] != $this->castling) {
+    			return array('valid' => false);    			
+    		}
+	    	//check changes to board
     		if ($move['newBoard'] != $this->board) {
     			return array('valid' => false);
     		}
-    		//mark piece as moved
-    		$this->game->getBoard()->setPieceAsMoved($move['from'][0], $move['from'][1]);
     		//add/remove En passant
-    		$this->game->getBoard()->setEnPassantAvailable($this->enPassant);
+    		$this->game->getBoard()->setEnPassant($this->enPassant);
     		//flag pawn as swapped/reset
     		$this->game->getBoard()->setPawnSwapped($this->pieceSwapped);
     		return array('valid' => true, 'board' => $this->board);
@@ -72,17 +82,66 @@ abstract class ValidationHelper
     
     protected function setGlobals($game) {
     	$this->game = $game;
-    	$this->board = $game->getBoard()->getBoard();
-    	//$this->unmoved = $game->getBoard()->getUnmoved();    	
+    	$this->board = $game->getBoard()->getBoard();  	
     }
+
+	/**
+	 * Get piece colour
+	 * @param char $piece
+	 * @return char
+	 */
+	protected function getPieceColour($piece) {
+		if (strtoupper($piece) == $piece) {
+			return 'w';
+		}
+		return 'b';
+	}
+	
+	/**
+	 * Get player's index
+	 * @param char $colour
+	 * @return int
+	 */
+	protected function getPlayerIndex($colour) {
+		if ($colour == 'w') {
+			return 0;
+		}
+		return 1;
+	}
+
+	/**
+	 * Get player's piece (uppercase for white)
+	 * @param char $colour
+	 * @param char $piece
+	 * @return char
+	 */
+	protected function getPlayerPiece($colour, $piece) {
+		if ($colour == 'w') {
+			return strtoupper($piece);
+		}
+		return $piece;
+	}
+
+	/**
+	 * Set/unset En passant availability
+	 */
+	function setEnPassant($moved, $fRow, $fCol, $tRow) {
+		if ($moved == 'p' && $fRow == 6 && $tRow == 4) {
+			$this->enPassant = array(5, $fCol);
+		} else if ($moved == 'P' && $fRow == 1 && $tRow == 3) {
+			$this->enPassant = array(2, $fCol);		
+		} else {
+			$this->enPassant = null;
+		}
+	}
     
     /**
      * Get array indices for given colour king's square
      * @param char $colour w/b
      * @return array [y,x]
      */
-    protected function getKingSquare($colour) {    	
-		$king = $colour.'_k';
+    protected function getKingSquare($colour) {
+		$king = $this->getPlayerPiece($colour, 'k');
 		//get king's position
 		for ($row = 0; $row < 8; $row++) {
 			$col = array_search($king, $this->board[$row]);
@@ -113,8 +172,8 @@ abstract class ValidationHelper
 		$row = $kingSquare[0];
 		$col = $kingSquare[1];
 		$blocks = [false,false,false,false];
-		$bishop = $opColour.'_b';
-		$queen = $opColour.'_q';
+		$bishop = $this->getPlayerPiece($opColour, 'b');
+		$queen = $this->getPlayerPiece($opColour, 'q');
 		for ($i = 1; $i < 8; $i++) {
 			$threats = [
 				$this->getPieceAt($row+$i, $col-$i), 
@@ -154,8 +213,8 @@ abstract class ValidationHelper
 	 */
 	protected function inCheckOnXAxis($opColour, $kingSquare) {
 		$row = $kingSquare[0];
-		$queen = $opColour.'_q';
-		$rook = $opColour.'_r';
+		$rook = $this->getPlayerPiece($opColour, 'r');
+		$queen = $this->getPlayerPiece($opColour, 'q');
 		//radiate out (for checkmates)
 		for ($col = $kingSquare[1]-1; $col >= 0; $col--) {
 			if ($this->board[$row][$col] == $rook || $this->board[$row][$col] == $queen) {
@@ -181,8 +240,8 @@ abstract class ValidationHelper
 	 */
 	protected function inCheckOnYAxis($opColour, $kingSquare) {
 		$col = $kingSquare[1];
-		$queen = $opColour.'_q';
-		$rook = $opColour.'_r';
+		$rook = $this->getPlayerPiece($opColour, 'r');
+		$queen = $this->getPlayerPiece($opColour, 'q');
 		//radiate out
 		for ($row = $kingSquare[0]-1; $row >= 0; $row--) {
 			if ($this->board[$row][$col] == $rook || $this->board[$row][$col] == $queen) {
@@ -209,35 +268,36 @@ abstract class ValidationHelper
 	protected function inCheckByKnight($opColour, $kingSquare) {
 		$x = $kingSquare[1];
 		$y = $kingSquare[0];
-		if ($this->pieceAt($y+2, $x-1, $opColour.'_n')) {
+		$knight = $this->getPlayerPiece($opColour, 'n');
+		if ($this->pieceAt($y+2, $x-1, $knight)) {
 			$this->checkThreat = array($y+2, $x-1);
 			return true;			
 		}
-		if ($this->pieceAt($y+2, $x+1, $opColour.'_n')) {
+		if ($this->pieceAt($y+2, $x+1, $knight)) {
 			$this->checkThreat = array($y+2, $x+1);
 			return true;			
 		}
-		if ($this->pieceAt($y+1, $x-2, $opColour.'_n')) {
+		if ($this->pieceAt($y+1, $x-2, $knight)) {
 			$this->checkThreat = array($y+1, $x-2);
 			return true;			
 		}
-		if ($this->pieceAt($y+1, $x+2, $opColour.'_n')) {
+		if ($this->pieceAt($y+1, $x+2, $knight)) {
 			$this->checkThreat = array($y+1, $x+2);
 			return true;			
 		}
-		if ($this->pieceAt($y-1, $x-2, $opColour.'_n')) {
+		if ($this->pieceAt($y-1, $x-2, $knight)) {
 			$this->checkThreat = array($y-1, $x-2);
 			return true;			
 		}
-		if ($this->pieceAt($y-1, $x+2, $opColour.'_n')) {
+		if ($this->pieceAt($y-1, $x+2, $knight)) {
 			$this->checkThreat = array($y-1, $x+2);
 			return true;			
 		}
-		if ($this->pieceAt($y-2, $x-1, $opColour.'_n')) {
+		if ($this->pieceAt($y-2, $x-1, $knight)) {
 			$this->checkThreat = array($y-2, $x-1);
 			return true;			
 		}
-		if ($this->pieceAt($y-2, $x+1, $opColour.'_n')) {
+		if ($this->pieceAt($y-2, $x+1, $knight)) {
 			$this->checkThreat = array($y-2, $x+1);
 			return true;			
 		}
@@ -249,14 +309,15 @@ abstract class ValidationHelper
 	 */
 	protected function inCheckByPawn($opColour, $kingSquare) {
 		$dir = 1;
+		$pawn = $this->getPlayerPiece($opColour, 'p');
 		if ($opColour == 'w') {
 			$dir = -1;
 		}
-		if ($this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]-1, $opColour.'_p')) {
+		if ($this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]-1, $pawn)) {
 			$this->checkThreat = array($kingSquare[0]+$dir, $kingSquare[1]-1);
 			return true;			
 		}
-		if ($this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]+1, $opColour.'_p')) {
+		if ($this->pieceAt($kingSquare[0]+$dir, $kingSquare[1]+1, $pawn)) {
 			$this->checkThreat = array($kingSquare[0]+$dir, $kingSquare[1]+1);
 			return true;			
 		}
@@ -390,7 +451,7 @@ abstract class ValidationHelper
 	 */
 	protected function occupiedByOwnPiece($row, $column, $colour) {
 		if ($row > -1 && $row < 8 && $column > -1 && $column < 8) {
-			if (!$this->vacant($row, $column) && $this->board[$row][$column][0] == $colour) {
+			if (!$this->vacant($row, $column) && $this->getPieceColour($this->board[$row][$column]) == $colour) {
 				return true;
 			}
 		}
@@ -403,7 +464,7 @@ abstract class ValidationHelper
 	 */
 	protected function occupiedByOtherPiece($row, $column, $colour) {
 		if ($row > -1 && $row < 8 && $column > -1 && $column < 8) {
-			if (!$this->vacant($row, $column) && $this->board[$row][$column][0] != $colour) {
+			if (!$this->vacant($row, $column) && $this->getPieceColour($this->board[$row][$column]) != $colour) {
 				return true;
 			}
 		}

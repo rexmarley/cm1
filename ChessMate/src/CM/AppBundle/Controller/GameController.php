@@ -249,8 +249,8 @@ class GameController extends Controller
     public function playComputerAction($skill)
     {
     	$taken = $this->get('html_helper')->getUnicodeTakenPieces(array(
-    			'w_p' => 0, 'w_r' => 0, 'w_n' => 0, 'w_b' => 0, 'w_q' => 0,
-    			'b_p' => 0, 'b_r' => 0, 'b_n' => 0, 'b_b' => 0, 'b_q' => 0
+    			'P' => 0, 'R' => 0, 'N' => 0, 'B' => 0, 'Q' => 0,
+    			'p' => 0, 'r' => 0, 'n' => 0, 'b' => 0, 'q' => 0
     	));
 	    return $this->render('CMAppBundle:Game:playComputer.html.twig', 
 	    		array('skillLevel' => $skill, 'player' => 'w', 'taken' => $taken));
@@ -335,6 +335,11 @@ class GameController extends Controller
 			$gameID = 'x';
 			$colour = 'x';
 			//get default pieces
+		    $pieces = $this->get('html_helper')->getUnicodePieces();
+		} else if ($gameID == 'w' || $gameID == 'b') {
+			//get black/white orientation
+			$colour = $gameID;  
+			$gameID = 'x';
 		    $pieces = $this->get('html_helper')->getUnicodePieces();
 		} else {
 		    $user = $this->getUser();	
@@ -616,6 +621,7 @@ class GameController extends Controller
 		    	'to' => $move['to'],
 		    	'swapped' => $move['newPiece'],
 	    		'enPassant' => $move['enPassant'],
+	    		'castling' => $move['castling'],
 	    		'newBoard' => $move['newBoard']
 		    );
     }

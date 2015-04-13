@@ -25,10 +25,10 @@
 				QUnit.test("testUpdateAbstractBoard", function( assert ) {
 					updateAbstractBoard([1,4],[3,2]);
 					assert.equal(abstractBoard[1][4], false);
-					assert.equal(abstractBoard[3][2], 'w_p');
+					assert.equal(abstractBoard[3][2], 'P');
 					updateAbstractBoard([7,3],[4,3]);
 					assert.equal(abstractBoard[7][3], false);
-					assert.equal(abstractBoard[4][3], 'b_q');
+					assert.equal(abstractBoard[4][3], 'q');
 					//reset board
 					updateAbstractBoard([3,2],[1,4]);
 					updateAbstractBoard([4,3],[7,3]);						
@@ -313,9 +313,11 @@
 					updateAbstractBoard([3,1], [4,1]);
 					//valid short castle - don't actually move
 					assert.equal(validateKing('w', [0,4], [0,6]), true);
-					//mark king as moved
-					unmoved[0][4] = false;
-					//invalid short castle - already moved
+					//invalid short castle - rook moved
+					castling['w'] = 'Q';
+					assert.equal(validateKing('w', [0,4], [0,6]), false);
+					//invalid long castle - rook moved
+					castling['w'] = 'K';
 					assert.equal(validateKing('w', [0,4], [0,6]), false);
 					//remove check
 					updateAbstractBoard([1,0], [5,4]);
@@ -338,33 +340,33 @@
 					assert.equal(validateKing('w', [1,5], [2,6]), true);
 					updateAbstractBoard([1,5], [2,6]);
 					//test not in check
-					assert.equal(inCheck('w'), false);
-					assert.equal(abstractBoard[5][5], 'b_n');
+					assert.equal(inCheck('b', [2,6]), false);
+					assert.equal(abstractBoard[5][5], 'n');
 					//test in check by knight
 					updateAbstractBoard([5,5], [4,7]);
-					assert.equal(inCheck('w'), true);
+					assert.equal(inCheck('b', [2,6]), true);
 					//move out of check
 					updateAbstractBoard([2,6], [3,7]);
 					//test in check on diagonal
 					updateAbstractBoard([5,4], [5,5]);
-					assert.equal(inCheck('w'), true);
+					assert.equal(inCheck('b', [3,7]), true);
 					//block check on diagonal
 					updateAbstractBoard([3,6], [4,6]);
-					assert.equal(inCheck('w'), false);
+					assert.equal(inCheck('b', [3,7]), false);
 					//check blocked on x-axis
 					updateAbstractBoard([5,5], [3,3]);
-					assert.equal(inCheck('w'), false);
+					assert.equal(inCheck('b', [3,7]), false);
 					//check on x
 					//check on y already tested
 					updateAbstractBoard([3,4], [5,5]);
-					assert.equal(inCheck('w'), true);
+					assert.equal(inCheck('b', [3,7]), true);
 					updateAbstractBoard([5,5],[3,4]);
 					//shift pieces
 					updateAbstractBoard([6,5],[5,5]);
 					updateAbstractBoard([4,6],[5,5]);
 					//check by pawn
 					updateAbstractBoard([6,6], [4,6]);
-					assert.equal(inCheck('w'), true);					
+					assert.equal(inCheck('b', [3,7]), true);					
 					//CHECKMATE TODO
 				});				
 			</script>

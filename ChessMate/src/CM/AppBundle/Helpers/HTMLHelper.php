@@ -8,28 +8,28 @@ namespace CM\AppBundle\Helpers;
 class HTMLHelper
 {
 	private static $defaultBoard = array(
-								    		array('w_r','w_n','w_b','w_q','w_k','w_b','w_n','w_r'),
-								    		array('w_p','w_p','w_p','w_p','w_p','w_p','w_p','w_p'),
+								    		array('R','N','B','Q','K','B','N','R'),
+								    		array('P','P','P','P','P','P','P','P'),
 								    		array(false, false, false, false, false, false, false, false),
 								    		array(false, false, false, false, false, false, false, false),
 								    		array(false, false, false, false, false, false, false, false),
 								    		array(false, false, false, false, false, false, false, false),
-								    		array('b_p','b_p','b_p','b_p','b_p','b_p','b_p','b_p'),
-								    		array('b_r','b_n','b_b','b_q','b_k','b_b','b_n','b_r')
+								    		array('p','p','p','p','p','p','p','p'),
+								    		array('r','n','b','q','k','b','n','r')
 								    	);
 	private static $unicode = array( 
-						    			'b_r' => '&#9820;',
-						    			'b_n' => '&#9822;',
-						    			'b_b' => '&#9821;',
-						    			'b_q' => '&#9819;',
-						    			'b_k' => '&#9818;',
-						    			'b_p' => '&#9823;',
-						    			'w_r' => '&#9814;',
-						    			'w_n' => '&#9816;',
-						    			'w_b' => '&#9815;',
-						    			'w_q' => '&#9813;',
-						    			'w_k' => '&#9812;',
-						    			'w_p' => '&#9817;'
+						    			'r' => '&#9820;',
+						    			'n' => '&#9822;',
+						    			'b' => '&#9821;',
+						    			'q' => '&#9819;',
+						    			'k' => '&#9818;',
+						    			'p' => '&#9823;',
+						    			'R' => '&#9814;',
+						    			'N' => '&#9816;',
+						    			'B' => '&#9815;',
+						    			'Q' => '&#9813;',
+						    			'K' => '&#9812;',
+						    			'P' => '&#9817;'
 						    		);
 	
    /**
@@ -67,7 +67,7 @@ class HTMLHelper
     	$wTaken = array();
     	$bTaken = array();
     	foreach ($taken as $piece => $count) {
-    		if ($piece[0] == 'w') {
+    		if (strtoupper($piece) == $piece) {
     			$wTaken[] = array('id' => $piece.'_t', 'img' => self::$unicode[$piece], 'count' => $count);
     		} else {
     			$bTaken[] = array('id' => $piece.'_t', 'img' => self::$unicode[$piece], 'count' => $count);

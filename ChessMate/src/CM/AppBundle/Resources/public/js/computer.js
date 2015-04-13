@@ -1,11 +1,9 @@
+//TODO: change to app.php for live
+var root = 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/';
 //difficulty
 var searchDepth = 6;
 //turn
 var activeColour = 'w';
-//castling
-var wCastling = 'KQ';
-var bCastling = 'kq';
-var castling = wCastling+bCastling;
 //en Passant
 var ep = '-';
 //50 moves rule - ignored
@@ -13,49 +11,16 @@ var halfMoves = '0';
 var fullMoves = '1';
 //start FEN
 var fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
-	
-$(document).ready(function(){
+
+$(document).ready(function() {
 	if (typeof worker !== 'undefined') {
 		worker.addEventListener('message', function(e) {
 			//console.log(e.data);
 			if (e.data.substr(0, 8) == 'bestmove') {
+				//get move
 				var msg = e.data.split(' ');
-				var move = msg[1];
-				//update FEN
-				var from = [parseInt(move.charAt(1), 10)-1, posOf[move.charAt(0)]-1];
-				var to = [parseInt(move.charAt(3), 10)-1, posOf[move.charAt(2)]-1];
-				var colour = activeColour;
-				updateFENSuffixes(activeColour, from[0], from[1], to[0]);
-				updateFEN(from, to);
-				console.log('FEN2:'+fen + ' ' + activeColour + ' ' + castling + ' ' + ep + ' ' + halfMoves + ' ' + fullMoves);
-				//get grid refs.
-				var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
-				var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
-				//check for takeable
-    			if (abstractBoard[to[0]][to[1]]) {
-					//take piece
-					takePiece(gridTo, 'Lost');	    				
-    			}
-	        	//update abstract board
-    			console.log('from:', from);
-    			console.log('to:', to);
-	    		updateAbstractBoard(from, to);
-    			//move piece
-				var moved = getOccupant(gridFrom);
-				moved.position({
-		            of: 'div#'+gridTo
-		        });	
-				//center piece
-				$('div#'+gridTo).append(moved.css('position','static'));			
-				//check for game over
-	    		var over = checkGameOver(colour);
-	    		if (over) {
-		    		alert(getGameOverMessage(over));
-		    		gameOver = true;
-	    		} else {				
-	    			playersTurn = true;
-				}
-		  }
+				performComputerMove(msg[1]);
+			}
 		}, false);
 	}
 	
@@ -106,8 +71,20 @@ $(document).ready(function(){
 	    	  $('#difficultySlider').attr('title', ui.value);
 	      }
 	  }).attr("title", (searchDepth + 1)/2);
+	
+	$('#restart').on('click', function() {
+		resetState();
+	});
+	$('#switchSides').on('click', function() {
+		resetState('b');
+	});
 });
 
+/**
+ * Set search depth
+ * @param skill
+ * @returns
+ */
 function setDifficulty(skill) {
 	var diff;
 	if (skill == 1) {
@@ -125,17 +102,74 @@ function setDifficulty(skill) {
 	searchDepth = Math.min((skill*2)-1, 19);
 }
 
-function swapPieceInFEN(colour, type, [endRow, pawnCol]) {
-	//TODO
+/**
+ * Perform computer move
+ * @param move algebraic notation
+ * @returns
+ */
+function performComputerMove(move) {
+	//update FEN
+	var from = [parseInt(move.charAt(1), 10)-1, posOf[move.charAt(0)]-1];
+	var to = [parseInt(move.charAt(3), 10)-1, posOf[move.charAt(2)]-1];
+	var colour = activeColour;
+	updateFENSuffixes(activeColour, from[0], from[1], to[0]);
+	updateFEN(from, to);
+	updateComputerCastling(from);
+	var piece = getPieceFromFEN(from[0], from[1]);
+	setEnPassant(piece, from[0], from[1], to[0]);
+	console.log('FEN2:'+getFEN());
+	//get grid refs.
+	var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
+	var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
+	//check for takeable
+	if (abstractBoard[to[0]][to[1]]) {
+		//take piece
+		takePiece(gridTo, 'Lost');	    				
+	}
+	//update abstract board
+	updateAbstractBoard(from, to);
+	//move piece
+	var moved = getOccupant(gridFrom);
+	moved.position({
+        of: 'div#'+gridTo
+    });	
+	//center piece
+	$('div#'+gridTo).append(moved.css('position','static'));			
+	//check for game over
+	var over = checkGameOver(colour);
+	if (over) {
+		alert(getGameOverMessage(over));
+		gameOver = true;
+	} else {				
+		playersTurn = true;
+	}	
 }
 
+function swapPieceInFEN(newPiece, position) {
+	//position = [endRow, pawnCol]
+	var split = fen.split('/');
+	var row = split[7 - position[0]];
+	var col = getFenIndex(position[0], position[1]);
+	split[7 - position[0]] = updateTRowFEN(position[0], col, position[1], newPiece);	
+	fen = split.join('/');	
+}
+
+/**
+ * Update FEN and send to computer opponent
+ * @param from
+ * @param to
+ */
 function switchToComputerOpponent(from, to) {
 	playersTurn = false;
 	updateFENSuffixes(activeColour, from[0], from[1], to[0]);
 	updateFEN(from, to);
-	console.log('FEN:'+fen + ' ' + activeColour + ' ' + castling + ' ' + ep + ' ' + halfMoves + ' ' + fullMoves);
-	worker.postMessage('position fen '+ fen + ' ' + activeColour + ' ' + castling + ' ' + ep + ' ' + halfMoves + ' ' + fullMoves);
+	console.log('FEN:'+ getFEN());
+	worker.postMessage('position fen '+ getFEN());
 	worker.postMessage('go depth '+searchDepth);
+}
+
+function getFEN() {
+	return fen + ' ' + activeColour + ' ' + getCastlingFEN() + ' ' + ep + ' ' + halfMoves + ' ' + fullMoves;
 }
 
 function updateFEN(from, to) {
@@ -163,7 +197,7 @@ function updateFEN(from, to) {
 			}
 			//get row again
 			tRow = split[7 - to[0]];
-			console.log('a:', tRow);
+			//console.log('a:', tRow);
 			if (from[1] < to[1]) {
 				//king-side
 				var rookFCol = 7;
@@ -226,9 +260,9 @@ function updateFRowFEN(row, col) {
 	} else if (col == row.length - 1) {
 		//edge piece
 		if (row.charAt(col - 1) % 1 === 0) {
-			row = (parseInt(row.charAt(col - 1), 10) + 1) + row.substr(2, col - 1);
+			row = row.substr(0, col - 1) + (parseInt(row.charAt(col - 1), 10) + 1);
 		} else {
-			row = row.substr(0, col - 1) + '1';			
+			row = row.substr(0, col) + '1';			
 		}		
 	} else if (col > 0 && row.charAt(col - 1) % 1 === 0 && col < row.length && row.charAt(col + 1) % 1 === 0) {
 		//counts on both sides
@@ -253,7 +287,6 @@ function updateTRowFEN(row, fenCol, col, moved) {
 	var after = '';
 	if (square % 1 === 0) {
 		if (row.length == 1) {
-			console.log(row);
 			//empty row
 			if (col > 0) {
 				before = col;
@@ -284,6 +317,7 @@ function updateTRowFEN(row, fenCol, col, moved) {
 	}
 	return row;
 }
+
 function switchPlayer(colour) {
 	if (colour == 'w') {
 		return 'b';
@@ -291,26 +325,19 @@ function switchPlayer(colour) {
 	return 'w';
 }
 
-//castling handled one colour at a time
 function updateFENSuffixes(colour, fRow, fCol, tRow) {
 	var split = fen.split('/');
 	var fenRow = split[7 - fRow];
 	var moved = fenRow.charAt(getFenIndex(fenRow, fCol));
-	console.log('ok');
-	console.log(moved, wCastling, fRow, fCol);
-	//handle castling
-	if (colour == 'w') {
-		wCastling = getIndividualCastlingFEN(moved, wCastling, fRow, fCol);
-	} else {
-		bCastling = getIndividualCastlingFEN(moved, bCastling, fRow, fCol);
-	}
-	castling = wCastling+bCastling;
 	//handle en Passant
 	setEnPassantFEN(moved, fRow, fCol, tRow);
 	//change colour
 	activeColour = switchPlayer(colour);
 }
 
+/**
+ * Set En passant position using algebraic notation
+ */
 function setEnPassantFEN(moved, fRow, fCol, tRow) {
 	if (moved == 'p' && fRow == 6 && tRow == 4) {
 		ep = letterAt[fCol]+'6';
@@ -321,49 +348,83 @@ function setEnPassantFEN(moved, fRow, fCol, tRow) {
 	}
 }
 
-function getIndividualCastlingFEN(moved, pCastling, fRow, fCol) {
-	//handle castling 
-	if (pCastling.length > 0) {
-		if (moved == 'k' || moved == 'K') {
-			pCastling = '';
-		} else if ((moved == 'r' && fRow == 7) || (moved == 'R' && fRow == 0)) {
-			if (pCastling.length > 1) {
-				//castle possible on both sides
-				if (fCol == 0) {
-					//castle no longer possible on queen-side
-					pCastling = pCastling.charAt(0);
-				} else if (fCol == 7) {
-					//castle no longer possible on king-side
-					pCastling = pCastling.charAt(1);					
-				}
-			} else {
-				//castle only possible on one side
-				if (pCastling == 'K' || pCastling == 'k') {
-					//castle king-side possible
-					if (fCol == 7) {
-						//castle no longer possible on king-side
-						pCastling = '';					
-					}
-				} else {
-					//castle queen-side possible
-					if (fCol == 0) {
-						//castle no longer possible on queen-side
-						pCastling = '';	
-					}
-				}
-			}
-		}
+/**
+ * Update computer castling state
+ * @param from
+ */
+function updateComputerCastling(from) {
+	var moved = getPieceFromFEN(from[0], from[1]);
+	if ($.inArray(moved, ['k', 'K', 'r', 'R']) !== -1) {
+		//update castling availability
+		updateCastling(moved, getPieceColour(moved), from[0], from[1]);
 	}
-	return pCastling;
 }
 
-function resetState() {
+/**
+ * Get castling FEN
+ * @return String
+ */
+function getCastlingFEN() {
+	var fen = castling['w']+castling['b'];
+	if (fen.length > 0) {
+		return fen;
+	}
+	return '-';
+}
+
+/**
+ * Get piece from FEN
+ * @param row
+ * @param col
+ * @returns
+ */
+function getPieceFromFEN(row, col) {
+	var split = fen.split('/');
+	var fRow = split[7 - row];
+	var fCol = getFenIndex(fRow, col);
+	return fRow.charAt(fCol);	
+}
+
+/**
+ * Reset game
+ * @param colour - side to play as
+ */
+function resetState(colour = 'w') {
 	fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 	ep = '-';
 	halfMoves = '0';
 	fullMoves = '1';
 	activeColour = 'w';
-	wCastling = 'KQ';
-	bCastling = 'kq';
-	castling = wCastling+bCastling;
+	castling = {'w': 'KQ', 'b': 'kq'};
+	enPassant = null;
+	castled = false;
+	enPassantPerformed = false;
+	checkThreat = null;
+	$('.board').attr('id', 'game_'+colour+'_x');
+	//reset taken pieces
+	$('.subscript').each(function() {
+		$(this).html('');
+		$(this).closest('div.piece').addClass('hidden');
+	});
+	//reset abstract board
+	abstractBoard = [
+	        ['R','N','B','Q','K','B','N','R'],
+	        ['P','P','P','P','P','P','P','P'],
+	        [false, false, false, false, false, false, false, false],
+	        [false, false, false, false, false, false, false, false],
+	        [false, false, false, false, false, false, false, false],
+	        [false, false, false, false, false, false, false, false],
+	        ['p','p','p','p','p','p','p','p'],
+	        ['r','n','b','q','k','b','n','r']
+        ];
+	//refresh actual board
+    $.get(root+'showBoard/'+colour, function(data) {
+    	$('.board').closest('div.col-md-6').html(data);
+        setMovement();
+        if (colour == 'b') {
+        	//get first move
+        	worker.postMessage('position fen '+ getFEN());
+        	worker.postMessage('go depth '+searchDepth);        	
+        }
+    });
 }

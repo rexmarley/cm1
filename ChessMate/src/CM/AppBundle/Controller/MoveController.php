@@ -46,7 +46,7 @@ class MoveController extends Controller
     		$game->setGameOver($game->getInactivePlayerIndex(), 'Game Aborted: '.$user->getUsername().' has cheated.');
 			$em->flush();
     	} else {
-	    	$game->setLastMoveTime(time());
+	    	$game->setLastMoveTime(time()+3); //TODO
 	    	//check for game over - if opponent disagrees, validate server-side 
 	    	$gameOver = $content->gameOver;
 	    	//get move details
@@ -54,6 +54,7 @@ class MoveController extends Controller
 	    			'by' => $player,
 	    			'from' => $content->from,
 	    			'to' => $content->to,
+	    			'castling' => (array) $content->castling,
 	    			'newBoard' => $content->board,
 	    			'enPassant' => $content->enPassant,
 	    			'newPiece' => $content->newPiece,
@@ -138,9 +139,8 @@ class MoveController extends Controller
     		$board->addTaken($taken);
     	}
     	$board->setBoard($move['newBoard']);
-    	$board->setEnPassantAvailable($move['enPassant']);
-    	//mark piece as moved
-    	$board->setPieceAsMoved($move['from'][0], $move['from'][1]);
+    	$board->setEnPassant($move['enPassant']);
+    	$board->setCastling($move['castling']);
     	$game->setBoard($board);
     	$em->flush();    	
     }
@@ -182,25 +182,26 @@ class MoveController extends Controller
     	//check piece exists at from square
     	$piece = $absBoard[$from[0]][$from[1]];
     	if (!$piece) {
-    		//cheat = inactive player i.e. player that made move
+    		//cheat = player that made move
     		$game->setGameOver($shaker, 'Game Aborted: '.$game->getPlayers()->get($mover)->getUsername().' has cheated.');
     	} else {
-	    	$piece = explode("_", $piece);
 	    	//get move details
 	    	$move = array(
 	    			'from' => $from,
 	    			'to' => $to,
-	    			'pColour' => $piece[0],
-	    			'pType' => $piece[1],
+	    			'piece' => $piece,
+	    			'castling' => $attempted['castling'],
+	    			'colour' => $this->getPieceColour($piece),
+	    			'enPassant' => $attempted['enPassant'],
 	    			'newPiece' => $attempted['newPiece'],
 	    			'newBoard' => $attempted['newBoard']
 	    	);
 	    	//make sure right colour moved
-	    	if ($move['pColour'] == 'w' and $mover == 1 || $move['pColour'] == 'b' and $mover == 0) {
+	    	if ($move['colour'] == 'w' and $mover == 1 || $move['colour'] == 'b' and $mover == 0) {
     			$game->setGameOver($shaker, 'Game Aborted: '.$game->getPlayers()->get($mover)->getUsername().' has cheated.');
 	    	} else {
 		    	//get piece validator 
-		    	$validator = $this->get($move['pType'].'_validator');
+		    	$validator = $this->get(strtolower($move['piece']).'_validator');
 		    	//validate move
 		    	$valid = $validator->validateMove($move, $game);
 		    	if ($valid['valid']) {
@@ -219,4 +220,16 @@ class MoveController extends Controller
     	$em->flush();
    	 	return new JsonResponse(array('cheat' => true));
     }
+
+	/**
+	 * Get piece colour
+	 * @param char $piece
+	 * @return char
+	 */
+	private function getPieceColour($piece) {
+		if (strtoupper($piece) == $piece) {
+			return 'w';
+		}
+		return 'b';
+	}
 }

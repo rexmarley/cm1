@@ -21,6 +21,10 @@ cm_play_computer:
 cm_play_game:
     path:     /play/{gameID}
     defaults: { _controller: "CMAppBundle:Game:play" }
+
+cm_show_board:
+    path:     /showBoard/{gameID}
+    defaults: { _controller: "CMAppBundle:Game:showBoard", gameID: null }
     
 cm_join_game:
     path:     /join/{gameID}

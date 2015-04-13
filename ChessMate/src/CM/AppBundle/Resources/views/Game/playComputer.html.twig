@@ -35,16 +35,20 @@
 				</div>
 				{{ include('CMAppBundle:Game:piecesWonOrLost.html.twig', { 'wonLost': 'Lost'}) }}
 				<div id="midGameOptions" class="row">
-					<div class="col-md-4 col-md-offset-2">
+					<div class="col-md-4">
 				    	<a id="restart" class="btn btn-large btn-warning">Restart</a>
 					</div>
 					<div class="col-md-4">
 				    	<a href="{{ path('cm_start', {}) }}" class="btn btn-large btn-danger">Quit</a>
 					</div>
+					<div class="col-md-4">
+				    	<a id="switchSides" class="btn btn-large btn-success">Switch Sides</a>
+					</div>
 				</div>
 				<div class="row">
 					<div class="col-md-12">
 						<center><h2><u>Difficulty</u></h2></center>
+						<label>1</label><label style="text-align:right; width: 98%;">10</label>
 						<div id="difficultySlider"></div>
 					</div>
 				</div>

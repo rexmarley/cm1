@@ -82,6 +82,7 @@ class GameOverHelper extends ValidationHelper
 		$opColour = $this->getOpponentColour($colour);
 		//get opponent's king's square
 		$kingSquare = $this->getKingSquare($opColour);
+		$king = $this->getPlayerPiece($opColour, 'k');
 		//check for draw
 		$alliesLeft = $this->alliesLeft($opColour);
 		if (!$alliesLeft && !$this->alliesLeft($colour)) {
@@ -95,13 +96,13 @@ class GameOverHelper extends ValidationHelper
 		foreach ($reachables as $square) {
 			if (!$this->inCheck($colour, $square)) {
 				//put king back
-				$this->board[$kingSquare[0]][$kingSquare[1]] = $opColour.'_k';
+				$this->board[$kingSquare[0]][$kingSquare[1]] = $king;
 				return false;
 			}
 		}
 		//--> no safe squares within reach
 		//put king back
-		$this->board[$kingSquare[0]][$kingSquare[1]] = $opColour.'_k';
+		$this->board[$kingSquare[0]][$kingSquare[1]] = $king;
 		//check if in check
 		if (!$this->inCheck($colour, $kingSquare)) {
 			//check for stalemate
@@ -115,7 +116,7 @@ class GameOverHelper extends ValidationHelper
 		$checkThreat = $this->checkThreat;
 		//replace threat with blocker
 		$threat = $this->board[$checkThreat[0]][$checkThreat[1]];
-		$this->board[$checkThreat[0]][$checkThreat[1]] = $colour.'_x';
+		$this->board[$checkThreat[0]][$checkThreat[1]] = 'x';
 		//if still in check, threat cannot be taken or blocked
 		if ($this->inCheck($colour, $kingSquare)) {
 			//restore board state
@@ -125,7 +126,7 @@ class GameOverHelper extends ValidationHelper
 		//--> only one active threat
 		//restore board state
 		$this->board[$checkThreat[0]][$checkThreat[1]] = $threat;
-		if ($threat == $opColour.'_n') {
+		if ($threat == $this->getPlayerPiece($opColour, 'n')) {
 			//get copy of  board
 			$board = $this->board;
 			//attempt to take knight
@@ -181,7 +182,7 @@ class GameOverHelper extends ValidationHelper
 				//new check created
 				//defender cannot be moved, ignore in further attempts
 				$this->board[$target[0]][$target[1]] = false;
-				$this->board[$source[0]][$source[1]] = 'x_x';
+				$this->board[$source[0]][$source[1]] = 'x';
 			}
 		}
 		return false;
@@ -298,7 +299,7 @@ class GameOverHelper extends ValidationHelper
     private function alliesLeft($colour) {
 		foreach ($this->board as $row) {
 			foreach ($row as $piece) {
-				if ($piece && $piece[0] == $colour && $piece != $colour.'_k') {
+				if ($piece && $this->getPieceColour($piece) == $colour && $piece != $this->getPlayerPiece($colour, 'k')) {
 					return true;
 				}
 			}
@@ -335,7 +336,7 @@ class GameOverHelper extends ValidationHelper
 		for ($row = $rowStart; $row <= $rowEnd; $row++) {
 			for ($col = $colStart; $col <= $colEnd; $col++) {
 				$occupant = $this->board[$row][$col];
-				if (!$occupant || $occupant[0] != $colour) {
+				if (!$occupant || $this->getPieceColour($occupant) != $colour) {
 					$reachables[] = array($row, $col);					
 				}
 			}			
