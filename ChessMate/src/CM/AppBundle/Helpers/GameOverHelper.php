@@ -77,7 +77,7 @@ class GameOverHelper extends ValidationHelper
 	 * @param char $colour
 	 * @return boolean|string
 	 */
-	private function getGameOver($colour) {
+	public function getGameOver($colour) {
 		//get opponent's colour
 		$opColour = $this->getOpponentColour($colour);
 		//get opponent's king's square

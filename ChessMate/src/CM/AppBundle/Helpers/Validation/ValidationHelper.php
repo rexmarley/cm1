@@ -29,7 +29,7 @@ abstract class ValidationHelper
     	$this->setGlobals($game);
     	//check piece matches origin
     	//and target square is not occupied by own piece
-    	$colour = $this->getPieceColour($move['colour']);
+    	$colour = $this->getPieceColour($move['piece']);
     	if (($this->board[$move['from'][0]][$move['from'][1]] != $move['piece'])
     		|| ($this->board[$move['to'][0]][$move['to'][1]] 
     			&& $this->getPieceColour($this->board[$move['to'][0]][$move['to'][1]]) == $colour) ) {
@@ -76,11 +76,11 @@ abstract class ValidationHelper
      * Overridden function
      * @return boolean
      */
-    protected function validatePiece($move) {
+    public function validatePiece($move) {
     	return false; 
     }
     
-    protected function setGlobals($game) {
+    public function setGlobals($game) {
     	$this->game = $game;
     	$this->board = $game->getBoard()->getBoard();  	
     }

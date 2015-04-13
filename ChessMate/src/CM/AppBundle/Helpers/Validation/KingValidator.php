@@ -14,7 +14,7 @@ class KingValidator extends ValidationHelper
 	 * Validate king movement
 	 * @param array $move
 	 */
-	protected function validatePiece($move) {
+	public function validatePiece($move) {
     	$from = $move['from'];
     	$to = $move['to'];
     	$colour = $this->getPieceColour($move['colour']);

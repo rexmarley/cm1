@@ -7,27 +7,28 @@ namespace CM\AppBundle\Helpers;
  */
 class HTMLHelper
 {
-// 	private static $defaultBoard = array(
-// 								    		array('R','N','B','Q','K','B','N','R'),
-// 								    		array('P','P','P','P','P','P','P','P'),
-// 								    		array(false, false, false, false, false, false, false, false),
-// 								    		array(false, false, false, false, false, false, false, false),
-// 								    		array(false, false, false, false, false, false, false, false),
-// 								    		array(false, false, false, false, false, false, false, false),
-// 								    		array('p','p','p','p','p','p','p','p'),
-// 								    		array('r','n','b','q','k','b','n','r')
-// 								    	);
-
 	private static $defaultBoard = array(
-			array('R','N','B',false,'K',false,'N','R'),
-			array('P','P','P','P',false,'P','P','P'),
-			array(false, false, false, false, false, false, false, false),
-			array(false, false, 'B', false, 'P', false, false, false),
-			array(false, 'p', 'Q', false, 'p', false, false, false),
-			array(false, false, 'n', false, false, false, 'b', false),
-			array('p',false,'p','p',false,false,'p','p'),
-			array('r',false,'b',false,'q','k','n','r')
-	);
+								    		array('R','N','B','Q','K','B','N','R'),
+								    		array('P','P','P','P','P','P','P','P'),
+								    		array(false, false, false, false, false, false, false, false),
+								    		array(false, false, false, false, false, false, false, false),
+								    		array(false, false, false, false, false, false, false, false),
+								    		array(false, false, false, false, false, false, false, false),
+								    		array('p','p','p','p','p','p','p','p'),
+								    		array('r','n','b','q','k','b','n','r')
+								    	);
+// 	private static $defaultBoard = array(
+// 								    					array('R','N','B','Q','K','B','N','R'),
+//     		array(false, false, false, false, false, false, false, false),
+//     		array(false, false, false, false, false, false, false, false),
+//     		array(false, 'P', false, false, false, 'P', false, false),
+//     		array(false, false, false, 'p', false, false, false, false),
+//     		array(false, false, false, false, false, false, 'p', false),
+//     		array(false, false, false, false, false, false, false, false),
+//     		array('r','n','b','q','k','b','n','r')
+// 								    	);
+								    		
+
 	private static $unicode = array( 
 						    			'r' => '&#9820;',
 						    			'n' => '&#9822;',
