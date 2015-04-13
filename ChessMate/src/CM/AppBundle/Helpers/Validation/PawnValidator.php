@@ -38,7 +38,7 @@ class PawnValidator extends ValidationHelper
 				$valid = true;    			
     		}
 			//check/perform En passant
-			else if ($enPassant[0] == $to[0] && $enPassant[1] == $to[1]) {
+			else if ($enPassant && $enPassant[0] == $to[0] && $enPassant[1] == $to[1]) {
 				//take pawn
 				$this->board[$from[0]][$to[1]] = false;
 				return true;    

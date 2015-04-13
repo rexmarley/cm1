@@ -185,24 +185,27 @@
 					assert.equal(validatePawn('b', [5,4], [3,4]), false);
 					//valid pawn movement - vulnerable to En passant
 					assert.equal(validatePawn('b', [6,2], [4,2]), true);
-					assert.equal(enPassantAvailable[0], 4);
-					assert.equal(enPassantAvailable[1], 2);	
+					setEnPassant('p', 6, 2, 4);
+					assert.equal(enPassant[0], 5);
+					assert.equal(enPassant[1], 2);	
 					updateAbstractBoard([6,2],[4,2]);
+					setEnPassant('b', 4, 3, 3);
 					//ignore En passant - timed out
 					assert.equal(validatePawn('w', [4,3], [5,4]), true);
 					assert.equal(checkEnPassantPerformed(), false);
-					assert.equal(enPassantAvailable, false);
+					assert.equal(enPassant, null);
 					updateAbstractBoard([4,3], [5,4]);
 					assert.equal(validatePawn('b', [4,2], [3,2]), true);
 					updateAbstractBoard([4,2], [3,2]);
 					//make white vulnerable to En passant
 					assert.equal(validatePawn('w', [1,1], [3,1]), true);
-					assert.equal(enPassantAvailable[0], 3);
-					assert.equal(enPassantAvailable[1], 1);		
+					setEnPassant('P', 1, 1, 3);
+					assert.equal(enPassant[0], 2);
+					assert.equal(enPassant[1], 1);		
 					updateAbstractBoard([1,1],[3,1]);
 					//perform En passant
 					assert.equal(validatePawn('b', [3,2], [2,1]), true);
-					assert.equal(enPassantAvailable, false);
+					assert.equal(enPassant, null);
 					assert.equal(checkEnPassantPerformed(), true);
 					assert.equal(abstractBoard[3][1], false);
 					//valid moves
@@ -367,7 +370,70 @@
 					//check by pawn
 					updateAbstractBoard([6,6], [4,6]);
 					assert.equal(inCheck('b', [3,7]), true);					
-					//CHECKMATE TODO
+					//GAMEOVER
+					assert.equal(checkGameOver('b'), false);
+					assert.equal(checkGameOver('b'), false);
+					//checkmate scenario 1
+					abstractBoard = [
+					        ['R','N','B',false,'K',false,'N','R'],
+					        ['P','P','P','P',false,'P','P','P'],
+					        [false, false, false, false, false, false, false, false],
+					        [false, false, 'B', false, 'P', false, false, false],
+					        [false, 'p', false, false, 'p', false, false, false],
+					        [false, false, 'n', false, false, false, false, false],
+					        ['p',false,'p','p',false,'Q','p','p'],
+					        ['r',false,'b','q','k','b','n','r']
+				        ];
+					assert.equal(checkGameOver('w'), 3);
+					//checkmate scenario 2
+					abstractBoard = [
+					        ['R',false,'B','Q',false,'R','K',false],
+					        ['P','P','P','P',false,false,false,'q'],
+					        [false, false, 'N', false, 'P', false, 'P', false],
+					        [false, false, 'B', false, false, 'P', 'n', false],
+					        [false, false, false, false, 'p', false, 'N', false],
+					        [false, false, false, 'p', false, false, false, false],
+					        ['p','p','p',false,false,'p','p','p'],
+					        ['r',false,'b',false,'k','b',false,'r']
+				        ];
+					assert.equal(checkGameOver('b'), 3);
+					//stalemate
+					abstractBoard = [
+					        [false, false, false, false, false, false, false, false],
+					        [false, 'r', false, false, false, false, false, false],
+					        [false, false, false, false, 'k', false, false, false],
+					        [false, false, false, false, false, false, false, false],
+					        [false, false, false, false, false, false, false, false],
+					        [false, false, false, false, false, false, 'r', false],
+					        [false, false, 'K', false, false, false, false, false],
+					        [false, false, false, false, 'q', false, false, false]
+				        ];
+					assert.equal(checkGameOver('b'), 2);
+					//drawn
+					abstractBoard = [
+					        [false, false, false, false, false, false, false, false],
+					        [false, false, false, false, false, false, false, false],
+					        [false, false, false, false, 'k', false, false, false],
+					        [false, false, false, false, false, false, false, false],
+					        [false, false, false, false, false, false, false, false],
+					        [false, false, false, false, false, false, false, false],
+					        [false, false, 'K', false, false, false, false, false],
+					        [false, false, false, false, false, false, false, false]
+				        ];
+					assert.equal(checkGameOver('w'), 1);
+					assert.equal(checkGameOver('b'), 1);
+					//blockable checkmate
+					abstractBoard = [
+					        ['R','N','B',false,'K',false,'N','R'],
+					        ['P','P','P','P',false,'P','P','P'],
+					        [false, false, false, false, false, false, false, false],
+					        [false, false, 'B', false, 'P', false, false, false],
+					        [false, 'p', 'Q', false, 'p', false, false, false],
+					        [false, false, 'n', false, false, false, 'b', false],
+					        ['p',false,'p','p',false,false,'p','p'],
+					        ['r',false,'b',false,'q','k','n','r']
+				        ];
+					assert.equal(checkGameOver('w'), false);
 				});				
 			</script>
 		</head>

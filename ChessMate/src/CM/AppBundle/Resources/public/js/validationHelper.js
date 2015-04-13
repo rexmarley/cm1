@@ -249,7 +249,7 @@ function validatePawn(colour, from, to) {
 		&& ((colour == 'w' && dir == 1) || (colour == 'b' && dir == -1)))  {
 		if (checkTakePiece(to, colour)) {
 			return true;
-		} else if (enPassant[0] == to[0] && enPassant[1] == to[1]) {
+		} else if (enPassant && enPassant[0] == to[0] && enPassant[1] == to[1]) {
 			//perform En passant
 			//allow revert if in check
 			var epTaken = abstractBoard[from[0]][to[1]];
