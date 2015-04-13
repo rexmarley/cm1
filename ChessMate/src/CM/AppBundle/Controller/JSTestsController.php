@@ -10,6 +10,6 @@ class JSTestsController extends Controller
 {    
     public function testJSAction()
     {    	
-        return $this->render('CMAppBundle:JSTests:testBoard.html.twig', array());
+        return $this->render('CMAppBundle:JSTests:tests.html.twig', array());
     }
 }

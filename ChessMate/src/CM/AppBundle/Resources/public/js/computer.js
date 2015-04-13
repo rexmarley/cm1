@@ -1,5 +1,3 @@
-//TODO: change to app.php for live
-var root = 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/';
 //difficulty
 var searchDepth = 6;
 //turn
@@ -15,7 +13,6 @@ var fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 $(document).ready(function() {
 	if (typeof worker !== 'undefined') {
 		worker.addEventListener('message', function(e) {
-			//console.log(e.data);
 			if (e.data.substr(0, 8) == 'bestmove') {
 				//get move
 				var msg = e.data.split(' ');
@@ -103,6 +100,19 @@ function setDifficulty(skill) {
 }
 
 /**
+ * Update FEN and send to computer opponent
+ * @param from
+ * @param to
+ */
+function switchToComputerOpponent(from, to) {
+	playersTurn = false;
+	updateFENSuffixes(activeColour, from[0], from[1], to[0]);
+	fen = updateFEN(fen, from, to);
+	worker.postMessage('position fen '+ getFEN(fen, activeColour, getCastlingFEN(), ep, halfMoves, fullMoves));
+	worker.postMessage('go depth '+searchDepth);
+}
+
+/**
  * Perform computer move
  * @param move algebraic notation
  * @returns
@@ -113,11 +123,10 @@ function performComputerMove(move) {
 	var to = [parseInt(move.charAt(3), 10)-1, posOf[move.charAt(2)]-1];
 	var colour = activeColour;
 	updateFENSuffixes(activeColour, from[0], from[1], to[0]);
-	updateFEN(from, to);
+	fen = updateFEN(fen, from, to);
 	updateComputerCastling(from);
-	var piece = getPieceFromFEN(from[0], from[1]);
+	var piece = getPieceFromFEN(fen, from[0], from[1]);
 	setEnPassant(piece, from[0], from[1], to[0]);
-	console.log('FEN2:'+getFEN());
 	//get grid refs.
 	var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
 	var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
@@ -145,34 +154,13 @@ function performComputerMove(move) {
 	}	
 }
 
-function swapPieceInFEN(newPiece, position) {
-	//position = [endRow, pawnCol]
-	var split = fen.split('/');
-	var row = split[7 - position[0]];
-	var col = getFenIndex(position[0], position[1]);
-	split[7 - position[0]] = updateTRowFEN(position[0], col, position[1], newPiece);	
-	fen = split.join('/');	
-}
-
 /**
- * Update FEN and send to computer opponent
- * @param from
- * @param to
+ * Update FEN with move
+ * @param fen
+ * @param from [row,col]
+ * @param to [row,col]
  */
-function switchToComputerOpponent(from, to) {
-	playersTurn = false;
-	updateFENSuffixes(activeColour, from[0], from[1], to[0]);
-	updateFEN(from, to);
-	console.log('FEN:'+ getFEN());
-	worker.postMessage('position fen '+ getFEN());
-	worker.postMessage('go depth '+searchDepth);
-}
-
-function getFEN() {
-	return fen + ' ' + activeColour + ' ' + getCastlingFEN() + ' ' + ep + ' ' + halfMoves + ' ' + fullMoves;
-}
-
-function updateFEN(from, to) {
+function updateFEN(fen, from, to) {
 	var split = fen.split('/');
 	//get 'from' row
 	var fRow = split[7 - from[0]];
@@ -197,7 +185,6 @@ function updateFEN(from, to) {
 			}
 			//get row again
 			tRow = split[7 - to[0]];
-			//console.log('a:', tRow);
 			if (from[1] < to[1]) {
 				//king-side
 				var rookFCol = 7;
@@ -228,101 +215,7 @@ function updateFEN(from, to) {
 		}
 	}
 	
-	fen = split.join('/');
-}
-
-function getFenIndex(row, col) {
-	var count = 0;
-	for (var i = 0; i < row.length; i++) {
-		if (count == col) {
-			return i;
-		} else if (row.charAt(i) % 1 === 0) {
-			count += parseInt(row.charAt(i), 10);
-			if (count > col) {
-				break;
-			}
-		} else {
-			count++;
-		}
-	}
-	return i;
-}
-
-function updateFRowFEN(row, col) {
-	//check if adjacent columns contain counts/empties or pieces
-	if (col == 0) {
-		//edge piece
-		if (row.charAt(1) % 1 === 0) {
-			row = (parseInt(row.charAt(1), 10) + 1) + row.substr(2, row.length - 2);
-		} else {
-			row = '1' + row.substr(1, row.length - 1);			
-		}
-	} else if (col == row.length - 1) {
-		//edge piece
-		if (row.charAt(col - 1) % 1 === 0) {
-			row = row.substr(0, col - 1) + (parseInt(row.charAt(col - 1), 10) + 1);
-		} else {
-			row = row.substr(0, col) + '1';			
-		}		
-	} else if (col > 0 && row.charAt(col - 1) % 1 === 0 && col < row.length && row.charAt(col + 1) % 1 === 0) {
-		//counts on both sides
-		row = row.substr(0, col - 1) + (parseInt(row.charAt(col - 1), 10) + parseInt(row.charAt(col + 1), 10) + 1) + row.substr(col+2, row.length - col - 1);		
-	} else if (col > 0 && row.charAt(col - 1) % 1 === 0) {
-		//count on left side
-		row = row.substr(0, col - 1) + (parseInt(row.charAt(col - 1), 10) + 1) + row.substr(col+1, row.length - col);
-	} else if (col < row.length && row.charAt(col + 1) % 1 === 0) {
-		//count on right side
-		row = row.substr(0, col) + (parseInt(row.charAt(col + 1), 10) + 1) + row.substr(col+2, row.length - col - 1);
-	} else {
-		//pieces both sides
-		row = row.substr(0, col) + '1' + row.substr(col+1, row.length - 1);
-	}
-	return row;
-}
-
-function updateTRowFEN(row, fenCol, col, moved) {
-	var square = row.charAt(fenCol);
-	//check if to square is empty i.e. numeric
-	var before = '';
-	var after = '';
-	if (square % 1 === 0) {
-		if (row.length == 1) {
-			//empty row
-			if (col > 0) {
-				before = col;
-			}
-			if (col < 7) {
-				after = (7 - col);
-			}
-			row = before + moved + after;
-		} else {
-			//find position in total
-			for (var i = 0; i < fenCol; i++) {
-				if (row.charAt(i) % 1 === 0) {
-					col -= parseInt(row.charAt(i), 10);
-				} else {
-					col--;
-				}
-			}
-			if (col > 0) {
-				before = col;
-			}
-			if (parseInt(square, 10) - col > 1) {
-				after = parseInt(square, 10) - col - 1;
-			}
-			row = row.substr(0, fenCol) + before + moved + after + row.substr(fenCol + 1, row.length - 1);			
-		}	
-	} else {
-		row = row.substr(0, fenCol) + moved + row.substr(fenCol+1, row.length - 1);			
-	}
-	return row;
-}
-
-function switchPlayer(colour) {
-	if (colour == 'w') {
-		return 'b';
-	}
-	return 'w';
+	return split.join('/');
 }
 
 function updateFENSuffixes(colour, fRow, fCol, tRow) {
@@ -353,36 +246,11 @@ function setEnPassantFEN(moved, fRow, fCol, tRow) {
  * @param from
  */
 function updateComputerCastling(from) {
-	var moved = getPieceFromFEN(from[0], from[1]);
+	var moved = getPieceFromFEN(fen, from[0], from[1]);
 	if ($.inArray(moved, ['k', 'K', 'r', 'R']) !== -1) {
 		//update castling availability
 		updateCastling(moved, getPieceColour(moved), from[0], from[1]);
 	}
-}
-
-/**
- * Get castling FEN
- * @return String
- */
-function getCastlingFEN() {
-	var fen = castling['w']+castling['b'];
-	if (fen.length > 0) {
-		return fen;
-	}
-	return '-';
-}
-
-/**
- * Get piece from FEN
- * @param row
- * @param col
- * @returns
- */
-function getPieceFromFEN(row, col) {
-	var split = fen.split('/');
-	var fRow = split[7 - row];
-	var fCol = getFenIndex(fRow, col);
-	return fRow.charAt(fCol);	
 }
 
 /**
@@ -418,12 +286,12 @@ function resetState(colour = 'w') {
 	        ['r','n','b','q','k','b','n','r']
         ];
 	//refresh actual board
-    $.get(root+'showBoard/'+colour, function(data) {
+    $.get('https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/showBoard/'+colour, function(data) {
     	$('.board').closest('div.col-md-6').html(data);
         setMovement();
         if (colour == 'b') {
         	//get first move
-        	worker.postMessage('position fen '+ getFEN());
+        	worker.postMessage('position fen '+ getFEN(fen, activeColour, getCastlingFEN(), ep, halfMoves, fullMoves));
         	worker.postMessage('go depth '+searchDepth);        	
         }
     });

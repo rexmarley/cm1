@@ -3,12 +3,92 @@
 		<head>
 			<meta charset="utf-8">
 			<title>JS Unit Tests</title>
-			{# TODO: composer packages #}
 			<script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.3/jquery.min.js"></script>
 			<link rel="stylesheet" href="//code.jquery.com/qunit/qunit-1.17.1.css">
 			<script src="//code.jquery.com/qunit/qunit-1.17.1.js"></script>
 			<script src="{{ asset('bundles/cmapp/js/validationHelper.js') }}"></script>
+			<script src="{{ asset('bundles/cmapp/js/fenHelper.js') }}"></script>
 			<script>
+				//test FEN translations
+				QUnit.test("testFENTranslations", function( assert ) {
+					//test FEN - board translations
+					assert.equal(getFENFromBoard(abstractBoard), 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
+					assert.equal(JSON.stringify(getBoardFromFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')), JSON.stringify(abstractBoard));					
+					assert.equal(getFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 'w', 'KQkq', '-', '0', '1'), 
+							'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1');
+					//test index translation
+					assert.equal(getFenIndex('pppppppp', 0), 0);
+					assert.equal(getFenIndex('pppppppp', 1), 1);
+					assert.equal(getFenIndex('pppppppp', 2), 2);
+					assert.equal(getFenIndex('pppppppp', 3), 3);
+					assert.equal(getFenIndex('pppppppp', 4), 4);
+					assert.equal(getFenIndex('pppppppp', 5), 5);
+					assert.equal(getFenIndex('pppppppp', 6), 6);
+					assert.equal(getFenIndex('pppppppp', 7), 7);
+					assert.equal(getFenIndex('pp4pp', 7), 4);
+					assert.equal(getFenIndex('1p4pp', 6), 3);
+					assert.equal(getFenIndex('1p3p2', 7), 4);
+					assert.equal(getFenIndex('1p3p2', 0), 0);
+					assert.equal(getFenIndex('1p3p2', 1), 1);
+					assert.equal(getFenIndex('1p3p2', 2), 2);
+					assert.equal(getFenIndex('1p3p2', 3), 2);
+					assert.equal(getFenIndex('1p3p2', 4), 2);
+					assert.equal(getFenIndex('1p3p2', 5), 3);
+					assert.equal(getFenIndex('1p3p2', 6), 4);
+					assert.equal(getFenIndex('1p3p2', 7), 4);
+					//test update 'from' row
+					assert.equal(updateFRowFEN('pppppppp', 0), '1ppppppp');
+					assert.equal(updateFRowFEN('pppppppp', 1), 'p1pppppp');
+					assert.equal(updateFRowFEN('pppppppp', 2), 'pp1ppppp');
+					assert.equal(updateFRowFEN('pppppppp', 3), 'ppp1pppp');
+					assert.equal(updateFRowFEN('pppppppp', 4), 'pppp1ppp');
+					assert.equal(updateFRowFEN('pppppppp', 5), 'ppppp1pp');
+					assert.equal(updateFRowFEN('pppppppp', 6), 'pppppp1p');
+					assert.equal(updateFRowFEN('pppppppp', 7), 'ppppppp1');
+					assert.equal(updateFRowFEN('p7', 0), '8');
+					assert.equal(updateFRowFEN('7p', 1), '8');
+					assert.equal(updateFRowFEN('3ppp1p', 1), '4pp1p');
+					assert.equal(updateFRowFEN('3ppp1p', 2), '3p1p1p');
+					assert.equal(updateFRowFEN('3ppp1p', 5), '3ppp2');
+					//test update 'to' row
+					assert.equal(updateTRowFEN('8', 0, 0, 'q'), 'q7');
+					assert.equal(updateTRowFEN('8', 0, 1, 'q'), '1q6');
+					assert.equal(updateTRowFEN('8', 0, 2, 'q'), '2q5');
+					assert.equal(updateTRowFEN('8', 0, 3, 'q'), '3q4');
+					assert.equal(updateTRowFEN('8', 0, 4, 'q'), '4q3');
+					assert.equal(updateTRowFEN('8', 0, 5, 'q'), '5q2');
+					assert.equal(updateTRowFEN('8', 0, 6, 'q'), '6q1');
+					assert.equal(updateTRowFEN('8', 0, 7, 'q'), '7q');
+					assert.equal(updateTRowFEN('pppppppp', 0, 0, 'q'), 'qppppppp');
+					assert.equal(updateTRowFEN('pppppppp', 1, 1, 'q'), 'pqpppppp');
+					assert.equal(updateTRowFEN('pppppppp', 2, 2, 'q'), 'ppqppppp');
+					assert.equal(updateTRowFEN('pppppppp', 3, 3, 'q'), 'pppqpppp');
+					assert.equal(updateTRowFEN('pppppppp', 4, 4, 'q'), 'ppppqppp');
+					assert.equal(updateTRowFEN('pppppppp', 5, 5, 'q'), 'pppppqpp');
+					assert.equal(updateTRowFEN('pppppppp', 6, 6, 'q'), 'ppppppqp');
+					assert.equal(updateTRowFEN('pppppppp', 7, 7, 'q'), 'pppppppq');
+					assert.equal(updateTRowFEN('1ppppppp', 0, 0, 'q'), 'qppppppp');
+					assert.equal(updateTRowFEN('pppp1ppp', 4, 4, 'q'), 'ppppqppp');
+					assert.equal(updateTRowFEN('ppppppp1', 7, 7, 'q'), 'pppppppq');
+					assert.equal(updateTRowFEN('2pppppp', 0, 0, 'q'), 'q1pppppp');
+					assert.equal(updateTRowFEN('2pppppp', 0, 1, 'q'), '1qpppppp');
+					assert.equal(updateTRowFEN('ppp2ppp', 3, 3, 'q'), 'pppq1ppp');
+					assert.equal(updateTRowFEN('ppp2ppp', 3, 4, 'q'), 'ppp1qppp');
+					assert.equal(updateTRowFEN('pppppp2', 6, 6, 'q'), 'ppppppq1');
+					assert.equal(updateTRowFEN('pppppp2', 6, 7, 'q'), 'pppppp1q');
+					assert.equal(updateTRowFEN('1p3p1p', 0, 0, 'q'), 'qp3p1p');
+					assert.equal(updateTRowFEN('1p3p1p', 1, 1, 'q'), '1q3p1p');
+					assert.equal(updateTRowFEN('1p3p1p', 2, 2, 'q'), '1pq2p1p');
+					assert.equal(updateTRowFEN('1p3p1p', 2, 3, 'q'), '1p1q1p1p');
+					assert.equal(updateTRowFEN('1p3p1p', 2, 4, 'q'), '1p2qp1p');
+					assert.equal(updateTRowFEN('1p3p1p', 3, 5, 'q'), '1p3q1p');
+					assert.equal(updateTRowFEN('1p3p1p', 4, 6, 'q'), '1p3pqp');
+					assert.equal(updateTRowFEN('1p3p1p', 5, 7, 'q'), '1p3p1q');
+					assert.equal(swapPieceInFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 'Q', [3,5]), 'rnbqkbnr/pppppppp/8/8/5Q2/8/PPPPPPPP/RNBQKBNR');
+					assert.equal(getPieceFromFEN('rnbqkbnr/pp3ppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 6, 5), 'p');
+					assert.equal(getPieceFromFEN('rnbqkbnr/pp3ppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 0, 3), 'Q');
+					assert.equal(getPieceFromFEN('rnbqkbnr/pp3ppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 7, 4), 'k');
+				});
 				//test abstractBoard indices to grid reference conversion
 				QUnit.test("testResolveAbstractBoardReference", function( assert ) {
 					for (i = 1; i <= 8; i++) {
