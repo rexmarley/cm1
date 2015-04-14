@@ -12,23 +12,15 @@ class BishopValidatorTest extends \PHPUnit_Framework_TestCase
 	 
 	public function setUp() {
 		$this->helper = new BishopValidator();
-		$this->board = $this->getMockBuilder('CM\AppBundle\Entity\Board')
-							->disableOriginalConstructor()->getMock();
 		$this->game = $this->getMockBuilder('CM\AppBundle\Entity\Game')
-							->disableOriginalConstructor()->getMock(); 	
-    	$this->game->expects($this->any())
-	    	->method('getBoard')
-	    	->will($this->returnValue($this->board));
+							->disableOriginalConstructor()->getMock();
 	}
 	
     public function testMoves()
     {
-    	$board = $this->getBoard();
-    	$this->board->expects($this->any())
-	    	->method('getBoard')
-	    	->will($this->returnValue($board));
+    	$this->board = $this->getBoard();
     	
-    	$this->helper->setGlobals($this->game);
+    	$this->helper->setGlobals($this->game, $this->board);
     	//valid moves
     	$this->assertEquals(true, $this->helper->validatePiece(array('from' => array(0,2), 'to' => array(2,0))));
     	$this->assertEquals(true, $this->helper->validatePiece(array('from' => array(0,2), 'to' => array(2,4))));

@@ -350,7 +350,8 @@ class GameController extends Controller
 		    //get player colour
 	    	$colour = $this->getPlayerColour($game, $user);
 	    	//get game pieces
-    		$pieces = $this->get('html_helper')->getUnicodePieces($game->getBoard()->getBoard());
+	    	$board = $this->get('fen_helper')->getBoardFromFEN($game->getBoard()->getFEN());
+    		$pieces = $this->get('html_helper')->getUnicodePieces($board);
 		}
 
         return $this->render('CMAppBundle:Game:board.html.twig', 
@@ -622,7 +623,7 @@ class GameController extends Controller
 		    	'swapped' => $move['newPiece'],
 	    		'enPassant' => $move['enPassant'],
 	    		'castling' => $move['castling'],
-	    		'newBoard' => $move['newBoard']
+    			'newFEN' => $move['newFEN']
 		    );
     }
     

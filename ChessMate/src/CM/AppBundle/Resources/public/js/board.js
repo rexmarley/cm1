@@ -389,11 +389,13 @@ function validatePointAndClick(moved, gridFrom, gridTo) {
  * Check opponent's move
  * @param array from grid-ref.
  * @param array to grid-ref
- * @param bool|string swapped has pawn been swapped 
+ * @param bool|string swapped has pawn been swapped
  */
-function checkMoveByOpponent(from, to, swapped, enPassant, newCastling, newBoard) {
+function checkMoveByOpponent(from, to, swapped, enPassant, newCastling, newFEN) {
 	var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
 	var gridTo = getGridRefFromAbstractIndices(to[0], to[1]);
+	//get new board
+	var newBoard = getBoardFromFEN(newFEN);
 	//get moved piece
 	var moved = getOccupant(gridFrom);
 	var piece = moved.attr('id').charAt(0);
@@ -429,7 +431,8 @@ function checkMoveByOpponent(from, to, swapped, enPassant, newCastling, newBoard
  * Validate move made by opponent
  * If invalid, one of the players has cheated
  */
-function validateMoveIn(piece, colour, from, to, newPiece, enPassant, newCastling, newBoard) {
+function validateMoveIn(piece, colour, from, to, newPiece, newEP, newCastling, newBoard) {
+	//console.log('ok');
 	//check opponent's piece
 	if (colour == $('.board').attr('id').charAt(5)) {
 		return false;			
@@ -443,7 +446,7 @@ function validateMoveIn(piece, colour, from, to, newPiece, enPassant, newCastlin
 		return false;			
 	}
 	//ensure en passant is correct
-	if (enPassant[0] != enPassant[0] || enPassant[1] != enPassant[1]) {
+	if (enPassant != newEP && (enPassant[0] != newEP[0] || enPassant[1] != newEP[1])) {
 		return false;
 	}
 	//check castling
@@ -462,6 +465,9 @@ function validateMoveIn(piece, colour, from, to, newPiece, enPassant, newCastlin
 	for (var row = 0; row < 8; row++) {
 		for (var col = 0; col < 8; col++) {
 			if (abstractBoard[row][col] != newBoard[row][col]) {
+//				console.log('aaaa');
+//				console.log(abstractBoard[row][col]);
+//				console.log(newBoard[row][col]);
 				return false;
 			}
 		}
@@ -639,7 +645,7 @@ function sendMove(from, to, colour) {
 	var game = $('.board').attr('id').split('_');
 	var data = { 
 		'gameID' : game[2],
-		'board' : abstractBoard, //TODO fen
+		'fen' : getFENFromBoard(abstractBoard),
 		'castling': castling,
 		'from' : from, 
 		'to' : to , 
@@ -747,7 +753,7 @@ function swapPawn(pieceID) {
 		sendMove(gFrom, [endRow, pawnCol], colour);
 	} else if (typeof computerOpponent !== 'undefined') {
 		//defined in computer.js
-		swapPieceInFEN(newPiece, [endRow, pawnCol]);
+		fen = swapPieceInFEN(fen, newPiece, [endRow, pawnCol]);
 	}
 }
 
@@ -817,7 +823,7 @@ function listen(gameID) {
 				handleChat(data['chat']);
 				//check for game over or new move
 				if (data['moved']) {
-	    			checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['castling'], data['newBoard']);
+	    			checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['castling'], data['newFEN']);
 				} else {
 					if (data['gameOver']) {
 						updateGameOver(data['pRating'], data['opRating'], data['overMsg']);

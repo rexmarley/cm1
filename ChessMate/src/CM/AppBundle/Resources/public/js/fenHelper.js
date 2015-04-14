@@ -1,3 +1,13 @@
+//defaults
+var fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
+//turn
+var activeColour = 'w';
+//en Passant
+var ep = '-';
+//50 moves rule
+var halfMoves = '0';
+var fullMoves = '1';
+
 /**
  * Get FEN from array representation of board
  * @param array board
@@ -8,7 +18,7 @@ function getFENFromBoard(board) {
 	for (var i = 7; i > -1; i--) {
 		//get row
 		var row = board[i];
-		fen[7 - i] = '';
+		var fenRow = '';
 		var count = 0;
 		for (var j = 0; j < 8; j++) {
 			if (row[j]) {
@@ -17,14 +27,15 @@ function getFENFromBoard(board) {
 					entry = count + entry;
 					count = 0;
 				}
-				fen[7 - i] = fen[7 - i] + entry;
+				fenRow = fenRow + entry;
 			} else {
 				count++;
-				if (count == 8) {
-					fen[7 - i] = count;
+				if (j == 7 && count != 0) {
+					fenRow = fenRow + count;
 				} 
 			}
 		}
+		fen[7 - i] = fenRow;
 	}
 	return fen.join('/');
 }
@@ -43,15 +54,17 @@ function getBoardFromFEN(fen) {
 			//empty row
 			board[7 - i] = [false, false, false, false, false, false, false, false];
 		} else {
-			for (var j = 0; j < 8; j++) {
+			var offset = 0;
+			for (var j = 0; j < row.length; j++) {
 				var entry = row.charAt(j);
 				if (entry % 1 === 0) {
 					for (var k = 0; k < entry; k++) {
-						board[7 - i][j+k] = false;
-						j++;
+						board[7 - i][j+offset] = false;
+						offset++;
 					}
+					offset--;
 				} else {
-					board[7 - i][j] = entry;
+					board[7 - i][j+offset] = entry;
 				}
 			}
 		}
@@ -168,6 +181,7 @@ function updateTRowFEN(row, fenCol, col, moved) {
 
 /**
  * Get piece from FEN
+ * @param fen
  * @param row
  * @param col
  * @returns
@@ -181,6 +195,7 @@ function getPieceFromFEN(fen, row, col) {
 
 /**
  * Swap piece in FEN
+ * @param fen
  * @param newPiece the new piece
  * @param position [row, col]
  */

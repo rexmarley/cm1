@@ -1,14 +1,5 @@
 //difficulty
 var searchDepth = 6;
-//turn
-var activeColour = 'w';
-//en Passant
-var ep = '-';
-//50 moves rule - ignored
-var halfMoves = '0';
-var fullMoves = '1';
-//start FEN
-var fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 
 $(document).ready(function() {
 	if (typeof worker !== 'undefined') {

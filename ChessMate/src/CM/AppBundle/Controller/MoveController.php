@@ -47,7 +47,7 @@ class MoveController extends Controller
 			$em->flush();
     	} else {
 	    	$game->setLastMoveTime(time()+3); //TODO
-	    	//check for game over - if opponent disagrees, validate server-side 
+	    	//get game over - if opponent disagrees, validate server-side 
 	    	$gameOver = $content->gameOver;
 	    	//get move details
 	    	$move = array(
@@ -55,7 +55,8 @@ class MoveController extends Controller
 	    			'from' => $content->from,
 	    			'to' => $content->to,
 	    			'castling' => (array) $content->castling,
-	    			'newBoard' => $content->board,
+	    			//'newBoard' => $content->board,
+	    			'newFEN' => $content->fen,
 	    			'enPassant' => $content->enPassant,
 	    			'newPiece' => $content->newPiece,
 	    			'gameOver' => $gameOver
@@ -133,12 +134,11 @@ class MoveController extends Controller
     private function saveMove(Game $game, array $move, $em) {
     	//update game state
     	$board = $game->getBoard();
-    	$absBoard = $board->getBoard();
-    	$taken = $absBoard[$move['to'][0]][$move['to'][1]];
-    	if ($taken) {
+    	$taken = $this->get('fen_helper')->getPieceFromFEN($board->getFEN(), $move['to'][0], $move['to'][1]);
+    	if (!is_numeric($taken)) {
     		$board->addTaken($taken);
     	}
-    	$board->setBoard($move['newBoard']);
+    	$board->setFEN($move['newFEN']);
     	$board->setEnPassant($move['enPassant']);
     	$board->setCastling($move['castling']);
     	$game->setBoard($board);
@@ -173,10 +173,12 @@ class MoveController extends Controller
     	} else if ($game->over()) {
 	    	throw new AccessDeniedException('The game is over');		
     	}
+    	$board = $game->getBoard();
+    	$fenHelper = $this->get('fen_helper');
+    	$absBoard = $fenHelper->getBoardFromFEN($board->getFEN());
     	//get attempted move
     	$attempted = $game->getLastMove();
-    	$board = $game->getBoard(); 
-    	$absBoard = $board->getBoard();
+    	//$absBoard = $board->getBoard();
     	$from = $attempted['from'];
     	$to = $attempted['to'];
     	//check piece exists at from square
@@ -194,7 +196,8 @@ class MoveController extends Controller
 	    			'colour' => $this->getPieceColour($piece),
 	    			'enPassant' => $attempted['enPassant'],
 	    			'newPiece' => $attempted['newPiece'],
-	    			'newBoard' => $attempted['newBoard']
+	    			//'newBoard' => $attempted['newBoard']
+	    			'newBoard' => $fenHelper->getBoardFromFEN($attempted['newFEN'])
 	    	);
 	    	//make sure right colour moved
 	    	if ($move['colour'] == 'w' and $mover == 1 || $move['colour'] == 'b' and $mover == 0) {
@@ -203,7 +206,7 @@ class MoveController extends Controller
 		    	//get piece validator 
 		    	$validator = $this->get(strtolower($move['piece']).'_validator');
 		    	//validate move
-		    	$valid = $validator->validateMove($move, $game);
+		    	$valid = $validator->validateMove($move, $game, $absBoard);
 		    	if ($valid['valid']) {
 		    		//cheater = active player i.e. player that questioned validity
     				$game->setGameOver($mover, 'Game Aborted: '.$game->getPlayers()->get($shaker)->getUsername().' has cheated.');

@@ -8,17 +8,11 @@ class GameOverHelperTest extends \PHPUnit_Framework_TestCase
 {	
 	private $helper;
 	private $game;
-	private $board;
 	 
 	public function setUp() {
 		$this->helper = new GameOverHelper();
-		$this->board = $this->getMockBuilder('CM\AppBundle\Entity\Board')
-							->disableOriginalConstructor()->getMock();
 		$this->game = $this->getMockBuilder('CM\AppBundle\Entity\Game')
-							->disableOriginalConstructor()->getMock(); 	
-    	$this->game->expects($this->any())
-	    	->method('getBoard')
-	    	->will($this->returnValue($this->board));
+							->disableOriginalConstructor()->getMock();
 	}
 	
     public function testCheckmate1()
@@ -34,11 +28,7 @@ class GameOverHelperTest extends \PHPUnit_Framework_TestCase
 			array('r',false,'b','q','k','b','n','r')
     	);
     	
-    	$this->board->expects($this->any())
-	    	->method('getBoard')
-	    	->will($this->returnValue($checkmate));
-    	
-    	$this->helper->setGlobals($this->game);
+    	$this->helper->setGlobals($this->game, $checkmate);
     	
     	$this->assertEquals('Checkmate', $this->helper->getGameOver('w'));
     }
@@ -56,11 +46,7 @@ class GameOverHelperTest extends \PHPUnit_Framework_TestCase
 			array('r',false,'b',false,'k','b',false,'r')
     	);
     	
-    	$this->board->expects($this->any())
-	    	->method('getBoard')
-	    	->will($this->returnValue($checkmate));
-    	
-    	$this->helper->setGlobals($this->game);
+    	$this->helper->setGlobals($this->game, $checkmate);
 
     	$this->assertEquals('Checkmate', $this->helper->getGameOver('b'));
     }
@@ -78,11 +64,7 @@ class GameOverHelperTest extends \PHPUnit_Framework_TestCase
 			array('r',false,'b',false,'q','k','n','r')
     	);
     	
-    	$this->board->expects($this->any())
-	    	->method('getBoard')
-	    	->will($this->returnValue($blockable));
-    	
-    	$this->helper->setGlobals($this->game);
+    	$this->helper->setGlobals($this->game, $blockable);
     	
     	$this->assertFalse($this->helper->getGameOver('w'));
     }
@@ -100,11 +82,7 @@ class GameOverHelperTest extends \PHPUnit_Framework_TestCase
 			array(false, false, false, false, 'q', false, false, false)
     	);
     	
-    	$this->board->expects($this->any())
-	    	->method('getBoard')
-	    	->will($this->returnValue($stalemate));
-    	
-    	$this->helper->setGlobals($this->game);
+    	$this->helper->setGlobals($this->game, $stalemate);
 
     	$this->assertEquals('Stalemate', $this->helper->getGameOver('b'));
     }
@@ -122,17 +100,12 @@ class GameOverHelperTest extends \PHPUnit_Framework_TestCase
 			array(false, false, false, false, false, false, false, false)
     	);
     	
-    	$this->board->expects($this->any())
-	    	->method('getBoard')
-	    	->will($this->returnValue($drawn));
-    	
-    	$this->helper->setGlobals($this->game);
+    	$this->helper->setGlobals($this->game, $drawn);
 
     	$this->assertEquals('Drawn', $this->helper->getGameOver('b'));
     }
     
     public function tearDown() {
-    	unset($this->board);
     	unset($this->game);
     	unset($this->helper);
     }

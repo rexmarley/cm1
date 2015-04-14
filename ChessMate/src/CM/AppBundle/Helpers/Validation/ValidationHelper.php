@@ -24,9 +24,9 @@ abstract class ValidationHelper
 	 *
 	 * @return Game
 	 */
-    public function validateMove(array $move, Game $game)
+    public function validateMove(array $move, Game $game, array $board)
     {
-    	$this->setGlobals($game);
+    	$this->setGlobals($game, $board);
     	//check piece matches origin
     	//and target square is not occupied by own piece
     	$colour = $this->getPieceColour($move['piece']);
@@ -38,10 +38,6 @@ abstract class ValidationHelper
     	//validate piece
     	$valid = $this->validatePiece($move);
     	if($valid) {
-    		//move piece
-    		if (!$this->pieceSwapped) {
-    			$this->updateAbstractBoard($move['from'], $move['to']);
-    		}
     		//update En passant
     		$this->setEnPassant($move['piece'], $move['from'][0], $move['from'][1], $move['to'][0]);
     		//check changes
@@ -66,7 +62,7 @@ abstract class ValidationHelper
     		$this->game->getBoard()->setEnPassant($this->enPassant);
     		//flag pawn as swapped/reset
     		$this->game->getBoard()->setPawnSwapped($this->pieceSwapped);
-    		return array('valid' => true, 'board' => $this->board);
+    		return array('valid' => true);
     	}
 
     	return array('valid' => false);
@@ -80,9 +76,9 @@ abstract class ValidationHelper
     	return false; 
     }
     
-    public function setGlobals($game) {
+    public function setGlobals($game, $board) {
     	$this->game = $game;
-    	$this->board = $game->getBoard()->getBoard();  	
+    	$this->board = $board;  	
     }
 
 	/**

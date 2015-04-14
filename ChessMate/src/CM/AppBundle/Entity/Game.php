@@ -439,7 +439,7 @@ class Game
     /**
      * Set last move, for validation
      *
-     * @param array $move[by<playerIndex>, from[y,x], to[y,x], newBoard, enPassantAvailable, newPiece]
+     * @param array $move[by<playerIndex>, from[y,x], to[y,x], newFEN, enPassantAvailable, newPiece]
      * 
      * @return Game
      */

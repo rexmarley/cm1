@@ -3,6 +3,8 @@ services:
         class: CM\AppBundle\Factories\GameSearchFactory
     game_factory:
         class: CM\AppBundle\Factories\GameFactory
+    fen_helper:
+        class: CM\AppBundle\Helpers\FENHelper 
     p_validator:
         class: CM\AppBundle\Helpers\Validation\PawnValidator
     r_validator:

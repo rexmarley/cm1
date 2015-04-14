@@ -12,6 +12,7 @@
 				//test FEN translations
 				QUnit.test("testFENTranslations", function( assert ) {
 					//test FEN - board translations
+					console.log(getBoardFromFEN('rnbqkbnr/pppppppp/8/8/4P3/8/PPPP1PPP/RNBQKBNR'));
 					assert.equal(getFENFromBoard(abstractBoard), 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR');
 					assert.equal(JSON.stringify(getBoardFromFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR')), JSON.stringify(abstractBoard));					
 					assert.equal(getFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 'w', 'KQkq', '-', '0', '1'), 
@@ -84,6 +85,7 @@
 					assert.equal(updateTRowFEN('1p3p1p', 3, 5, 'q'), '1p3q1p');
 					assert.equal(updateTRowFEN('1p3p1p', 4, 6, 'q'), '1p3pqp');
 					assert.equal(updateTRowFEN('1p3p1p', 5, 7, 'q'), '1p3p1q');
+					//test accessing single position
 					assert.equal(swapPieceInFEN('rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 'Q', [3,5]), 'rnbqkbnr/pppppppp/8/8/5Q2/8/PPPPPPPP/RNBQKBNR');
 					assert.equal(getPieceFromFEN('rnbqkbnr/pp3ppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 6, 5), 'p');
 					assert.equal(getPieceFromFEN('rnbqkbnr/pp3ppp/8/8/8/8/PPPPPPPP/RNBQKBNR', 0, 3), 'Q');
