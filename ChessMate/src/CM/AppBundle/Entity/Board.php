@@ -19,11 +19,6 @@ class Board
      */
     protected $id;
 
-//     /**
-//      * @ORM\Column(type="array")
-//      */
-//     protected $board;
-
      /**
       * @ORM\Column(type="array")
       */
@@ -82,24 +77,6 @@ class Board
     	$this->enPassant = null;
     	$this->pawnSwapped = false;
     }
-
-//     /**
-//      * Set default board
-//      *
-//      */
-//     private function setDefaultBoard()
-//     {
-//         $this->board = array(
-// 				array('R','N','B','Q','K','B','N','R'),
-// 	    		array('P','P','P','P','P','P','P','P'),
-// 	    		array(false, false, false, false, false, false, false, false),
-// 	    		array(false, false, false, false, false, false, false, false),
-// 	    		array(false, false, false, false, false, false, false, false),
-// 	    		array(false, false, false, false, false, false, false, false),
-// 	    		array('p','p','p','p','p','p','p','p'),
-// 	    		array('r','n','b','q','k','b','n','r')
-//     	);
-//     }
     
     private function setDefaultTaken() {
     	$this->takenPieces = array(
@@ -129,29 +106,6 @@ class Board
     {
         return $this->fen;
     }
-
-//     /**
-//      * Set board
-//      *
-//      * @param array $board
-//      * @return Board
-//      */
-//     public function setBoard(array $board)
-//     {
-//         $this->board = $board;
-
-//         return $this;
-//     }
-
-//     /**
-//      * Get board
-//      *
-//      * @return array 
-//      */
-//     public function getBoard()
-//     {
-//         return $this->board;
-//     }
 
     /**
      * Set castling options for player
@@ -230,26 +184,6 @@ class Board
 
         return $this;
     }
-
-//     /**
-//      * Update board
-//      *
-//      * @param array $from	[y,x]
-//      * @param array $to		[y,x]
-//      * @return Board
-//      */
-//     public function updateBoard(array $from, array $to)
-//     {
-//     	if ($this->board[$to[0]][$to[1]]) {
-//     		//keep track of taken pieces for reloads
-//     		$this->taken[] = $this->board[$to[0]][$to[1]];
-//     	}
-//     	//move piece
-//         $this->board[$to[0]][$to[1]] = $this->board[$from[0]][$from[1]];
-//         $this->board[$from[0]][$from[1]] = false;
-
-//         return $this;
-//     }
 
     /**
      * Set Piece

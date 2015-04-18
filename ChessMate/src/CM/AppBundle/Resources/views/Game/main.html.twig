@@ -2,7 +2,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-	{% stylesheets '../vendor/components/jqueryui/themes/smoothness/jquery-ui.min.css' filter='cssrewrite'  %} 
+	{% stylesheets '%kernel.root_dir%/../vendor/components/jqueryui/themes/smoothness/jquery-ui.min.css' filter='cssrewrite'  %} 
         <link href="{{ asset_url }}" rel="stylesheet" type="text/css" />
 	{% endstylesheets %}
 {% endblock %}
@@ -38,8 +38,16 @@
     			<a id="startGame" class="btn btn-large btn-success">Start Game</a>
 			</div>
 		</div>
-		{{ include('CMAppBundle:Game:newGameOptions.html.twig', {}) }}
+		<div id="currentGamesDialog" class="ui-dialog closeable">
+			<center>
+				<u><h2 class="red">Current Games</h2></u>
+				{% for game in games %}
+					<h2><a href="{{ path('cm_play_game', { 'gameID' : game.id })}}">{{ game.whitePlayer }} vs. {{ game.blackPlayer }}</a></h2>		
+				{% endfor %}
+			</center>
+		</div>
 	{% endif %}
+	{{ include('CMAppBundle:Game:newGameOptions.html.twig', {}) }}
 	<div class="row">
 	    <div class="col-md-6 {{ offset }}">
 		    {{ render(controller('CMAppBundle:Game:showBoard', { 'gameID': gameID })) }}

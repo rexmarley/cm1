@@ -76,13 +76,15 @@ $(document).ready( function() {
 		$.ajax({
 			type: "POST",
 			url: url,
-			data: {'msg': '<span class="purple">'+msg+'</span><br>'}
+			data: {'msg': '<span class="purple">'+msg+'</span><br>'},
+			success: function(data) {
+				lastChatSeen = data['chatID'];
+			}
 		});
-		lastChatSeen++;
 		//get username
 		var user = $('span#pName2').html().split(':');
 		//add to own window
-		$('div#chatLog').append('<label>'+user[0]+': &nbsp;</label><span class="blue">'+msg+'</span><br>');
+		$('div#chatLog').append('<label>'+user[0].trim()+':&nbsp;</label><span class="blue">'+msg+'</span><br>');
 		//always scroll to bottom
 		var scroll = $('div#chatDisplay');
 		scroll.scrollTop(scroll.scrollTop()+300);
@@ -95,6 +97,8 @@ var selectedPiece = null;
 var playersTurn = true;
 //timer interval
 var tInterval;
+var pTime = 0;
+var opTime = 0;
 //global for swapping pawn
 var gFrom = [];
 var lastChatSeen = 0;
@@ -178,7 +182,7 @@ function setMovement() {
 }
 
 /**
- * Join Game/check oppponent has joined
+ * Join game/check opponent has joined
  */
 function joinGame(gameID) {
 	//show loading dialog
@@ -196,7 +200,7 @@ function joinGame(gameID) {
 	
 	$.ajax({
 		type: "POST",
-		url: root + 'join/'+gameID,
+		url: Routing.generate('cm_join_game', { gameID: gameID }),
 		success: function(data) {
 			//close loading dialog
 			clearInterval(joining);
@@ -205,7 +209,7 @@ function joinGame(gameID) {
 				//game cancelled
 				alert('Game aborted by opponent!');
 				//back to start
-    			location.href = root + 'start';
+    			location.href = Routing.generate('cm_start');
 			} else {
 				performOnLoadActions(gameID);
 				inProgress = true;
@@ -218,76 +222,94 @@ function joinGame(gameID) {
  * Game initialisation for load/reload
  */
 function performOnLoadActions(gameID) {
+	opTime = getSecondsLeft($('#tLeft1'))*1000;
+	pTime = getSecondsLeft($('#tLeft2'))*1000;
 	//if not players turn
 	if ((activePlayer === 0 && $('.board').attr('id').charAt(5) == 'b')
 			|| (activePlayer === 1 && $('.board').attr('id').charAt(5) == 'w')) {
     	playersTurn = false;
 		//start opponent's timer
-    	$('#tLeft1').addClass('red');
-    	setTimeout(function(){
-	    	startTimer('#tLeft1');
-    	}, 1000);
+		startTimer($('#tLeft1'), opTime);
     } else {
 		//start own timer
-    	$('#tLeft2').addClass('red');
-    	startTimer('#tLeft2');
+		startTimer($('#tLeft2'), pTime);
 	}
 	//open general listener
 	listen(gameID);
 }
 
 /**
- * Switch timers
+ * Switch active player/timer
  */
-function switchTimers() {
+function switchPlayer() {
 	clearInterval(tInterval);
 	if ($('#tLeft1').hasClass('red')) {
     	$('#tLeft1').removeClass('red');
-    	setTimeout(function(){
-	    	startTimer('#tLeft2');	
-    	}, 1500);		
+		startTimer($('#tLeft2'), pTime+100);
+		playersTurn = true;
 	} else {
-    	$('#tLeft2').removeClass('red');
-    	setTimeout(function(){
-	    	startTimer('#tLeft1');
-    	}, 1500);
+		playersTurn = false;
+		setTimeout(function() {
+			$('#tLeft2').removeClass('red');
+		}, 100);
+		startTimer($('#tLeft1'), opTime+200);
 	}
 }
 
 /**
- * Start timer with given id
+ * Start given timer
  */
-function startTimer(timerID) {
-	var timeLeft = $(timerID);
-	timeLeft.addClass('red');
-	var time = timeLeft.text().split(':');
+function startTimer(timer, actualTimeLeft) {
+	timer.addClass('red');
+	var time = timer.text().split(':');
+	var mins = time[0];
+	var secs = time[1];
+	var tSpeed = actualTimeLeft/getSecondsLeft(timer);
+	//use Date() for more accurate time-keeping
+	var start = new Date().getTime();
+    var elapsed;
+	//track milliseconds
+	var ms = 0;
+	//synch timer every 100ms
 	tInterval = setInterval(function() {
-		if (time[1] == '00') {
-			if (time[0] == '0') {
-				//end game
-				clearInterval(tInterval);
-			} else {
-				time[1] = '59';
-				time[0] = time[0] - 1;					
-			}
-		} else {
-			time[1] = time[1] - 1;
-			if (time[1] < 10) {
-				time[1] = '0' + time[1];
-			}
+		elapsed = new Date().getTime() - start;
+		if (elapsed + ms >= tSpeed) {
+			ms = elapsed - 1000;
+			start = start + tSpeed;
+			time = tick(mins, secs);
+			mins = time[0];
+			secs = time[1];
+			timer.text(mins+':'+secs);
 		}
-		timeLeft.text(time[0]+':'+time[1]);
-	}, 1000);
+	}, 100);
 }
 
 /**
- * Stop timer with given id
+ * Get next second in countdown
  */
-function stopTimer(timerID) {
-	clearInterval(tInterval);
-	if ($(timerID).hasClass('red')) {
-    	$(timerID).removeClass('red');	
-	}		
+function tick(mins, secs) {
+	if (secs == '00') {
+		if (mins == '0') {
+			//end game
+			clearInterval(tInterval);
+		} else {
+			secs = '59';
+			mins = mins - 1;					
+		}
+	} else {
+		secs = secs - 1;
+		if (secs < 10) {
+			secs = '0' + secs;
+		}
+	}
+	return [mins, secs];
+}
+
+function getSecondsLeft(timer) {
+	var time = timer.text().split(':');
+	var mins = time[0];
+	var secs = time[1];
+	return parseInt(mins*60, 10)+parseInt(secs, 10);
 }
 
 /**
@@ -420,11 +442,13 @@ function checkMoveByOpponent(from, to, swapped, enPassant, newCastling, newFEN) 
 			moved.html($('#pick_'+swapped).html());
 			//set new id
 			moved.attr('id', swapped+'_'+num);					
-		}		
+		}
+		return true;
 	} else {
 		//validate server-side & find cheat
 		findCheat();
 	}
+	return false;
 }
 
 /**
@@ -432,7 +456,6 @@ function checkMoveByOpponent(from, to, swapped, enPassant, newCastling, newFEN) 
  * If invalid, one of the players has cheated
  */
 function validateMoveIn(piece, colour, from, to, newPiece, newEP, newCastling, newBoard) {
-	//console.log('ok');
 	//check opponent's piece
 	if (colour == $('.board').attr('id').charAt(5)) {
 		return false;			
@@ -465,9 +488,6 @@ function validateMoveIn(piece, colour, from, to, newPiece, newEP, newCastling, n
 	for (var row = 0; row < 8; row++) {
 		for (var col = 0; col < 8; col++) {
 			if (abstractBoard[row][col] != newBoard[row][col]) {
-//				console.log('aaaa');
-//				console.log(abstractBoard[row][col]);
-//				console.log(newBoard[row][col]);
 				return false;
 			}
 		}
@@ -584,7 +604,7 @@ function findCheat() {
 	var game = $('.board').attr('id').split('_');
 	$.ajax({
 		type: "POST",
-		url: root+'findCheat/'+game[2],
+		url: Routing.generate('cm_find_cheat', { gameID: game[2] }),
 		success: function(data) {
 			//re-open listener
 			listen(game[2]);
@@ -598,10 +618,7 @@ function findCheat() {
 function acceptDraw(url) {
 	$.ajax({
 		type: "POST",
-		url: url,
-		success: function(data) {
-			updateGameOver(data['pRating'], data['opRating'], "Game Over: Draw Accepted");
-		}
+		url: url
 	});
 	$('#drawOffered').addClass('hidden');
 }
@@ -655,20 +672,13 @@ function sendMove(from, to, colour) {
 	};
 	$.ajax({
 		type: "POST",
-		url: root+'sendMove',
+		url: Routing.generate('cm_send_move', {}),
 		dataType: 'json',
 		contentType: 'application/json',
-		data: JSON.stringify(data),
-		success: function(data) {
-			if (data['gameOver']) {
-				//update ratings cosmetically
-				updateGameOver(data['pRating'], data['opRating'], message);
-			}
-		}
+		data: JSON.stringify(data)
 	});
-	playersTurn = false;
+	switchPlayer();
 	newPiece = false;
-	switchTimers();
 }
 
 /**
@@ -681,20 +691,15 @@ function saveMove(over) {
 	//save move
 	$.ajax({
 		type: "POST",
-		url: root+'saveMove/'+game[2],
+		url: Routing.generate('cm_save_move', { gameID: game[2] }),
 		dataType: 'json',
 		contentType: 'application/json',
 		data: JSON.stringify({'gameOver': over}),
 		success: function(data) {
-			if (data['gameOver']) {
-				updateGameOver(data['gameOver']['pRating'], data['gameOver']['opRating'], data['gameOver']['overMsg']);
-			}
 			//re-open listener
 			listen(game[2]);
 		}
 	});
-	playersTurn = true;
-	switchTimers();
 }
 
 /**
@@ -726,7 +731,7 @@ var newPiece = false;
  */
 function swapPawn(pieceID) {
 	//get selected piece
-	var piece = pieceID.charAt(0);
+	var piece = pieceID.charAt(5);
 	var colour = getPieceColour(piece);
 	//get new piece & id
 	newPiece = piece;
@@ -810,10 +815,10 @@ function getOccupant(squareID) {
  * @param gameID
  * @param gameOverReceived
  */
-function listen(gameID) {
+function listen(gameID, delay=100) {
 	$.ajax({
 		type: "POST",
-		url: root+'listen',
+		url: Routing.generate('cm_listen', {}),
 		dataType: 'json',
 		contentType: 'application/json',
 		data: JSON.stringify({'gameID': gameID, 'opChatty': opChatty, 'lastChat': lastChatSeen, 'overReceived': gameOver}),
@@ -823,7 +828,11 @@ function listen(gameID) {
 				handleChat(data['chat']);
 				//check for game over or new move
 				if (data['moved']) {
-	    			checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['castling'], data['newFEN']);
+	    			if (checkMoveByOpponent(data['from'], data['to'], data['swapped'], data['enPassant'], data['castling'], data['newFEN'])) {
+						pTime = data['pTimeLeft'];
+						opTime = data['opTimeLeft'];
+						switchPlayer();
+					}
 				} else {
 					if (data['gameOver']) {
 						updateGameOver(data['pRating'], data['opRating'], data['overMsg']);
@@ -840,8 +849,14 @@ function listen(gameID) {
 			    	listen(gameID);					
 				}
 			} else {
-		    	listen(gameID);					
+		    	listen(gameID);
 			}
+		},
+		error: function(data) {
+			//exponentially increase time between attempts
+			setInterval(function(){
+				listen(gameID, delay*10);
+			}, delay);				
 		}
 	});	
 }
@@ -855,17 +870,49 @@ function listen(gameID) {
  */
 function updateGameOver(pRating, opRating, overMsg) {
 	gameOver = true;
+	showRatingDifferences(pRating, opRating);
+	//update ratings
 	$('label#rating1').html('('+opRating+')');
 	$('label#rating2').html('('+pRating+')');
-	//stop timers
-	clearInterval(tInterval);
 	//hide resign/offer draw
 	if (!$('a#offerDraw').hasClass('hidden')) {
 		$('a#offerDraw').addClass('hidden');
 		$('a#resign').addClass('hidden');
 	}
+	//show new game button	
+	$('a#startGame2').closest('div').removeClass('hidden');
 	//show message
 	alert(overMsg);
+	//stop timers
+	clearInterval(tInterval);
+}
+
+/**
+ * Show rating changes in chat box
+ */
+function showRatingDifferences(pRating, opRating) {
+	var pDisplay = $('label#rating2');
+	var opDisplay = $('label#rating1');
+	var oldPR = pDisplay.html().substr(1, pDisplay.html().length - 2);
+	var oldOpR = opDisplay.html().substr(1, opDisplay.html().length - 2);
+	var pChange = parseInt(pRating, 10) - parseInt(oldPR, 10);
+	var pColour = 'red';
+	if (pChange > -1) {
+		pChange = '+'+pChange;
+		pColour = 'blue';
+	}
+	var opChange = parseInt(opRating, 10) - parseInt(oldOpR, 10);
+	var opColour = 'red';
+	if (opChange > -1) {
+		opChange = '+'+opChange;
+		opColour = 'blue';
+	}
+	//get usernames
+	var player = $('span#pName2').html().split(':');
+	var opponent = $('span#pName1').html().split(':');
+	$('div#chatLog').append('<label>Game Over: &nbsp;</label>');
+	$('div#chatLog').append('<label>'+opponent[0]+'</label><span class="'+opColour+'"> '+opChange+'</span>');
+	$('div#chatLog').append('<label>, &nbsp; '+player[0]+'</label><span class="'+pColour+'"> '+pChange+'</span><br>');
 }
 
 /**
@@ -873,13 +920,15 @@ function updateGameOver(pRating, opRating, overMsg) {
  * @param data ajax response
  */
 function handleChat(chat) {
-	lastChatSeen = chat['msgs'][0];
-	for(var i = 0; i < chat['msgs'][1].length; i++) {
-		$('div#chatLog').append(chat['msgs'][1][i].trim());
+	if (chat['msgs'][0] > lastChatSeen) {
+		lastChatSeen = chat['msgs'][0];
+		for(var i = 0; i < chat['msgs'][1].length; i++) {
+			$('div#chatLog').append(chat['msgs'][1][i].trim());
+		}
+		//always scroll to bottom
+		var scroll = $('div#chatDisplay');
+		scroll.scrollTop(scroll.scrollTop()+300);		
 	}
-	//always scroll to bottom
-	var scroll = $('div#chatDisplay');
-	scroll.scrollTop(scroll.scrollTop()+300);
 	//check for chat toggled
 	if (chat['toggled']) {
 		opChatty = !opChatty;

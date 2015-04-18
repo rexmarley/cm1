@@ -46,6 +46,33 @@ table {
 	}
 }
 
+@media all and (min-width: 1200px) and (max-width: 1350px) {
+	div.board {
+		width: 42em !important;
+		height: 40em !important;
+		margin-left: auto !important;
+	}
+	
+	div.square {
+	    height: 5em !important;
+	    width: 5.25em !important;
+	}
+	div.piece {
+		font-size: 4em !important;
+	}
+	
+	div.piecesWonLost div.piece {
+		font-size: 3em;	
+	}
+	
+	div#chatBox {
+		height:14em !important;
+	}	
+	div#chatDisplay{
+		height:57.3% !important;
+	}
+}
+
 @media screen and (min-width: 800px) {
 	div#userOptions {
 		margin-top: 5%;
@@ -235,9 +262,13 @@ a#showCurrentGames {
 div#newGameOptions {
 	background: radial-gradient(#CCCCE7, #ffffff) no-repeat;
 	font-size: 1.2em;
+	cursor:default;
 }
 div#newGameOptions input[type='radio'][name='duration'] {
 	margin-left:5%;
+}
+div#newGameOptions input, div#newGameOptions label {
+	cursor:pointer;
 }
 
 div#newGameOptions h2 {
@@ -252,6 +283,10 @@ div#newGameOptions input[type="submit"] {
 div#newGameOptions a {
 	width:100%;
 	margin-top: 3%;
+}
+
+div#findingGameDialog {
+	cursor:default;
 }
 
 div.board {

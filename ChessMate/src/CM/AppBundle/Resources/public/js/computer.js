@@ -215,8 +215,8 @@ function updateFENSuffixes(colour, fRow, fCol, tRow) {
 	var moved = fenRow.charAt(getFenIndex(fenRow, fCol));
 	//handle en Passant
 	setEnPassantFEN(moved, fRow, fCol, tRow);
-	//change colour
-	activeColour = switchPlayer(colour);
+	//change player
+	activeColour = getOpponentColour(colour);
 }
 
 /**
@@ -277,7 +277,7 @@ function resetState(colour = 'w') {
 	        ['r','n','b','q','k','b','n','r']
         ];
 	//refresh actual board
-    $.get('https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/showBoard/'+colour, function(data) {
+    $.get(Routing.generate('cm_show_board', { gameID: colour }), function(data) {
     	$('.board').closest('div.col-md-6').html(data);
         setMovement();
         if (colour == 'b') {

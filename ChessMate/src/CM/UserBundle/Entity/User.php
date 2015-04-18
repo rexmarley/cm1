@@ -187,7 +187,7 @@ class User extends BaseUser
     /**
      * Add game to user
      *
-     * @param \CM\AppBundle\Entity\Game $currentGames
+     * @param \CM\AppBundle\Entity\Game $currentGame
      * @return User
      */
     public function addCurrentGame(\CM\AppBundle\Entity\Game $currentGame)
@@ -200,11 +200,21 @@ class User extends BaseUser
     /**
      * Remove game
      *
-     * @param \CM\AppBundle\Entity\Game $currentGames
+     * @param \CM\AppBundle\Entity\Game $currentGame
      */
     public function removeCurrentGame(\CM\AppBundle\Entity\Game $currentGame)
     {
         $this->currentGames->removeElement($currentGame);
+    }
+
+    /**
+     * Set current games
+     *
+     * @param \Doctrine\Common\Collections\Collection 
+     */
+    public function setCurrentGames(\Doctrine\Common\Collections\Collection $games)
+    {
+        $this->currentGames = $games;
     }
 
     /**
@@ -329,7 +339,7 @@ class User extends BaseUser
 	 */
 	private function getNewDeviation($dSq) {
 		//set minimum RD threshold of 30
-		return max(round(sqrt(((1/$this->deviation/$this->deviation)+(1/$dSq))**-1), 1), 30);
+		return max(round(sqrt(pow((1/$this->deviation/$this->deviation)+(1/$dSq),-1)), 1), 30);
 	}
 	
 	/**
@@ -342,7 +352,7 @@ class User extends BaseUser
 			$sum += $this->getMatchDifference($match['opRating'], $match['opRD']);
 		}
 		$q = $this->getQ();
-		return ($q*$q*$sum)**-1;
+		return pow(($q*$q*$sum),-1);
 	}
 	
 	/**
@@ -381,6 +391,6 @@ class User extends BaseUser
 	 */
 	private function getE($opRating, $opRD) {
 		$pow = -$this->getG($opRD)*($this->rating - $opRating)/400;
-		return 1/(1+(10**$pow));
+		return 1/(1+pow(10,$pow));
 	}
 }

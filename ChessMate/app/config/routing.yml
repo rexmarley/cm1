@@ -9,3 +9,6 @@ cm_app_login:
 cm_user:
     resource: "@CMUserBundle/Resources/config/routing.yml"
     prefix:   /
+
+fos_js_routing:
+    resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"

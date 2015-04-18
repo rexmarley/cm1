@@ -39,53 +39,29 @@ class MoveController extends Controller
     		//attempt to make move without validating previous
 	    	throw new AccessDeniedException('Stop messing about!');
     	}
-    	//check player has time left
-    	$moveTime = time() - $game->getLastMoveTime();
-    	$timeLeft = $game->getPlayerTime($player) - $moveTime;
-    	if ($timeLeft < $moveTime) {
-    		$game->setGameOver($game->getInactivePlayerIndex(), 'Game Aborted: '.$user->getUsername().' has cheated.');
-			$em->flush();
-    	} else {
-	    	$game->setLastMoveTime(time()+3); //TODO
-	    	//get game over - if opponent disagrees, validate server-side 
-	    	$gameOver = $content->gameOver;
-	    	//get move details
-	    	$move = array(
-	    			'by' => $player,
-	    			'from' => $content->from,
-	    			'to' => $content->to,
-	    			'castling' => (array) $content->castling,
-	    			//'newBoard' => $content->board,
-	    			'newFEN' => $content->fen,
-	    			'enPassant' => $content->enPassant,
-	    			'newPiece' => $content->newPiece,
-	    			'gameOver' => $gameOver
-	    	);
-		    //save move for validation by opponent
-		    $game->setLastMove($move);
-			//mark move as unvalidated
-			$game->setLastMoveValidated(false);
-			$em->flush();
-			if ($gameOver) {
-				//get new ratings for display; don't update until verified
-				if ($gameOver == 3) {
-					//checkmate
-			    	$wResult = 1;
-			    	$lResult = 0;
-				} else {
-					//draw
-			    	$wResult = 0.5;
-			    	$lResult = 0.5;					
-				}
-				$opponent = $game->getPlayers()->get(1 - $player);
-	    		$user->updateRating(array(array('opRating' => $opponent->getRating(), 'opRD' => $opponent->getDeviation(), 'result' => $wResult)));
-	    		$opponent->updateRating(array(array('opRating' => $user->getRating(), 'opRD' => $user->getDeviation(), 'result' => $lResult)));
-	    		//don't flush
-    			return new JsonResponse(array('gameOver' => true, 'pRating' => $user->getRating(), 'opRating' => $opponent->getRating()));
-			}
-    	}
+    	$moveTime = round(microtime(true) * 1000);
+    	$game->setPlayerTime($player, $game->getPlayerTime($player)+100);
+	    $game->setLastMoveTime($moveTime);
+	    //get game over - if opponent disagrees, validate server-side 
+	    $gameOver = $content->gameOver;
+	    //get move details
+	    $move = array(
+	    		'by' => $player,
+	    		'from' => $content->from,
+	    		'to' => $content->to,
+	    		'castling' => (array) $content->castling,
+	    		'newFEN' => $content->fen,
+	    		'enPassant' => $content->enPassant,
+	    		'newPiece' => $content->newPiece,
+	    		'gameOver' => $gameOver
+	    );
+		//save move for validation by opponent
+		$game->setLastMove($move);
+		//mark move as unvalidated
+		$game->setLastMoveValidated(false);
+		$em->flush();
 
-    	return new JsonResponse(array('gameOver' => false));
+    	return new JsonResponse(array('sent' => true));
     }
     
     /**
@@ -117,12 +93,11 @@ class MoveController extends Controller
 		$game->setLastMoveValidated(true);
     	//save move
     	$this->saveMove($game, $move, $em);
-    	//check for game over
+    	//check game over
     	$em->refresh($game);
-		$gameOverHelper = $this->get('game_fin_helper');
-		$gameOver = $gameOverHelper->checkGameOver($game, $gameOver, $move['gameOver'], $player, $em);
+		$this->get('game_fin_helper')->checkGameOver($game, $gameOver, $move['gameOver'], $player, $em);
 
-	    return new JsonResponse(array('saved' => true, 'gameOver' => $gameOver));
+	    return new JsonResponse(array('saved' => true));
     }
     
     /**
@@ -196,7 +171,6 @@ class MoveController extends Controller
 	    			'colour' => $this->getPieceColour($piece),
 	    			'enPassant' => $attempted['enPassant'],
 	    			'newPiece' => $attempted['newPiece'],
-	    			//'newBoard' => $attempted['newBoard']
 	    			'newBoard' => $fenHelper->getBoardFromFEN($attempted['newFEN'])
 	    	);
 	    	//make sure right colour moved
@@ -208,7 +182,7 @@ class MoveController extends Controller
 		    	//validate move
 		    	$valid = $validator->validateMove($move, $game, $absBoard);
 		    	if ($valid['valid']) {
-		    		//cheater = active player i.e. player that questioned validity
+		    		//cheater = player that questioned validity
     				$game->setGameOver($mover, 'Game Aborted: '.$game->getPlayers()->get($shaker)->getUsername().' has cheated.');
 	    			//save validated move
 	    			$this->saveMove($game, $attempted, $em);

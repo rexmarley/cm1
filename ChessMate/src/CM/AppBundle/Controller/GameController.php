@@ -12,6 +12,7 @@ use CM\AppBundle\Entity\Game;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use CM\AppBundle\Entity\ChatMessage;
 use Doctrine\ORM\EntityManager;
+use Doctrine\Common\Collections\ArrayCollection;
 
 class GameController extends Controller
 {    
@@ -39,14 +40,16 @@ class GameController extends Controller
 				$user->setPassword("");
 				$user->setRegistered(false);
 				$user->setLastActiveTime(new \DateTime());
+				//give guest average rating
+				$user->setRating(1100);
+				$userManager->updateUser($user);
 			} else {
 				$user = $user[0];
 				$name = $user->getUsername();
 				$user->setLastActiveTime(new \DateTime());
+				//remove any left over games
+				$user->setCurrentGames(new ArrayCollection());
 			}
-			//give guest average rating
-			$user->setRating(1100);
-			$userManager->updateUser($user);
 			//set login token
 			$token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
 			$this->get("security.context")->setToken($token);		
@@ -219,8 +222,8 @@ class GameController extends Controller
     	$pIndex = $game->getPlayers()->indexOf($user);
     	$opIndex = 1 - $pIndex;
     	//get time left
-    	$userTime = $this->getMinutesTimeString($game->getPlayerTime($pIndex));
-    	$opTime = $this->getMinutesTimeString($game->getPlayerTime($opIndex));
+    	$userTime = $this->getMinutesTimeString(floor($game->getPlayerTime($pIndex)/100/10));
+    	$opTime = $this->getMinutesTimeString(floor($game->getPlayerTime($opIndex)/100/10));
     	$pChatty = $game->getPlayerIsChatty($pIndex);
     	$opChatty = $game->getPlayerIsChatty($opIndex);
     	//get opponent
@@ -297,10 +300,10 @@ class GameController extends Controller
      * @return boolean
      */
     private function checkJoined($user, $game, $em) {
-	    //wait for oppponent to join
+	    //wait for opponent to join
 	    $waited = 0;
 	    $em->refresh($game);
-	    while (!$game->getJoined() && $waited < 15) {
+	    while (!$game->getJoined() && $waited < 8) {
 			sleep(1);
 	    	$em->refresh($game);
 	    	$waited++;
@@ -312,7 +315,7 @@ class GameController extends Controller
 	    	//update rating deviation
 	    	$game->setStartRDs();
 	    	//set time
-	    	$game->setLastMoveTime(time());
+	    	$game->setLastMoveTime(round(microtime(true) * 1000)+300);
 	    } else {
 	    	//cancel game
 	    	$em->remove($game);
@@ -409,12 +412,11 @@ class GameController extends Controller
 	    $pIndex = $players->indexOf($user);
 	    $opIndex = 1 - $pIndex;
     	//resign
-    	$game->setGameOver($opIndex, 'Game Over: '.$user->getUsername().' has resigned');
-    	$em->flush();
-    	$em->refresh($game);
-	    $pRating = $players->get($pIndex)->getRating();
-	    $opRating = $players->get($opIndex)->getRating();
-    	return new JsonResponse(array('pRating' => $pRating, 'opRating' => $opRating));  
+		if (!$game->over()) {
+			$game->setGameOver($opIndex, 'Game Over: '.$user->getUsername().' has resigned');
+			$em->flush();
+		}
+    	return new JsonResponse();  
     }
 	
     /**
@@ -461,7 +463,7 @@ class GameController extends Controller
 	    $em->persist($chat);
     	$em->flush();
     	
-    	return new JsonResponse();    	
+    	return new JsonResponse(array('chatID' => $chat->getId()));    	
     }
 	
     /**
@@ -500,15 +502,7 @@ class GameController extends Controller
 	    //accept draw
 	    $game->setGameOver(2, "Game Over: Draw Accepted");
     	$em->flush();
-    	$em->refresh($game);
-    	//reload players - get new ratings
-	    $players = $game->getPlayers();
-    	foreach ($players as $p) {
-    		$em->refresh($p);
-    	}
-	    $pRating = $players->get($pIndex)->getRating();
-	    $opRating = $players->get(1 - $pIndex)->getRating();
-    	return new JsonResponse(array('pRating' => $pRating, 'opRating' => $opRating));
+    	return new JsonResponse();
     }
     
     /**
@@ -517,23 +511,33 @@ class GameController extends Controller
      * @return \Symfony\Component\HttpFoundation\JsonResponse
      */
     public function listenAction(Request $request) {
-    	$content = json_decode($request->getContent());    	
+    	$content = json_decode($request->getContent());
 	    $user = $this->getUser();
-    	//disconnect session
-    	$this->get('session')->save();
     	$changed = false;
+    	//save session (allow multiple ajax calls)
+    	$this->get('session')->save();
+		set_time_limit(180);
     	//get game	
     	$em = $this->getDoctrine()->getManager();
 	    $gameID = $content->gameID;
+	    $lastSeen = $content->lastChat;
+	    //check if game over already received
+	    $overReceived = $content->overReceived;  
+    	$opChatty = $content->opChatty;
 	    $game = $em->getRepository('CMAppBundle:Game')->find($gameID);
 	    $players = $game->getPlayers();
     	$pIndex = $players->indexOf($user);
     	$opIndex = 1 - $pIndex;
     	$opponent = $players->get($opIndex);
-    	//check opponent has moved within reasonable amount of time
-    	$game = $this->checkFairPlay($game, $pIndex, $em);
+    	//check opponent has time left
+    	if ($game->getPlayerTime($opIndex) < 200) {
+    		$game->setGameOver($pIndex, 'Game Over: '.$opponent->getUsername().' is out of time.');
+			$em->flush();
+    	} else {
+			//check opponent has moved within reasonable amount of time		
+			$game = $this->checkFairPlay($game, $pIndex, $em);			
+		}		
     	//get all chat on reloads
-	    $lastSeen = $content->lastChat;
 	    if ($game->getPlayerIsChatty($pIndex)) {
 	    	if ($lastSeen == 0) {
 	    		$chatMsgs = $em->getRepository('CMAppBundle:ChatMessage')->findAllGameChat($game);	    		
@@ -543,24 +547,29 @@ class GameController extends Controller
 	    } else {
 	    	$chatMsgs = array($lastSeen, array());
 	    }
-	    //check if game over already received
-	    $overReceived = $content->overReceived;
 	    //wait for game over/new move/draw offered/chat
 	    $waited = 0;
+		$em->refresh($game);
 	    //check for changes
 	    while ((!$game->over() || $overReceived) && !$game->newMoveReady($pIndex) && count($chatMsgs[1]) == 0 
-	    		&& $game->getDrawOfferer() != $opIndex && $waited < 25) {
+	    		&& $game->getDrawOfferer() != $opIndex && $waited < 150) {
 	    	sleep(1);
 	    	$em->refresh($game);
 	    	if ($game->getPlayerIsChatty($pIndex)) {
 	    		//get opponent's chat - own handled client-side & on reload
 	    		$chatMsgs = $em->getRepository('CMAppBundle:ChatMessage')->findGamePlayerChat($opponent, $game, $lastSeen);
 	    	}
+	    	if (!$game->over()) {
+				if ($game->getPlayerTime($opIndex) < 200) {
+					$game->setGameOver($pIndex, 'Game Over: '.$opponent->getUsername().' is out of time.');
+					$em->flush();
+					$em->refresh($game);
+				}
+			}
 	    	$waited++;
 	    }
 	    $gameOver = $game->over();
-	    //still allow chat if game over	    
-    	$opChatty = $content->opChatty;
+	    //still allow chat if game over	  
     	$chatToggled = false;
     	if ($game->getPlayerIsChatty($opIndex) != $opChatty) {
     		//chat toggled
@@ -580,8 +589,10 @@ class GameController extends Controller
 	    	foreach ($players as $p) {
 	    		$em->refresh($p);
 	    	}
-	    	$pRating = $players->get($pIndex)->getRating();
-	    	$opRating = $players->get($opIndex)->getRating();
+			//re-fetch users from database to ensure updated
+			$repo = $em->getRepository('CMUserBundle:User');
+	    	$pRating = $repo->find($players->get($pIndex)->getId())->getRating();
+	    	$opRating = $repo->find($players->get($opIndex)->getId())->getRating();
 	    	return new JsonResponse(array('change' => true, 'gameOver' => true, 'pRating' => $pRating, 'opRating' => $opRating, 'overMsg' => $message, 'chat' => $chat));
 	    } else {
 	    	//check for draw offered
@@ -599,6 +610,8 @@ class GameController extends Controller
 	    		$response = $this->getNewMoveResponse($game->getLastMove());
 	    		$response['chat'] = $chat;
 	    		$response['drawOffered'] = $drawOffered;
+				$response['pTimeLeft'] = $game->getPlayerTime($pIndex);
+				$response['opTimeLeft'] = $game->getPlayerTime($opIndex);
 	    		return new JsonResponse($response);
 	    	} else if (count($chatMsgs[1]) > 0) {
 	    		$changed = true;
@@ -638,7 +651,7 @@ class GameController extends Controller
     	$opponent = $game->getPlayers()->get(1 - $pIndex);
     	if (!$game->getLastMoveValidated()) {
     		//user has moved/is waiting
-    		if ((time() - $game->getLastMoveTime()) > 60) {
+    		if ((round(microtime(true) * 1000) - $game->getLastMoveTime()) > 60) {
     			$game->setGameOver($pIndex, "Game Aborted: ".$opponent->getUsername()." has disconnected");
     			$em->flush();    			
     		}
@@ -646,11 +659,11 @@ class GameController extends Controller
     		//user has moved/is waiting
     		$gameLength = $game->getLength();
     		if ($gameLength < 601) {
-    			$timeOut = 4;
+    			$timeOut = 5;
     		} else if ($gameLength < 1801) {
     			$timeOut = 6;    			
     		} else {
-    			$timeOut = 11;    			
+    			$timeOut = 11;
     		}
     		if ($opponent->getLastActiveTime() < new \DateTime($timeOut.' minutes ago')) {
     			$game->setGameOver($pIndex, "Game Aborted: ".$opponent->getUsername()." has disconnected");

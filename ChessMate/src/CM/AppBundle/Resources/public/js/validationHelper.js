@@ -79,11 +79,9 @@ function getPlayerPiece(colour, piece) {
  */
 function getOpponentColour(colour) {
 	if (colour == 'w') {
-		colour = 'b';
-	} else {
-		colour = 'w';			
+		return 'b';
 	}
-	return colour;
+	return 'w';
 }
 
 /**

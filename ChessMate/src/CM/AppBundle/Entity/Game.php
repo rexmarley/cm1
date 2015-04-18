@@ -107,7 +107,7 @@ class Game
         $this->players = new \Doctrine\Common\Collections\ArrayCollection();
         $this->board = $board;
         $this->playersJoined = array(false,false);
-        $this->playerTimes = array($length, $length);
+        $this->playerTimes = array($length*1000, $length*1000);
         $this->length = $length;
     	//set white as active
     	$this->setActivePlayerIndex(0);
@@ -374,7 +374,7 @@ class Game
      * Set time left for player
      *
      * @param int $player index
-     * @param int $timeLeft seconds
+     * @param int $timeLeft milliseconds
      * @return Game
      */
     public function setPlayerTime($player, $timeLeft)
@@ -393,8 +393,8 @@ class Game
     {
         if ($this->over()) {
         	return 0;
-        } else if ($player == $this->activePlayerIndex && !is_null($this->lastMoveTime)) {
-        	return $this->playerTimes[$player] + $this->lastMoveTime - time();        	
+        } else if ($player == $this->activePlayerIndex && !is_null($this->lastMoveTime) && $this->lastMoveValidated) {
+        	return $this->playerTimes[$player] + $this->lastMoveTime - round(microtime(true) * 1000);        	
         } else {
         	return $this->playerTimes[$player];        	
         }
@@ -519,28 +519,40 @@ class Game
      */
     public function setGameOver($victor, $message) {
 	    //set won/lost/drawn on players
-	    if ($victor == 2) {
-	    	$wResult = 0.5;
-	    	$lResult = 0.5;
-	    	$windex = 0;
-	    	$lIndex = 1;
-	    } else {
-	    	$wResult = 1;
-	    	$lResult = 0;
-	    	$windex = $victor;
-	    	$lIndex = 1 - $victor;
-	    }
-    	$winner = $this->players->get($windex);
-    	$loser = $this->players->get($lIndex);
-	    $winner->updateRating(array(array('opRating' => $loser->getRating(), 'opRD' => $loser->getDeviation(), 'result' => $wResult)));
-	    $loser->updateRating(array(array('opRating' => $winner->getRating(), 'opRD' => $winner->getDeviation(), 'result' => $lResult)));
-    	//remove from user's current games
-    	foreach ($this->players as $p) {
-    		$p->removeCurrentGame($this);
-    	}
-    	//mark game as over
-	    $this->setVictorIndex($victor);
-    	$this->setGameOverMessage($message);   	
+		if (!$this->over()) {
+			//mark game as over
+			$this->setVictorIndex($victor);
+			//calculate new ratings
+			if ($victor == 2) {
+				$wResult = 0.5;
+				$lResult = 0.5;
+				$windex = 0;
+				$lIndex = 1;
+			} else {
+				$wResult = 1;
+				$lResult = 0;
+				$windex = $victor;
+				$lIndex = 1 - $victor;
+			}
+			$winner = $this->players->get($windex);
+			$wRating = $winner->getRating();
+			$wDev = $winner->getDeviation();
+			$loser = $this->players->get($lIndex);
+			$lRating = $loser->getRating();
+			$lDev = $loser->getDeviation();
+			//update ratings for registered users
+			if ($winner->getRegistered()) {
+				$winner->updateRating(array(array('opRating' => $lRating, 'opRD' => $lDev, 'result' => $wResult)));				
+			}
+			if ($loser->getRegistered()) {
+				$loser->updateRating(array(array('opRating' => $wRating, 'opRD' => $wDev, 'result' => $lResult)));				
+			}
+			//remove from user's current games
+			foreach ($this->players as $p) {
+				$p->removeCurrentGame($this);
+			}
+			$this->setGameOverMessage($message);
+		}
     }
     
     /**

@@ -2,7 +2,7 @@
 
 {% block stylesheets %}
     {{ parent() }}
-	{% stylesheets '../vendor/components/jqueryui/themes/smoothness/jquery-ui.min.css' filter='cssrewrite'  %} 
+	{% stylesheets '%kernel.root_dir%/../vendor/components/jqueryui/themes/smoothness/jquery-ui.min.css' filter='cssrewrite'  %} 
         <link href="{{ asset_url }}" rel="stylesheet" type="text/css" />
 	{% endstylesheets %}
 {% endblock %}

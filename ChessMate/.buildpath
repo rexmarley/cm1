@@ -7,6 +7,7 @@
 	<buildpathentry excluding="Symfony/Component/Intl/Resources/stubs/" kind="src" path="vendor/symfony/intl"/>
 	<buildpathentry kind="src" path="vendor/phpunit/php-code-coverage/src"/>
 	<buildpathentry kind="src" path="vendor/doctrine/doctrine-bundle"/>
+	<buildpathentry kind="src" path="vendor/friendsofsymfony/jsrouting-bundle"/>
 	<buildpathentry kind="src" path="vendor/doctrine/doctrine-cache-bundle"/>
 	<buildpathentry kind="src" path="vendor/doctrine/orm/lib"/>
 	<buildpathentry kind="src" path="vendor/psr/log"/>
@@ -42,6 +43,7 @@
 	<buildpathentry kind="src" path="vendor/doctrine/dbal/lib"/>
 	<buildpathentry kind="src" path="vendor/sebastian/global-state/src"/>
 	<buildpathentry kind="src" path="src"/>
+	<buildpathentry kind="src" path="vendor/willdurand/jsonp-callback-validator/src"/>
 	<buildpathentry kind="src" path="vendor/sebastian/comparator/src"/>
 	<buildpathentry kind="src" path="vendor/sebastian/exporter/src"/>
 	<buildpathentry kind="src" path="vendor/symfony/intl/Symfony/Component/Intl/Resources/stubs"/>

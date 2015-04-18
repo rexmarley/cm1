@@ -2,7 +2,7 @@
 var fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 //turn
 var activeColour = 'w';
-//en Passant
+//En passant
 var ep = '-';
 //50 moves rule
 var halfMoves = '0';
@@ -217,18 +217,6 @@ function getCastlingFEN() {
 		return fen;
 	}
 	return '-';
-}
-
-/**
- * Get opposing colour 
- * @param colour
- * @returns char
- */
-function switchPlayer(colour) {
-	if (colour == 'w') {
-		return 'b';
-	}
-	return 'w';
 }
 
 function getFEN(fen, activeColour, castling, ep, halfMoves, fullMoves) {

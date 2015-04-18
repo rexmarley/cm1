@@ -27,8 +27,6 @@ security:
                 path:   /logout
                 target: /login
             anonymous: ~
-            #http_basic:
-            #    realm: "Secured Demo Area"
 
     access_control:
         - { path: ^/game, roles: ROLE_USER, requires_channel: https }

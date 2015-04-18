@@ -1,6 +1,3 @@
-//TODO: change to app.php for live
-var root = 'https://'+document.location.hostname+'/CM/ChessMate/web/app_dev.php/game/';
-	
 $(document).ready( function() {
 	
 	/**
@@ -58,6 +55,9 @@ $(document).ready( function() {
 	});
 	
 	$('a#startGame').on('click', function() {
+		$('#newGameOptions').dialog("open");
+	});	
+	$('a#startGame2').on('click', function() {
 		$('#newGameOptions').dialog("open");
 	});
 
@@ -151,7 +151,7 @@ var matchSearch;
  * Find/create new game
  */
 function checkSearchMatched(searchID) {
-	var url = root+'matchSearch/'+searchID;
+	var url = Routing.generate('cm_match_search', { searchID: searchID });
 	matchSearch = $.post(url);
 	matchSearch.done(function(data) {
 		if(data['matched']) {
