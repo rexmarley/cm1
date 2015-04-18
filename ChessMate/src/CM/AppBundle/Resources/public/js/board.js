@@ -882,7 +882,7 @@ function updateGameOver(pRating, opRating, overMsg) {
 	//show new game button	
 	$('a#startGame2').closest('div').removeClass('hidden');
 	//show message
-	alert(overMsg);
+	alert(overMsg + "\n\n" + '<a href="https://www.surveymonkey.com/r/JWPDV65" target="blank">If you haven\'t already, please take a minute to rate this application.</a>');
 	//stop timers
 	clearInterval(tInterval);
 }

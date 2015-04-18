@@ -116,7 +116,7 @@ function performComputerMove(move) {
 	updateFENSuffixes(activeColour, from[0], from[1], to[0]);
 	fen = updateFEN(fen, from, to);
 	updateComputerCastling(from);
-	var piece = getPieceFromFEN(fen, from[0], from[1]);
+	var piece = getPieceFromFEN(fen, to[0], to[1]);
 	setEnPassant(piece, from[0], from[1], to[0]);
 	//get grid refs.
 	var gridFrom = getGridRefFromAbstractIndices(from[0], from[1]);
@@ -128,11 +128,24 @@ function performComputerMove(move) {
 	}
 	//update abstract board
 	updateAbstractBoard(from, to);
-	//move piece
 	var moved = getOccupant(gridFrom);
+	//check for reaching other side
+	if (pawnHasReachedOtherSide(piece, colour, to[0])) {
+		//give queen
+		var queen = getPlayerPiece(colour, 'q');
+		abstractBoard[to[0]][to[1]] = queen;
+		var num = getNewPieceNumber(queen);
+		//change piece
+		moved.html($('#pick_'+queen).html());
+		//set new id
+		moved.attr('id', queen+'_'+num);
+		//update fen
+		fen = swapPieceInFEN(fen, queen, to);
+	}
+	//move piece
 	moved.position({
         of: 'div#'+gridTo
-    });	
+    });
 	//center piece
 	$('div#'+gridTo).append(moved.css('position','static'));			
 	//check for game over
@@ -140,7 +153,7 @@ function performComputerMove(move) {
 	if (over) {
 		alert(getGameOverMessage(over));
 		gameOver = true;
-	} else {				
+	} else {			
 		playersTurn = true;
 	}	
 }
