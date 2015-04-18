@@ -349,6 +349,14 @@ div.timer {
 	margin-top: -2.5%;
 }
 
+div#gameOverDialog  {
+	cursor: default;
+}
+
+div#gameOverDialog  a {
+	color: #0000ff;
+}
+
 div#midGame {
 	margin: 0% 3%;	
 }

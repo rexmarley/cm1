@@ -77,7 +77,17 @@
 	</div>
 	{% if game is defined %}
 		<div id="joiningGameDialog" class="ui-dialog">
-			<h2>Joining game<span id="loadingDots"></span></h2>
+			<h3>Joining game<span id="loadingDots"></span></h3>
+		</div>
+		<div id="gameOverDialog" class="ui-dialog">
+			<center>
+				<h4 class="red"></h4>
+				<a href="https://www.surveymonkey.com/r/JWPDV65" target="blank">
+					If you haven't already, please take a minute to rate this application.
+				</a>
+				<p>
+				<a id="acceptGameOver" class="btn btn-info">OK</a>
+			</center>
 		</div>
 	{% endif %}
 {% endblock %}
