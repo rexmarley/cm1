@@ -33,6 +33,10 @@ class BishopValidatorTest extends \PHPUnit_Framework_TestCase
     	$this->assertEquals(true, $this->helper->validatePiece(array('from' => array(7,5), 'to' => array(3,1))));
     	$this->assertEquals(true, $this->helper->validatePiece(array('from' => array(0,5), 'to' => array(4,1))));
     	//invalid moves
+    	$this->assertEquals(false, $this->helper->validatePiece(array('from' => array(0,2), 'to' => array(0,3))));
+    	$this->assertEquals(false, $this->helper->validatePiece(array('from' => array(0,5), 'to' => array(2,4))));
+    	$this->assertEquals(false, $this->helper->validatePiece(array('from' => array(7,2), 'to' => array(7,4))));
+    	$this->assertEquals(false, $this->helper->validatePiece(array('from' => array(7,5), 'to' => array(4,1))));
     }
     
     private function getBoard() {

@@ -17,16 +17,6 @@ class HTMLHelper
 								    		array('p','p','p','p','p','p','p','p'),
 								    		array('r','n','b','q','k','b','n','r')
 								    	);
-// 	private static $defaultBoard = array(
-// 								    					array('R','N','B','Q','K','B','N','R'),
-//     		array(false, false, false, false, false, false, false, false),
-//     		array(false, false, false, false, false, false, false, false),
-//     		array(false, 'P', false, false, false, 'P', false, false),
-//     		array(false, false, false, 'p', false, false, false, false),
-//     		array(false, false, false, false, false, false, 'p', false),
-//     		array(false, false, false, false, false, false, false, false),
-//     		array('r','n','b','q','k','b','n','r')
-// 								    	);
 								    		
 
 	private static $unicode = array( 

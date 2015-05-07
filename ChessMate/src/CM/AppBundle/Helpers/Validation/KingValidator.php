@@ -17,7 +17,7 @@ class KingValidator extends ValidationHelper
 	public function validatePiece($move) {
     	$from = $move['from'];
     	$to = $move['to'];
-    	$colour = $this->getPieceColour($move['colour']);
+    	$colour = $this->getPieceColour($move['piece']);
 		if (abs($to[1] - $from[1]) <= 1 && abs($to[0] - $from[0]) <= 1) {
 			return true;
 		} else {
