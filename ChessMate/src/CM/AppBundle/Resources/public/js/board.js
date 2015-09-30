@@ -826,7 +826,8 @@ function getOccupant(squareID) {
  * @param gameID
  * @param gameOverReceived
  */
-function listen(gameID, delay=100) {
+function listen(gameID, delay) {
+	delay = delay || 100;
 	$.ajax({
 		type: "POST",
 		url: Routing.generate('cm_listen', {}),

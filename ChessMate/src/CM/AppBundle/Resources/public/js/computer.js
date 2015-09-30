@@ -261,7 +261,8 @@ function updateComputerCastling(from) {
  * Reset game
  * @param colour - side to play as
  */
-function resetState(colour = 'w') {
+function resetState(colour) {
+	colour = colour || 'w';
 	fen = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR';
 	ep = '-';
 	halfMoves = '0';
