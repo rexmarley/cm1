@@ -1,0 +1,21 @@
+cm_app:
+    resource: "@CMAppBundle/Resources/config/routing.yml"
+    prefix:   /cm/game/
+    
+cm_app_home:
+    path:     /
+    defaults: { _controller: "FOSUserBundle:Security:login" }
+    prefix:   /cm/
+    
+cm_app_login:
+    path:     /cm
+    defaults: { _controller: "FOSUserBundle:Security:login" }
+    prefix:   /
+
+cm_user:
+    resource: "@CMUserBundle/Resources/config/routing.yml"
+    prefix:   /cm/
+
+fos_js_routing:
+    resource: "@FOSJsRoutingBundle/Resources/config/routing/routing.xml"
+    prefix:   /cm/

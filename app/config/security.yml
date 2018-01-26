@@ -1,0 +1,37 @@
+# To get started with security, check out the documentation:
+# https://symfony.com/doc/current/security.html
+security:
+
+    # https://symfony.com/doc/current/security.html#b-configuring-how-users-are-loaded
+    providers:
+        in_memory:
+            memory: ~
+    encoders:
+        FOS\UserBundle\Model\UserInterface: sha512
+    
+    role_hierarchy:
+        ROLE_ADMIN:       ROLE_USER
+        ROLE_SUPER_ADMIN: [ROLE_USER, ROLE_ADMIN, ROLE_ALLOWED_TO_SWITCH]
+
+    firewalls:
+        dev:
+            pattern:  ^/(_(profiler|wdt)|css|images|js)/
+            security: false
+
+        main:
+            pattern:    ^/
+            form_login:
+                provider: fos_userbundle
+                check_path: /cm/login_check
+                login_path: /cm/login
+                csrf_token_generator: security.csrf.token_manager
+                always_use_default_target_path: false
+                default_target_path:            /cm/game/start
+            logout:
+                path:   /cm/logout
+                target: /cm/login
+            anonymous: ~
+
+    access_control:
+        - { path: ^/cm/game, roles: ROLE_USER, requires_channel: http }
+        - { path: ^/cm/login, roles: IS_AUTHENTICATED_ANONYMOUSLY, requires_channel: http }

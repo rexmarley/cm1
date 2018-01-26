@@ -1,0 +1,24 @@
+services:
+    game_search_factory:
+        class: CM\AppBundle\Factories\GameSearchFactory
+    game_factory:
+        class: CM\AppBundle\Factories\GameFactory
+    fen_helper:
+        class: CM\AppBundle\Helpers\FENHelper 
+    p_validator:
+        class: CM\AppBundle\Helpers\Validation\PawnValidator
+    r_validator:
+        class: CM\AppBundle\Helpers\Validation\RookValidator
+    n_validator:
+        class: CM\AppBundle\Helpers\Validation\KnightValidator
+    b_validator:
+        class: CM\AppBundle\Helpers\Validation\BishopValidator
+    q_validator:
+        class: CM\AppBundle\Helpers\Validation\QueenValidator
+    k_validator:
+        class: CM\AppBundle\Helpers\Validation\KingValidator
+    game_fin_helper:
+        class: CM\AppBundle\Helpers\GameOverHelper
+    html_helper:
+        class: CM\AppBundle\Helpers\HTMLHelper        
+

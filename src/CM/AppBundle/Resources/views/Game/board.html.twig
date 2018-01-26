@@ -1,0 +1,56 @@
+{% if player == 'b' %}
+	{% set topRow = 1 %}
+	{% set bottomRow = 8 %}
+	{% set leftCol = 'h' %}
+	{% set rightCol = 'a' %}
+	{# resolve white/black perspective #}
+	{% set alt = 1 %}
+	{% set alt2 = 8 %}
+	{% set alt3 = 1 %}
+{% else %}
+	{% set topRow = 8 %}
+	{% set bottomRow = 1 %}
+	{% set leftCol = 'a' %}
+	{% set rightCol = 'h' %}
+	{# resolve white/black perspective #}
+	{% set alt = 0 %}
+	{% set alt2 = 1 %}
+	{% set alt3 = -1 %}
+{% endif %}
+<div id ="game_{{ player }}_{{ gameID }}" class="board hidden">
+	{% for i in topRow..bottomRow  %}
+		{% for j in leftCol..rightCol  %}
+			{% if (i+alt) is divisible by(2) %}
+				{% if loop.index is divisible by(2) %}
+					{% set  squareColour = 'dark' %}
+				{% else %}
+					{% set  squareColour = 'light' %}
+				{% endif %}
+			{% else %}
+				{% if loop.index is divisible by(2) %}
+					{% set  squareColour = 'light' %}
+				{% else %}
+					{% set  squareColour = 'dark' %}
+				{% endif %}	
+			{% endif %}		
+			<div id="{{j}}_{{i}}" class="square {{ squareColour }} ui-droppable clipped">
+				{% set col = (alt2-loop.index)*alt3 %}
+				{% if pieces[i-1][col] %}
+					<div id="{{ pieces[i-1][col].id }}" class="piece ui-draggable">{{ pieces[i-1][col].img | raw }}</div>
+				{% endif %}
+			</div>
+		{% endfor %}
+	{% endfor %}
+</div>
+<div id="choosePiece_b" class="ui-dialog" title="Choose Piece">
+	<div id="pick_q" class="piece choosablePiece">&#9819;</div>
+	<div id="pick_r" class="piece choosablePiece">&#9820;</div>
+	<div id="pick_b" class="piece choosablePiece">&#9821;</div>
+	<div id="pick_n" class="piece choosablePiece">&#9822;</div>
+</div>
+<div id="choosePiece_w" class="ui-dialog" title="Choose Piece">
+	<div id="pick_Q" class="piece choosablePiece">&#9813;</div>
+	<div id="pick_R" class="piece choosablePiece">&#9814;</div>
+	<div id="pick_B" class="piece choosablePiece">&#9815;</div>
+	<div id="pick_N" class="piece choosablePiece">&#9816;</div>
+</div>

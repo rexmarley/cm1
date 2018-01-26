@@ -1,0 +1,35 @@
+<div id="pieces{{ wonLost }}" class="row piecesWonLost">
+	<div class="col-md-12">
+		<h4>Pieces {{ wonLost }}:</h4>
+		{% if player == 'w' %}
+			{% if wonLost == 'Won' %}
+				{% set p = 1 %}
+			{% else %}
+				{% set p = 0 %}
+			{% endif %}
+		{% else %}
+			{% if wonLost == 'Won' %}
+				{% set p = 0 %}
+			{% else %}
+				{% set p = 1 %}
+			{% endif %}
+		{% endif %}
+		{% for i in 0..4  %}
+			{% if taken[p][i].count > 0 %}
+				{% set hidden = '' %}
+			{% else %}
+				{% set hidden = 'hidden' %}
+			{% endif %}
+			<div id="{{ taken[p][i].id }}" class="piece {{ hidden }}">
+				<p>
+					{{ taken[p][i].img | raw }}
+					<sub class="subscript">
+						{% if taken[p][i].count > 1 %}
+							{{ taken[p][i].count }}
+						{% endif %}
+					</sub>
+				</p>
+			</div>
+		{% endfor %}
+	</div>
+</div>
