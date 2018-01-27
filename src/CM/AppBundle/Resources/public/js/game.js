@@ -1,7 +1,7 @@
 $(document).ready( function() {
 	
 	/**
-	 * Change skill labels on selection of human/computer opponent
+	 * Change labels on selection of human/computer opponent
 	 */
 	$("input:radio[name='opponent']").on('change', function() {
 		  if (this.value == 1) {
@@ -13,6 +13,7 @@ $(document).ready( function() {
 				  $('#skillLevel').addClass('hidden');
 			  }
 			  $('#minsPerPlayer').removeClass('hidden');
+			  $('#findGame').text('Find Match');
 		  } else {
 			  $("label[for='skill1']").html('Easy');
 			  $("label[for='skill2']").html('Moderate');
@@ -22,6 +23,7 @@ $(document).ready( function() {
 				  $('#skillLevel').removeClass('hidden');
 			  }
 			  $('#minsPerPlayer').addClass('hidden');
+			  $('#findGame').text('PLAY');
 		  }
 	});
 	

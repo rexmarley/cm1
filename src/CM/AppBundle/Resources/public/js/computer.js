@@ -58,13 +58,16 @@ $(document).ready(function() {
 	    	  setDifficulty(ui.value);
 	    	  $('#difficultySlider').attr('title', ui.value);
 	      }
-	  }).attr("title", (searchDepth + 1)/2);
-	
+	}).attr("title", (searchDepth + 1)/2);
+
+	var currColour = 0;
 	$('#restart').on('click', function() {
-		resetState();
+		resetState(currColour === 0 ? 'w' : 'b');
 	});
 	$('#switchSides').on('click', function() {
-		resetState('b');
+		resetState(currColour === 0 ? 'b' : 'w');
+		switchPiecesWonLost();
+		currColour = 1-currColour;
 	});
 });
 
@@ -293,7 +296,9 @@ function resetState(colour) {
         ];
 	//refresh actual board
     $.get(Routing.generate('cm_show_board', { gameID: colour }), function(data) {
-    	$('.board').closest('div.col-md-6').html(data);
+    	$('.board').closest('div.boardHolder').html(data);
+    	scaleBoard();
+    	$('div.board').removeClass('hidden');
         setMovement();
         if (colour == 'b') {
         	//get first move
@@ -301,4 +306,11 @@ function resetState(colour) {
         	worker.postMessage('go depth '+searchDepth);        	
         }
     });
+}
+function switchPiecesWonLost() {
+	var pieces = $('div#piecesWon div.pieces');
+	pieces.attr('id', 'tempSwitch');
+	$('div#piecesWon .wonLostHeader').after($('div#piecesLost div.pieces'));
+	$('div#piecesLost .wonLostHeader').after(pieces);
+	pieces.attr('id', '');
 }
